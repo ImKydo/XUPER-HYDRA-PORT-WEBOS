@@ -806,6 +806,19 @@ function startHttpApi() {
       );
     }
   }),
+  service.register("setSession", function (e) {
+    if (needModule(e, magis, "./magis")) {
+      var p = e.payload || {};
+      var uid = p.userId && String(p.userId).trim();
+      var tok = p.userToken && String(p.userToken).trim();
+      var sn = (p.sn && String(p.sn).trim()) || "";
+      if (!uid || !tok) {
+        return respond(e, new Error("Faltan userId o userToken"), null);
+      }
+      var ok = magis.setManualSession({ userId: uid, userToken: tok, sn: sn });
+      respond(e, null, { ok: ok, userId: uid });
+    }
+  }),
   console.log("[xuper-service] started " + pkg.name + " v" + pkg.version));
 
 /* API local de respaldo: se arranca después de registrar todos los métodos. */

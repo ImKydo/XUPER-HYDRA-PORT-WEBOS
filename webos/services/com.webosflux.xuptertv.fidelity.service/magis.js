@@ -540,6 +540,7 @@ function call(e, r, t, n) {
             );
         if (
           a &&
+          !1 !== t.baseFields &&
           ("aaa100028" === i || "aaa100027" === i || l || u) &&
           !t._sessionRetried
         )
@@ -575,6 +576,7 @@ function call(e, r, t, n) {
           );
         if (
           a &&
+          !1 !== t.baseFields &&
           (i === GEO_BLOCKED || l || u) &&
           (t._seedTries || 0) < SEED_RESCUE_ROUNDS
         ) {
@@ -661,6 +663,21 @@ function clearStoredSession() {
   try {
     fs.unlinkSync(SESSION_FILE);
   } catch (e) {}
+}
+function setManualSession(e) {
+  if (!e || !e.userId || !e.userToken) return !1;
+  session.userId = String(e.userId).trim();
+  session.userToken = String(e.userToken).trim();
+  session.sn = String(e.sn || session.sn || "").toLowerCase();
+  session.snToken = "";
+  session.seed = null;
+  session.usesSeed = !1;
+  session.at = Date.now();
+  session.ready = !0;
+  session.lastError = "";
+  saveStoredSession();
+  console.log("[magis] sesión manual configurada: userId=" + session.userId);
+  return !0;
 }
 function seedIdentity(e) {
   var r = trim(e && e.userToken);
@@ -2302,6 +2319,7 @@ module.exports = {
   call: call,
   post: post,
   ensureSession: ensureSession,
+  setManualSession: setManualSession,
   session: session,
   seedStatus: function () {
     var e,

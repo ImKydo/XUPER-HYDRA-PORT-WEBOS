@@ -1866,7 +1866,7 @@
   function st(e) {
     if (X.focus) {
       if (!at(X.focus)) {
-        var screenElem = t("screen-" + X.screen) || document;
+        var screenElem = document.getElementById("screen-" + X.screen) || document;
         var fallback = ot(screenElem);
         if (fallback) {
           rt(fallback);
@@ -1875,7 +1875,7 @@
       }
       if (!X.focus._onMove || !X.focus._onMove(e)) {
         for (
-          var t = "home" === X.screen && n(X.focus, ".home-page"),
+          var isHomePage = "home" === X.screen && n(X.focus, ".home-page"),
             a = "home" === X.screen && n(X.focus, ".home-tabs"),
             i = it(),
             r = X.focus.getBoundingClientRect(),
@@ -1890,7 +1890,7 @@
           var p = i[c];
           if (
             p !== X.focus &&
-            (!t || !n(p, ".home-tabs")) &&
+            (!isHomePage || !n(p, ".home-tabs")) &&
             (!a || n(p, ".home-tabs"))
           ) {
             var u,
@@ -2642,7 +2642,8 @@
       console.error("selectTab error:", e);
     }
     try {
-      ne && rt(ne);
+      var initialFocus = (typeof Ue !== "undefined" && Ue && Ue[0]) ? Ue[0] : ne;
+      initialFocus && rt(initialFocus);
     } catch (e) {
       console.error("setFocus error:", e);
     }
@@ -13387,7 +13388,7 @@
         (vt(),
           void 0 !== t.tab
             ? bt(parseInt(t.tab, 10) || 0, !0)
-            : (bt(0, !1), rt(ne)));
+            : (bt(0, !1), (typeof Ue !== "undefined" && Ue && Ue[0] ? rt(Ue[0]) : (ne && rt(ne)))));
         "detail" === o
           ? ba(l[parseInt(t.vod, 10) || 0])
           : "search" === o

@@ -25,7 +25,8 @@
         { "name": "netdiag", "public": false },
         { "name": "checkUpdate", "public": false },
         { "name": "applyUpdate", "public": false },
-        { "name": "liveLog", "public": false }
+        { "name": "liveLog", "public": false },
+        { "name": "setSession", "public": false }
       ]
     }
   ]
