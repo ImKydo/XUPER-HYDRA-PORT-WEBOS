@@ -819,6 +819,17 @@ function startHttpApi() {
       respond(e, null, { ok: ok, userId: uid });
     }
   }),
+  service.register("setBearer", function (e) {
+    if (needModule(e, magis, "./magis")) {
+      var p = e.payload || {};
+      var b = p.bearer && String(p.bearer).trim();
+      if (!b) {
+        return respond(e, new Error("Falta bearer"), null);
+      }
+      magis.setKinoBearer(b);
+      respond(e, null, { ok: true, bearer: b.slice(0, 8) + "..." });
+    }
+  }),
   console.log("[xuper-service] started " + pkg.name + " v" + pkg.version));
 
 /* API local de respaldo: se arranca después de registrar todos los métodos. */

@@ -26,7 +26,8 @@
         { "name": "checkUpdate", "public": false },
         { "name": "applyUpdate", "public": false },
         { "name": "liveLog", "public": false },
-        { "name": "setSession", "public": false }
+        { "name": "setSession", "public": false },
+        { "name": "setBearer", "public": false }
       ]
     }
   ]
