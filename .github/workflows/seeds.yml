@@ -43,7 +43,7 @@ jobs:
           curl -s https://cloudflare.com/cdn-cgi/trace || true
 
       - name: Acunar semillas
-        run: node tools/mint-seeds.js --count "${{ inputs.count || '30' }}" --pool pool/seeds.json --out pool/seeds.json --soft-fail
+        run: node tools/mint-seeds.js --count "${{ inputs.count || '30' }}" --ttl-hours 12 --pool pool/seeds.json --out pool/seeds.json --soft-fail
 
       - name: Publicar pool
         working-directory: pool
