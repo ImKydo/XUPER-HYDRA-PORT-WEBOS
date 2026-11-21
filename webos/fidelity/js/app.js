@@ -1,6 +1,6 @@
 !(function () {
   "use strict";
-  var APP_VERSION = "3.1.72";
+  var APP_VERSION = "3.1.74";
   window.APP_VERSION = APP_VERSION;
   /* Iconos vectoriales inline: las fuentes de las TV webOS no incluyen
      glifos ★ ☆ ▶ ⚙ ➕ ni emoji, por eso se dibujan en SVG. */
@@ -8183,6 +8183,17 @@
                       (X.streamMode || "normal") +
                       (X.streamError ? " | error " + Ka(X.streamError) : "")
                   ));
+                var dm = (e && e.devMode) || X.devMode;
+                if (dm) {
+                  t.push(
+                    "Modo Dev LG: " +
+                      (dm.enabled
+                        ? dm.registered
+                          ? "Renovación automática activa 24/7 (lg.pirate.vodka)"
+                          : dm.message || "Activo"
+                        : "No detectado en esta TV")
+                  );
+                }
                 /* Tiempos reales de arranque: permiten ver de un vistazo si la
                    demora está en resolver la señal o en que el reproductor
                    reciba el primer cuadro (relay/ffmpeg o CDN lento). */
@@ -9090,6 +9101,9 @@
       "ping",
       {},
       function (e, t) {
+        if (!e && t && t.devMode) {
+          X.devMode = t.devMode;
+        }
         s ||
           ((s = !0),
           clearTimeout(l),
@@ -10886,6 +10900,25 @@
         }));
     }
   }
+  function seekByPointer(evt) {
+    if ("vod" !== X.playerMode || !xe || !Pe) return;
+    var total = Hr();
+    if (!total || total <= 0) return;
+    var rect = Pe.getBoundingClientRect();
+    if (!rect || rect.width <= 0) return;
+    var clientX = evt.clientX;
+    if (typeof clientX !== "number" || isNaN(clientX)) return;
+    var ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    var targetTime = Math.max(0, Math.min(total - 2, Math.floor(ratio * total)));
+    var current = Vr();
+    var diff = targetTime - current;
+    if (Math.abs(diff) >= 1) {
+      li(diff);
+      oi(targetTime, total);
+    }
+    pi();
+    rt(Pe, !0);
+  }
   function lr() {
     if (
       ((Ce = t("player-stage")),
@@ -10911,8 +10944,16 @@
       (Ne = t("vod-seek-thumb")),
       Pe &&
         (Pe.classList.add("focusable"),
-        (Pe._activate = function () {
+        (Pe._activate = function (evt) {
+          if (evt && typeof evt.clientX === "number") {
+            seekByPointer(evt);
+            return;
+          }
           Ur(!0);
+        }),
+        Pe.addEventListener("click", function (evt) {
+          seekByPointer(evt);
+          evt.stopPropagation();
         }),
         (Pe._onMove = function (e) {
           return "left" === e
@@ -10921,6 +10962,15 @@
               ? (Br(1), !0)
               : ("down" === e || "up" === e) && (Ur(!1), !0);
         })),
+      Pe &&
+        Pe.parentNode &&
+        Pe.parentNode.addEventListener &&
+        Pe.parentNode.addEventListener("click", function (evt) {
+          if (evt.target === Pe || (Pe && Pe.contains(evt.target)) || evt.target === Pe.parentNode) {
+            seekByPointer(evt);
+            evt.stopPropagation();
+          }
+        }),
       (hi = t("player-playsetting-view")),
       (gi = t("psv-sec-selection")),
       (yi = t("psv-episodes-row")),
@@ -13182,7 +13232,7 @@
         if (t) {
           rt(t, !0);
           if (t._activate) {
-            t._activate();
+            t._activate(e);
           } else if (t.click && t !== e.target) {
             t.click();
           }
@@ -13219,7 +13269,7 @@
             return;
           }
         } else if ("player" === X.screen) {
-          if (!n(e.target, ".player-channels") && !n(e.target, ".player-infobar")) {
+          if (!n(e.target, ".player-channels") && !n(e.target, ".player-infobar") && !n(e.target, ".player-vod-infobar")) {
             if (X.channelsOpen) {
               no();
             } else {

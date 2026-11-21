@@ -27,7 +27,9 @@
         { "name": "applyUpdate", "public": false },
         { "name": "liveLog", "public": false },
         { "name": "setSession", "public": false },
-        { "name": "setBearer", "public": false }
+        { "name": "setBearer", "public": false },
+        { "name": "devModeStatus", "public": false },
+        { "name": "devModeRenew", "public": false }
       ]
     }
   ]

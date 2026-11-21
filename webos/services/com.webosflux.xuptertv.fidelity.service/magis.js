@@ -7,6 +7,13 @@ var crypto = require("crypto"),
   path = require("path"),
   dnsx = require("./dnsx"),
   upstream = require("./upstream"),
+  moviezone = (function () {
+    try {
+      return require("./moviezone");
+    } catch (e) {
+      return null;
+    }
+  })(),
   KEY_HEX = "e7af1ed7de1ffddd7bd3fe37ebdffde9ef3fe1ae39edfeb8",
   HOSTS = [
     "mptec.dhkrxuzcy.com",
@@ -736,30 +743,43 @@ function usableSeeds(includeExpired) {
   return includeExpired ? a : [];
 }
 function storeSeeds(e) {
-  for (var r = Date.now(), t = [], n = [], s = 0; s < e.length; s++) {
-    var a = e[s];
+  var r = Date.now(),
+    existing = seedPool || [],
+    combined = (e || []).concat(existing),
+    seenIds = {},
+    t = [],
+    n = [];
+  for (var s = 0; s < combined.length; s++) {
+    var a = combined[s];
     if (a && trim(a.userId) && trim(a.userToken)) {
+      var uid = trim(a.userId) + "|" + trim(a.userToken).slice(-6);
+      if (seenIds[uid]) continue;
+      seenIds[uid] = !0;
       var o = "number" == typeof a.exp && a.exp > 0 ? a.exp : 0,
         i = {
           userId: trim(a.userId),
           userToken: trim(a.userToken),
-          sn: trim(a.sn).toLowerCase(),
+          sn: trim(a.sn || "").toLowerCase(),
         };
-      (o && (i.exp = o),
-        o && 1e3 * o - r < SEED_MIN_LIFE_MS ? n.push(i) : t.push(i));
+      if (a.customer) i.customer = trim(a.customer);
+      if (a.jwtToken) i.jwtToken = trim(a.jwtToken);
+      if (o) i.exp = o;
+      if (o && 1e3 * o - r < SEED_MIN_LIFE_MS) {
+        n.push(i);
+      } else {
+        t.push(i);
+      }
     }
   }
-  for (
-    var l = t.length >= SEED_MAX ? t : t.concat(n), u = l.length - 1;
-    u > 0;
-    u--
-  ) {
+  var l = t.length >= SEED_MAX ? t : t.concat(n);
+  for (var u = l.length - 1; u > 0; u--) {
     var d = Math.floor(Math.random() * (u + 1)),
       c = l[u];
-    ((l[u] = l[d]), (l[d] = c));
+    l[u] = l[d];
+    l[d] = c;
   }
-  ((seedPool = l.slice(0, SEED_MAX)),
-    writeJsonSafe(SEED_FILE, { at: (seedsAt = r), seeds: seedPool }));
+  seedPool = l.slice(0, SEED_MAX);
+  writeJsonSafe(SEED_FILE, { at: (seedsAt = r), seeds: seedPool });
 }
 var kinoBearer = KINO_BEARER_DEFAULT;
 try {
@@ -1291,14 +1311,39 @@ function home(e, r, t) {
     s = treeCache[n];
   if (s && Date.now() - s.at < TREE_TTL)
     return t(null, { root: e, pageNum: r, items: s.items, cached: !0 });
+  var tryFallback = function (errOrig) {
+    if (moviezone) {
+      return moviezone.home(e, r, function (mzErr, mzData) {
+        if (!mzErr && mzData && mzData.items && mzData.items.length) {
+          console.log("[magis] usando respaldo MovieZone para " + e);
+          return t(null, mzData);
+        }
+        t(errOrig);
+      });
+    }
+    t(errOrig);
+  };
   ensureSession(function (s) {
-    if (s) return t(s);
+    if (s) return tryFallback(s);
     call(
       "getNextColumns",
       { columnCode: ROOT_CODES[e], pageNum: r, pageSize: 60, version: "" },
       function (s, a) {
-        if (s) return t(s);
+        if (s) return tryFallback(s);
         var o = itemsFromTree(a, e);
+        if ((!o || !o.length) && moviezone) {
+          return moviezone.home(e, r, function (mzErr, mzData) {
+            if (!mzErr && mzData && mzData.items && mzData.items.length) {
+              console.log("[magis] portal sin títulos, usando respaldo MovieZone para " + e);
+              return t(null, mzData);
+            }
+            enrichCatalog(e, o, function (enriched) {
+              ((treeCache[n] = { at: Date.now(), items: enriched }),
+                pruneCache(treeCache, 12, TREE_TTL),
+                t(null, { root: e, pageNum: r, items: enriched, cached: !1 }));
+            });
+          });
+        }
         enrichCatalog(e, o, function (enriched) {
           ((treeCache[n] = { at: Date.now(), items: enriched }),
             pruneCache(treeCache, 12, TREE_TTL),
@@ -1415,8 +1460,20 @@ function search(e, r, t) {
     s = searchCache[cacheKey];
   if (s && Date.now() - s.at < SEARCH_TTL)
     return t(null, { items: s.items, cached: !0 });
+  var tryFallback = function (errOrig) {
+    if (moviezone) {
+      return moviezone.search(n, page, function (mzErr, mzData) {
+        if (!mzErr && mzData && mzData.items && mzData.items.length) {
+          console.log("[magis] usando búsqueda MovieZone para " + n);
+          return t(null, mzData);
+        }
+        t(errOrig);
+      });
+    }
+    t(errOrig);
+  };
   ensureSession(function (e) {
-    if (e) return t(e);
+    if (e) return tryFallback(e);
     call(
       "v3/searchByName",
       {
@@ -1428,7 +1485,7 @@ function search(e, r, t) {
         pageSize: 50,
       },
       function (e, rResp) {
-        if (e) return t(e);
+        if (e) return tryFallback(e);
         var s = rResp && rResp.searchItemList,
           a = [],
           o = {};
@@ -1441,6 +1498,17 @@ function search(e, r, t) {
                 d && !o[d.id] && ((o[d.id] = !0), a.push(d), remember(d));
               }
           }
+        if ((!a || !a.length) && moviezone) {
+          return moviezone.search(n, page, function (mzErr, mzData) {
+            if (!mzErr && mzData && mzData.items && mzData.items.length) {
+              console.log("[magis] portal sin resultados, usando búsqueda MovieZone para " + n);
+              return t(null, mzData);
+            }
+            searchCache[cacheKey] = { at: Date.now(), items: a };
+            pruneCache(searchCache, 16, SEARCH_TTL);
+            t(null, { items: a, total: rResp && rResp.totalSize, cached: !1 });
+          });
+        }
         ((searchCache[cacheKey] = { at: Date.now(), items: a }),
           pruneCache(searchCache, 16, SEARCH_TTL),
           t(null, { items: a, total: rResp && rResp.totalSize, cached: !1 }));
@@ -1451,6 +1519,9 @@ function search(e, r, t) {
 function detail(e, r, t) {
   var n = trim(e);
   if (!n) return r(new Error("falta contentId"));
+  if (moviezone && moviezone.isMovieZoneId(n)) {
+    return moviezone.detail(n, r);
+  }
   ensureSession(function (e) {
     if (e) return r(e);
     var cached = itemCache[n] || null;
@@ -1878,6 +1949,30 @@ function loadPlay(e, r, t) {
   attempt();
 }
 function mediaInfo(e, r, t) {
+  if (moviezone && (moviezone.isMovieZoneId(e) || moviezone.isMovieZoneId(r))) {
+    return t(null, {
+      name: "MovieZone",
+      audio: "Español Latino",
+      subtitles: [],
+      tracks: [
+        {
+          index: 0,
+          quality: "HD",
+          videoCodec: "h264",
+          audioCodec: "aac",
+          audio: "Español Latino",
+        },
+      ],
+      selected: {
+        index: 0,
+        quality: "HD",
+        videoCodec: "h264",
+        audioCodec: "aac",
+        audio: "Español Latino",
+      },
+      duration: 0,
+    });
+  }
   loadPlay(e, r, function (e, r) {
     if (e) return t(e);
     var n = r.tracks[0];
@@ -1894,28 +1989,34 @@ function mediaInfo(e, r, t) {
   });
 }
 function resolve(e, r, t, n) {
-  ("function" == typeof t && ((n = t), (t = {})),
-    (t = t || {}),
-    (xQualityPref =
-      "720" === trim(t.quality).toLowerCase() ||
-      "save" === trim(t.quality).toLowerCase()
-        ? "720"
-        : "1080" === trim(t.quality).toLowerCase()
-          ? "1080"
-          : "2160" === trim(t.quality).toLowerCase()
-            ? "2160"
-            : "auto"),
-    (xHevcOk = !(
-      !1 === t.hevc ||
-      "false" === String(t.hevc) ||
-      "0" === String(t.hevc)
-    )),
-    (xUhdOk = !(
-      !t.uhd ||
-      "false" === String(t.uhd) ||
-      "0" === String(t.uhd)
-    )),
-    loadPlay(e, r, function (e, r) {
+  if ("function" == typeof t) {
+    n = t;
+    t = {};
+  }
+  t = t || {};
+  if (moviezone && (moviezone.isMovieZoneId(e) || moviezone.isMovieZoneId(r))) {
+    return moviezone.resolve(e, r, t, n);
+  }
+  xQualityPref =
+    "720" === trim(t.quality).toLowerCase() ||
+    "save" === trim(t.quality).toLowerCase()
+      ? "720"
+      : "1080" === trim(t.quality).toLowerCase()
+        ? "1080"
+        : "2160" === trim(t.quality).toLowerCase()
+          ? "2160"
+          : "auto";
+  xHevcOk = !(
+    !1 === t.hevc ||
+    "false" === String(t.hevc) ||
+    "0" === String(t.hevc)
+  );
+  xUhdOk = !(
+    !t.uhd ||
+    "false" === String(t.uhd) ||
+    "0" === String(t.uhd)
+  );
+  loadPlay(e, r, function (e, r) {
       if (e) return n(e);
       var s = r.play,
         a = r.episode,
@@ -1970,7 +2071,7 @@ function resolve(e, r, t, n) {
           name: text(s && s.name),
         });
       });
-    }));
+    });
 }
 for (
   var LIVE_K = [
