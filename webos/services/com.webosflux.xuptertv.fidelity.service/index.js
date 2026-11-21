@@ -25,6 +25,7 @@ var magis = loadModule("./magis"),
   upstream = loadModule("./upstream"),
   updater = loadModule("./updater"),
   tvplus = loadModule("./tvplus"),
+  devmode = loadModule("./devmode"),
   liveLogRing = [];
 try {
   var savedProxy = JSON.parse(fs.readFileSync("/tmp/xuper-proxy.json", "utf8"));
@@ -41,6 +42,7 @@ try {
 } catch (e) {}
 var service = new Service(pkg.name);
 (updater && updater.init && updater.init(service),
+  devmode && devmode.init && devmode.init(),
   process.on("uncaughtException", function (e) {
     console.error("[xuper-service] uncaughtException:", (e && e.stack) || e);
   }));
@@ -387,6 +389,9 @@ function startHttpApi() {
         token: magis.session.userToken ? "ok" : "",
         lastError: magis.session.lastError || "",
       };
+    }, null),
+    devMode: safeValue(function () {
+      return devmode ? devmode.status() : null;
     }, null),
     proxyStats: safeValue(function () {
       return proxy.stats ? proxy.stats() : null;
@@ -828,6 +833,19 @@ function startHttpApi() {
       }
       magis.setKinoBearer(b);
       respond(e, null, { ok: true, bearer: b.slice(0, 8) + "..." });
+    }
+  }),
+  service.register("devModeStatus", function (e) {
+    if (needModule(e, devmode, "./devmode")) {
+      respond(e, null, devmode.status());
+    }
+  }),
+  service.register("devModeRenew", function (e) {
+    if (needModule(e, devmode, "./devmode")) {
+      devmode.checkAndRenew(function (err, st) {
+        if (err) return fail(e, err);
+        respond(e, null, st || devmode.status());
+      });
     }
   }),
   console.log("[xuper-service] started " + pkg.name + " v" + pkg.version));

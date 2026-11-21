@@ -1,10 +1,10 @@
 {
-  "version": "3.1.72",
+  "version": "3.1.74",
   "name": "XuperTV",
   "minWebos": "1.0.0",
-  "ipkUrl": "https://github.com/cristianco7/XUPER-HYDRA-PORT-WEBOS/releases/download/v3.1.72/com.webosflux.xuptertv.fidelity_3.1.72_all.ipk",
-  "sha256": "9ab8269db9a6953ce47a7dcfba46e5600c187946c4cdd92dbffa737cf9cce2d7",
-  "changelog": "v3.1.72: Solución definitiva al error portal200001 (actualización a APK 49902 / cabecera 43404), renovación automática de semillas de 8 horas directo desde backend oficial de Kino con fallback a GitHub, foco inicial visible en pestaña TV y corrección de flechas del control remoto.",
-  "releaseDate": "2026-11-20",
-  "releasedAt": "2026-11-20T17:30:00Z"
+  "ipkUrl": "https://github.com/cristianco7/XUPER-HYDRA-PORT-WEBOS/releases/download/v3.1.74/com.webosflux.xuptertv.fidelity_3.1.74_all.ipk",
+  "sha256": "79f8ffae02d172d95587fe93637302b309f887bb02d34ab56cad1b5b95727fcc",
+  "changelog": "v3.1.74: Adelanto/retroceso directo en películas con Magic Remote haciendo click en cualquier punto de la barra de progreso; auto-renovación silenciosa 24/7 de sesión de Modo Desarrollador de webOS (integración lg.pirate.vodka) para evitar expiración de apps.",
+  "releaseDate": "2026-11-21",
+  "releasedAt": "2026-11-21T13:36:00Z"
 }
