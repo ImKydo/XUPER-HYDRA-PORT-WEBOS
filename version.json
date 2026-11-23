@@ -1,10 +1,10 @@
 {
-  "version": "3.1.75",
+  "version": "3.1.76",
   "name": "XuperTV",
   "minWebos": "1.0.0",
-  "ipkUrl": "https://github.com/cristianco7/XUPER-HYDRA-PORT-WEBOS/releases/download/v3.1.75/com.webosflux.xuptertv.fidelity_3.1.75_all.ipk",
-  "sha256": "c6845356eb21af0c7ac60e883e60134364b6b52c042b4860458a73034ed2ebf1",
-  "changelog": "v3.1.75: Corrección crítica en series para preservar riel de temporadas al cambiar de temporada; detección automática y activación por defecto de Modo Fluido en TVs webOS 1.x/2.x (UF/UB/UG/LF); watchdog inteligente que conmuta automáticamente a Modo Fluido ante pantalla negra con solo audio; refuerzo del workflow automatizado de semillas nocturnas.",
-  "releaseDate": "2026-11-22",
-  "releasedAt": "2026-11-22T21:13:00Z"
+  "ipkUrl": "https://github.com/cristianco7/XUPER-HYDRA-PORT-WEBOS/releases/download/v3.1.76/com.webosflux.xuptertv.fidelity_3.1.76_all.ipk",
+  "sha256": "57744e57e59ac352de577ea5b311012ed6fd4a241794253b2c35148a27fa4e28",
+  "changelog": "v3.1.76: Riel de Continuar viendo (Watch History) en la pantalla principal con barra de progreso, tiempo transcurrido y reanudación a un clic; overlay de Telemetría en Vivo ('Stats for Nerds') durante la reproducción (buffer real, frames descartados, readyState y DoH) activable con la tecla Azul/Info del control remoto.",
+  "releaseDate": "2026-11-23",
+  "releasedAt": "2026-11-23T04:02:00Z"
 }

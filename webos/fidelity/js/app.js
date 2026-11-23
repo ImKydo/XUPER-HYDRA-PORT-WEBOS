@@ -1,6 +1,6 @@
 !(function () {
   "use strict";
-  var APP_VERSION = "3.1.75";
+  var APP_VERSION = "3.1.76";
   window.APP_VERSION = APP_VERSION;
   /* Iconos vectoriales inline: las fuentes de las TV webOS no incluyen
      glifos ★ ☆ ▶ ⚙ ➕ ni emoji, por eso se dibujan en SVG. */
@@ -1989,7 +1989,9 @@
           if (liveFavoritePrompt) return void closeLiveFavoriteConfirm();
           if (X.categoryPickerOpen) return ((dt = Date.now()), void ur());
           if ("player" === X.screen)
-            return Ye
+            return isTelemetryHudOpen()
+              ? void closeTelemetryHud()
+              : Ye
               ? void Ur(!1)
               : liveSearchOpen
                 ? void closeLiveChannelSearch()
@@ -2004,7 +2006,7 @@
                           : X.vodInfobarVisible
                             ? fi()
                             : (function () {
-                                (ui(), fi());
+                                (ui(), fi(), closeTelemetryHud());
                                 var e = X.playerReturn;
                                 if (e && "detail" === e.screen) {
                                   var a = t("screen-player"),
@@ -2412,6 +2414,11 @@
           toggleChannelFavoriteDirect(X.channel, null);
           return void (e.preventDefault && e.preventDefault());
         }
+      }
+      var isBlueKey = (406 === t || "ColorF3Blue" === a || "Blue" === a || 457 === t || "Info" === a);
+      if (isBlueKey && "player" === X.screen) {
+        toggleTelemetryHud();
+        return void (e.preventDefault && e.preventDefault());
       }
       var isChannelUp = (427 === t || 33 === t || "ChannelUp" === a || "PageUp" === a);
       var isChannelDown = (428 === t || 34 === t || "ChannelDown" === a || "PageDown" === a);
@@ -5561,6 +5568,255 @@
     }
     return o + 360 + 35;
   }
+
+  /* Carril de Continuar viendo (Watch History): muestra los contenidos en curso
+     con barra de progreso, tiempo o episodio, y reanudación a un clic. Cumple
+     con el contrato obligatorio de carrusel estilo Netflix (.catalog-rail y loop). */
+  function renderHistoryRail(t, historyList, startY) {
+    if (!historyList || !historyList.length) return startY;
+    var valid = [];
+    for (var h = 0; h < historyList.length && valid.length < 10; h++) {
+      var itm = historyList[h];
+      if (itm && itm.id && (itm.position >= 5 || itm.duration > 0)) {
+        valid.push(itm);
+      }
+    }
+    if (!valid.length) return startY;
+    var o = startY || 772,
+      s = e("div", "kids-subtitle", "Continuar viendo");
+    i(s, 48, o, 1824, 40);
+    t.appendChild(s);
+    o += 54;
+
+    var l = e("div", "catalog-rail scrollable");
+    i(l, 48, o, 1824, 380);
+    t.appendChild(l);
+    l.style.width = "1824px";
+    l.style.height = "380px";
+    l.style.position = "absolute";
+    l.style.overflowX = "auto";
+    l.style.overflowY = "hidden";
+    l.style.whiteSpace = "nowrap";
+    l.style.scrollbarWidth = "none";
+    l.style.webkitOverflowScrolling = "touch";
+    l.classList.add("catalog-rail");
+    l.style.minWidth = "1824px";
+    if (valid.length <= 4) l.classList.add("is-short-rail");
+
+    var hasMore = historyList.length > 10,
+      total = valid.length + (hasMore ? 1 : 0);
+
+    var revealRailCard = function (rail, card) {
+      if (!card) return;
+      var left = card.offsetLeft || 0,
+        width = card.offsetWidth || 244,
+        viewport = rail.clientWidth || 1824,
+        current = rail.scrollLeft || 0,
+        padding = 38,
+        next = current;
+      if (left < current + padding) next = Math.max(0, left - padding);
+      else if (left + width > current + viewport - padding)
+        next = Math.max(0, left + width - viewport + padding);
+      if (next !== current) smoothScroll(rail, next, null, 200);
+    };
+    var focusRailCard = function (rail, card) {
+      revealRailCard(rail, card);
+      rt(card);
+    };
+    var railMove = function (rail, idx) {
+      return function (dir) {
+        if ("right" === dir) {
+          if (idx < total - 1 && rail.children[idx + 1]) {
+            focusRailCard(rail, rail.children[idx + 1]);
+            return !0;
+          }
+          if (rail.children[0]) {
+            rail.scrollLeft = 0;
+            smoothScroll(rail, 0, null, 240);
+            focusRailCard(rail, rail.children[0]);
+            return !0;
+          }
+        } else if ("left" === dir) {
+          if (idx > 0 && rail.children[idx - 1]) {
+            focusRailCard(rail, rail.children[idx - 1]);
+            return !0;
+          }
+          if (Ue && Ue[X.tab]) {
+            rt(Ue[X.tab]);
+            return !0;
+          }
+        }
+        return !1;
+      };
+    };
+
+    for (var c = 0; c < valid.length; c++) {
+      var itemData = valid[c];
+      var card = e("div", "poster gold focusable history-rail-card");
+      i(card, 264 * c, 0, 244, 360);
+      if (itemData.poster) {
+        var img = e("img", "p-img");
+        img.setAttribute("data-poster-src", itemData.poster);
+        img.onerror = function () {
+          if (this.src && 0 === this.src.indexOf("https://") && !this._httpFallback) {
+            this._httpFallback = !0;
+            return void (this.src = this.src.replace("https://", "http://"));
+          }
+          this.style.display = "none";
+          if (card) card.classList.add("is-img-error");
+        };
+        card.appendChild(img);
+      }
+      card.appendChild(e("div", "p-shade"));
+      var titleText = itemData.title || "Contenido";
+      card.appendChild(e("div", "p-title", titleText));
+
+      var pct = 0;
+      if (itemData.duration > 0 && itemData.position > 0) {
+        pct = Math.min(100, Math.max(5, Math.round((itemData.position / itemData.duration) * 100)));
+      } else if (itemData.position > 0) {
+        pct = 25;
+      }
+      var progWrap = e("div", "history-rail-bar");
+      var progFill = e("div", "history-rail-fill");
+      progFill.style.width = (pct || 10) + "%";
+      progWrap.appendChild(progFill);
+      card.appendChild(progWrap);
+
+      var labelText = itemData.series
+        ? (itemData.episodeNumber ? "Ep. " + itemData.episodeNumber : "Episodio") + (itemData.position ? " · " + ai(itemData.position) : "")
+        : (itemData.position ? ai(itemData.position) : "");
+      if (labelText) {
+        card.appendChild(e("div", "history-rail-badge", labelText));
+      }
+
+      (function (savedItem) {
+        card._activate = function () {
+          cn(savedItem);
+        };
+      })(itemData);
+
+      card._onMove = railMove(l, c);
+      card._onFocus = (function (rail, cEl) {
+        return function () {
+          revealRailCard(rail, cEl);
+        };
+      })(l, card);
+      l.appendChild(card);
+    }
+
+    if (hasMore) {
+      var moreCard = e("div", "poster gold focusable see-more");
+      i(moreCard, 264 * valid.length, 0, 244, 360);
+      moreCard.appendChild(e("div", "see-more-dots", "···"));
+      moreCard.appendChild(e("div", "see-more-label", "Ver historial"));
+      moreCard.appendChild(e("div", "see-more-count", historyList.length + " títulos"));
+      moreCard._activate = function () {
+        We = "history";
+        Ha();
+        Ua(1, !0);
+      };
+      moreCard._onMove = railMove(l, valid.length);
+      moreCard._onFocus = function () {
+        revealRailCard(l, moreCard);
+      };
+      l.appendChild(moreCard);
+    }
+
+    return o + 360 + 35;
+  }
+
+  /* HUD de Telemetría ("Stats for Nerds"): overlay en vivo durante la reproducción
+     con métricas reales de buffer, Starfish readyState, frames descartados y DoH. */
+  var telemetryHudEl = null,
+    telemetryHudTimer = null;
+  function isTelemetryHudOpen() {
+    return !!telemetryHudEl;
+  }
+  function closeTelemetryHud() {
+    if (telemetryHudTimer) {
+      clearInterval(telemetryHudTimer);
+      telemetryHudTimer = null;
+    }
+    if (telemetryHudEl && telemetryHudEl.parentNode) {
+      telemetryHudEl.parentNode.removeChild(telemetryHudEl);
+    }
+    telemetryHudEl = null;
+  }
+  function updateTelemetryHudData() {
+    if (!telemetryHudEl) return;
+    try {
+      var title = (X.playerItem && (X.playerItem.title || X.playerItem.name)) ||
+                  (F && F[X.channel] && F[X.channel].name) ||
+                  X.playerTitle ||
+                  "Emisión";
+      var epText = X.playerEpisode && (X.playerEpisode.number || X.playerEpisode.title)
+        ? " (Ep. " + (X.playerEpisode.number || X.playerEpisode.title) + ")"
+        : "";
+      var modeText = "live" === X.playerMode
+        ? "TV en Vivo (HLS)"
+        : ("smooth" === X.streamMode || "relay" === X.streamMode)
+          ? "Modo Fluido (fMP4 Relay 8787)"
+          : "Normal (Proxy Directo)";
+
+      var bufSec = 0;
+      if (xe && xe.buffered && xe.buffered.length > 0) {
+        var cur = Number(xe.currentTime) || 0;
+        var end = Number(xe.buffered.end(xe.buffered.length - 1)) || 0;
+        bufSec = Math.max(0, end - cur);
+      }
+
+      var dropped = 0;
+      if (xe) {
+        if (typeof xe.webkitDroppedFrameCount === "number") {
+          dropped = xe.webkitDroppedFrameCount;
+        } else if (xe.getVideoPlaybackQuality) {
+          var q = xe.getVideoPlaybackQuality();
+          dropped = (q && q.droppedVideoFrames) || 0;
+        }
+      }
+
+      var res = (xe && xe.videoWidth && xe.videoHeight)
+        ? (xe.videoWidth + "x" + xe.videoHeight)
+        : "Auto / En buffer";
+
+      var rStates = ["0 (Vacío)", "1 (Metadata)", "2 (Cuadro actual)", "3 (Suficiente)", "4 (Buffer lleno)"];
+      var rState = xe ? (rStates[xe.readyState] || xe.readyState) : "-";
+
+      var nStates = ["0 (Vacío)", "1 (Inactivo/OK)", "2 (Cargando datos)", "3 (Sin señal)"];
+      var nState = xe ? (nStates[xe.networkState] || xe.networkState) : "-";
+
+      var bufColor = bufSec >= 8 ? "#4ade80" : (bufSec >= 3 ? "#facc15" : "#f87171");
+
+      var html = '<div class="thud-header">' +
+        '<span class="thud-title">⚡ TELEMETRÍA XUPERTV</span>' +
+        '<span class="thud-close-hint">[Tecla Azul / Back: Cerrar]</span>' +
+        '</div>' +
+        '<div class="thud-body">' +
+          '<div class="thud-row"><span class="thud-label">Canal / Título:</span> <span class="thud-val thud-highlight">' + String(title + epText).slice(0, 42) + '</span></div>' +
+          '<div class="thud-row"><span class="thud-label">Modo reproducción:</span> <span class="thud-val">' + modeText + '</span></div>' +
+          '<div class="thud-row"><span class="thud-label">Resolución video:</span> <span class="thud-val">' + res + '</span></div>' +
+          '<div class="thud-row"><span class="thud-label">Buffer disponible:</span> <span class="thud-val" style="color:' + bufColor + '; font-weight:bold;">' + bufSec.toFixed(1) + ' seg</span></div>' +
+          '<div class="thud-row"><span class="thud-label">Frames descartados:</span> <span class="thud-val">' + dropped + '</span></div>' +
+          '<div class="thud-row"><span class="thud-label">ReadyState:</span> <span class="thud-val">' + rState + '</span></div>' +
+          '<div class="thud-row"><span class="thud-label">NetworkState:</span> <span class="thud-val">' + nState + '</span></div>' +
+          '<div class="thud-row"><span class="thud-label">Anti-Censura DNS:</span> <span class="thud-val" style="color:#38bdf8;">DoH Anycast Activo</span></div>' +
+        '</div>';
+      telemetryHudEl.innerHTML = html;
+    } catch (err) {}
+  }
+  function toggleTelemetryHud() {
+    if (telemetryHudEl) {
+      closeTelemetryHud();
+      return;
+    }
+    var playerScreen = t("screen-player");
+    if (!playerScreen) return;
+    telemetryHudEl = e("div", "telemetry-hud");
+    playerScreen.appendChild(telemetryHudEl);
+    updateTelemetryHudData();
+    telemetryHudTimer = setInterval(updateTelemetryHudData, 800);
+  }
   var sectionCatalogCache = {},
     sectionCatalogLoading = {},
     sectionRequestId = 0;
@@ -6146,6 +6402,10 @@
       categoryMap: secCategoryMap,
       categoryTitles: secCategoryTitles
     };
+
+    if (i && i.sectionTitle === "Destacados" && Q && Q.history && Q.history.length) {
+      u = renderHistoryRail(e, Q.history, u);
+    }
 
     if (popItems.length) {
       u = ga(e, popItems, u, i.popularTitle, sectionInfoFor(i.popularTitle, ""), sectionCtx, i.popularTitle);
