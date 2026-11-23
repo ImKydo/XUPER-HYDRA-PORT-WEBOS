@@ -1,10 +1,10 @@
 {
-  "version": "3.1.74",
+  "version": "3.1.75",
   "name": "XuperTV",
   "minWebos": "1.0.0",
-  "ipkUrl": "https://github.com/cristianco7/XUPER-HYDRA-PORT-WEBOS/releases/download/v3.1.74/com.webosflux.xuptertv.fidelity_3.1.74_all.ipk",
-  "sha256": "79f8ffae02d172d95587fe93637302b309f887bb02d34ab56cad1b5b95727fcc",
-  "changelog": "v3.1.74: Adelanto/retroceso directo en películas con Magic Remote haciendo click en cualquier punto de la barra de progreso; auto-renovación silenciosa 24/7 de sesión de Modo Desarrollador de webOS (integración lg.pirate.vodka) para evitar expiración de apps.",
-  "releaseDate": "2026-11-21",
-  "releasedAt": "2026-11-21T13:36:00Z"
+  "ipkUrl": "https://github.com/cristianco7/XUPER-HYDRA-PORT-WEBOS/releases/download/v3.1.75/com.webosflux.xuptertv.fidelity_3.1.75_all.ipk",
+  "sha256": "306adeeced51b1334fd761f961e06a19e7652b8a2404db00067f68159623eea6",
+  "changelog": "v3.1.75: Corrección crítica en series con múltiples temporadas para evitar que el riel de temporadas desaparezca al cambiar de temporada en la ficha de detalles; refuerzo del workflow automatizado de semillas nocturnas con doble frecuencia y mayor margen de expiración.",
+  "releaseDate": "2026-11-22",
+  "releasedAt": "2026-11-22T21:13:00Z"
 }

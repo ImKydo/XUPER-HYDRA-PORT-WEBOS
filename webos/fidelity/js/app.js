@@ -1,6 +1,6 @@
 !(function () {
   "use strict";
-  var APP_VERSION = "3.1.74";
+  var APP_VERSION = "3.1.75";
   window.APP_VERSION = APP_VERSION;
   /* Iconos vectoriales inline: las fuentes de las TV webOS no incluyen
      glifos ★ ☆ ▶ ⚙ ➕ ni emoji, por eso se dibujan en SVG. */
@@ -6596,63 +6596,74 @@
       }),
       le.appendChild(M),
       (function (t) {
-        var isMovie = (1 === X.tab) || ("movie" === t.type) || ("película" === t.kind) || ("pelicula" === t.category);
-        var isSeries = !isMovie && x(t) && ((t.episodes && t.episodes.length > 1) || (t.seasons && t.seasons.length > 1));
+        var hasSeasonsList = (t.seasons && t.seasons.length > 1) || (t._catalogSeasons && t._catalogSeasons.length > 1);
+        var isMovie = !hasSeasonsList && ((1 === X.tab) || ("movie" === t.type) || ("película" === t.kind) || ("pelicula" === t.category));
+        var isSeries = hasSeasonsList || (!isMovie && x(t) && ((t.episodes && t.episodes.length > 1) || (t.seasons && t.seasons.length > 1)));
         var a = isSeries && t.episodes ? t.episodes : [],
           n = isSeries && a.length > 1,
           r = wa(a.length);
         X.detailRange >= r.length && (X.detailRange = 0);
-        var hasMultiSeasons = isSeries && t.seasons && t.seasons.length > 1;
+        var hasMultiSeasons = hasSeasonsList || (isSeries && t.seasons && t.seasons.length > 1);
         var showRanges = !hasMultiSeasons && n && a.length > 20;
         var rangesCont = null;
         var seasonsRail = null;
         if (hasMultiSeasons) {
-          if (hasMultiSeasons) {
-            seasonsRail = e("div", "detail-seasons-rail scrollable");
-            for (var sIdx = 0; sIdx < t.seasons.length; sIdx++) {
-              (function (sNum) {
-                var sItem = t.seasons[sNum];
-                var sBtn = e(
-                  "div",
-                  "detail-season-btn focusable" +
-                    (sNum === X.detailSeason ? " is-selected" : ""),
-                  "Temporada " + (sItem.number || sNum + 1)
-                );
-                sBtn._seasonIdx = sNum;
-                sBtn._onFocus = function () {
-                  if (seasonsRail) {
-                    var cLeft = seasonsRail.scrollLeft,
-                      cWidth = seasonsRail.clientWidth,
-                      oLeft = sBtn.offsetLeft,
-                      oWidth = sBtn.offsetWidth;
-                    if (oLeft < cLeft + 40) {
-                      smoothScroll(seasonsRail, Math.max(0, oLeft - 40), null, 180);
-                    } else if (oLeft + oWidth > cLeft + cWidth - 40) {
-                      smoothScroll(seasonsRail, oLeft + oWidth - cWidth + 40, null, 180);
-                    }
+          if (!t.seasons || t.seasons.length < 2) {
+            t.seasons = t._catalogSeasons || t.seasons;
+          }
+          seasonsRail = e("div", "detail-seasons-rail scrollable");
+          for (var sIdx = 0; sIdx < t.seasons.length; sIdx++) {
+            (function (sNum) {
+              var sItem = t.seasons[sNum];
+              var sBtn = e(
+                "div",
+                "detail-season-btn focusable" +
+                  (sNum === X.detailSeason ? " is-selected" : ""),
+                "Temporada " + (sItem.number || sNum + 1)
+              );
+              sBtn._seasonIdx = sNum;
+              sBtn._onFocus = function () {
+                if (seasonsRail) {
+                  var cLeft = seasonsRail.scrollLeft,
+                    cWidth = seasonsRail.clientWidth,
+                    oLeft = sBtn.offsetLeft,
+                    oWidth = sBtn.offsetWidth;
+                  if (oLeft < cLeft + 40) {
+                    smoothScroll(seasonsRail, Math.max(0, oLeft - 40), null, 180);
+                  } else if (oLeft + oWidth > cLeft + cWidth - 40) {
+                    smoothScroll(seasonsRail, oLeft + oWidth - cWidth + 40, null, 180);
                   }
-                };
-                sBtn._activate = function () {
-                  if (X.detailSeason !== sNum) {
-                    X.detailSeason = sNum;
-                    X.detailRange = 0;
-                    X.detailEpisode = null;
-                    jr("Cargando temporada…");
-                    P("detail", { contentId: sItem.id }, function (err, res) {
-                      if (!err && res && !1 !== res.returnValue) {
-                        res.item && H(t, res.item);
-                        t.episodes = res.episodes || [];
-                        t.seasonId = sItem.id;
-                        sItem._episodes = t.episodes;
-                        X.detailEpisode = t.episodes[0] || null;
+                }
+              };
+              sBtn._activate = function () {
+                if (X.detailSeason !== sNum) {
+                  X.detailSeason = sNum;
+                  X.detailRange = 0;
+                  X.detailEpisode = null;
+                  jr("Cargando temporada…");
+                  P("detail", { contentId: sItem.id }, function (err, res) {
+                    if (!err && res && !1 !== res.returnValue) {
+                      var pSeasons = (t.seasons && t.seasons.length > 1) ? t.seasons : t._catalogSeasons;
+                      var pCat = t._catalogSeasons;
+                      res.item && H(t, res.item);
+                      if (pCat) t._catalogSeasons = pCat;
+                      if (pSeasons && pSeasons.length) {
+                        t.seasons = pSeasons;
+                        t.kind = "serie";
+                        t.type = "teleplay";
                       }
-                      Ca(t);
-                      var newRail = de ? de.querySelector(".detail-seasons-rail") : null;
-                      var newBtn = newRail ? newRail.children[sNum] : null;
-                      newBtn && rt(newBtn);
-                    });
-                  }
-                };
+                      t.episodes = res.episodes || [];
+                      t.seasonId = sItem.id;
+                      sItem._episodes = t.episodes;
+                      X.detailEpisode = t.episodes[0] || null;
+                    }
+                    Ca(t);
+                    var newRail = de ? de.querySelector(".detail-seasons-rail") : null;
+                    var newBtn = newRail ? newRail.children[sNum] : null;
+                    newBtn && rt(newBtn);
+                  });
+                }
+              };
                 sBtn._onMove = function (dir) {
                   if ("left" === dir) {
                     if (sNum > 0 && seasonsRail.children[sNum - 1]) {
@@ -6682,10 +6693,7 @@
               })(sIdx);
             }
             de.appendChild(seasonsRail);
-          } else {
-            /* Serie de temporada única: no agregar botón redundante que choque con rangos */
           }
-        }
         if (showRanges) {
           rangesCont = e("div", "detail-ranges scrollable");
           for (var c = 0; c < r.length; c++)
@@ -6991,7 +6999,15 @@
             jr("Cargando temporada…");
             P("detail", { contentId: sData.id }, function (err, res) {
               if (!err && res && !1 !== res.returnValue) {
+                var pSeasons = (item.seasons && item.seasons.length > 1) ? item.seasons : item._catalogSeasons;
+                var pCat = item._catalogSeasons;
                 res.item && H(item, res.item);
+                if (pCat) item._catalogSeasons = pCat;
+                if (pSeasons && pSeasons.length) {
+                  item.seasons = pSeasons;
+                  item.kind = "serie";
+                  item.type = "teleplay";
+                }
                 item.episodes = res.episodes || [];
                 item.seasonId = sData.id;
                 sData._episodes = item.episodes;
