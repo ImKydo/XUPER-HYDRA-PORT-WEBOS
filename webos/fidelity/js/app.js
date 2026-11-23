@@ -1292,6 +1292,23 @@
         X.playback.hasOwnProperty(t) &&
           void 0 !== e[t] &&
           (X.playback[t] = e[t]);
+    /* Detección de televisores webOS 1.x / 2.x o modelos legacy (UF, UB, UG, LF)
+       que no decodifican HEVC dentro de MPEG-TS crudo. Por defecto en estas TVs
+       se activa Modo Fluido (fMP4) para que la imagen se vea sin pantalla negra. */
+    try {
+      var ver = xWebosVersion();
+      var legacyModel = /^\d{2}(UB|UF|UG|LF)/i.test(String(panelInfo().modelName || ""));
+      var isLegacyTv = (ver > 0 && ver < 3) || legacyModel;
+      if (isLegacyTv && !localStorage.getItem("xuper_legacy_smooth_v1")) {
+        localStorage.setItem("xuper_legacy_smooth_v1", "1");
+        X.playback.streamMode = "smooth";
+        X.streamMode = "smooth";
+        K(G, X.playback);
+      } else if (!e && isLegacyTv) {
+        X.playback.streamMode = "smooth";
+        X.streamMode = "smooth";
+      }
+    } catch (e) {}
     /* Migración: las versiones anteriores guardaban subtitle=true por defecto.
        Se apaga una sola vez al actualizar. Después de esto, si el espectador
        activa los subtítulos, su elección se conserva hasta que los desactive. */
@@ -12508,6 +12525,34 @@
                       : 0,
                   n = t || a || i || 0;
                 (oi(e, n), yn(e), sn(e, n));
+                /* Watchdog de pantalla negra / solo audio:
+                   Si el video arranca en Modo Normal, ya lleva >= 3.5 s reproduciéndose (audio suena),
+                   pero videoWidth === 0 (el decodificador de video no puede demuxar la pista de imagen),
+                   se activa automáticamente Modo Fluido para rescatar la imagen sin que el usuario deba hacer nada. */
+                if (
+                  "player" === X.screen &&
+                  "vod" === X.playerMode &&
+                  "normal" === X.streamMode &&
+                  xe &&
+                  !xe.paused &&
+                  (xe.currentTime || 0) >= 3.5 &&
+                  xe.videoWidth === 0 &&
+                  X.playerItem
+                ) {
+                  var noVideoKey = (Ln(X.playerItem) || Sn(X.playerItem)) + "|no_video";
+                  if (wn !== noVideoKey) {
+                    wn = noVideoKey;
+                    X.streamMode = "smooth";
+                    Lr();
+                    jr("Optimizando imagen con Modo Fluido…");
+                    setTimeout(function () {
+                      "vod" === X.playerMode &&
+                        "smooth" === X.streamMode &&
+                        sr();
+                    }, 0);
+                    return;
+                  }
+                }
               }
             }, 500)));
         }),
