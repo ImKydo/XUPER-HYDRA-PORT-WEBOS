@@ -1328,18 +1328,39 @@ function home(e, r, t) {
     s = treeCache[n];
   if (s && Date.now() - s.at < TREE_TTL)
     return t(null, { root: e, pageNum: r, items: s.items, cached: !0 });
+  var responded = false;
+  var finish = function (errRes, dataRes) {
+    if (responded) return;
+    responded = true;
+    if (homeTimer) {
+      clearTimeout(homeTimer);
+      homeTimer = null;
+    }
+    t(errRes, dataRes);
+  };
   var tryFallback = function (errOrig) {
     if (moviezone) {
       return moviezone.home(e, r, function (mzErr, mzData) {
         if (!mzErr && mzData && mzData.items && mzData.items.length) {
           console.log("[magis] usando respaldo MovieZone para " + e);
-          return t(null, mzData);
+          return finish(null, mzData);
         }
-        t(errOrig);
+        finish(errOrig);
       });
     }
-    t(errOrig);
+    finish(errOrig);
   };
+  var homeTimer = setTimeout(function () {
+    if (responded) return;
+    if (moviezone) {
+      console.log("[magis] portal demoró >6s en responder para " + e + ", recurriendo a MovieZone");
+      moviezone.home(e, r, function (mzErr, mzData) {
+        if (!mzErr && mzData && mzData.items && mzData.items.length) {
+          return finish(null, mzData);
+        }
+      });
+    }
+  }, 6000);
   ensureSession(function (s) {
     if (s) return tryFallback(s);
     call(
@@ -1352,19 +1373,19 @@ function home(e, r, t) {
           return moviezone.home(e, r, function (mzErr, mzData) {
             if (!mzErr && mzData && mzData.items && mzData.items.length) {
               console.log("[magis] portal sin títulos, usando respaldo MovieZone para " + e);
-              return t(null, mzData);
+              return finish(null, mzData);
             }
             enrichCatalog(e, o, function (enriched) {
               ((treeCache[n] = { at: Date.now(), items: enriched }),
                 pruneCache(treeCache, 12, TREE_TTL),
-                t(null, { root: e, pageNum: r, items: enriched, cached: !1 }));
+                finish(null, { root: e, pageNum: r, items: enriched, cached: !1 }));
             });
           });
         }
         enrichCatalog(e, o, function (enriched) {
           ((treeCache[n] = { at: Date.now(), items: enriched }),
             pruneCache(treeCache, 12, TREE_TTL),
-            t(null, { root: e, pageNum: r, items: enriched, cached: !1 }));
+            finish(null, { root: e, pageNum: r, items: enriched, cached: !1 }));
         });
       }
     );
@@ -2009,6 +2030,57 @@ function mediaInfo(e, r, t) {
     });
   });
 }
+var rescueResolveWithMovieZone = function (contentId, seriesContentId, opts, origErr, cb) {
+  if (!moviezone) return cb(origErr);
+  var cachedItem = itemCache[contentId] || (seriesContentId ? itemCache[seriesContentId] : null);
+  var rawTitle = (cachedItem && (cachedItem.title || cachedItem.name || cachedItem.alias)) || (opts && (opts.title || opts.name)) || "";
+  var titleToSearch = rawTitle.replace(/\s*\(\d{4}\)\s*/g, "").trim();
+  if (!titleToSearch) return cb(origErr);
+
+  console.log("[magis] rescatando reproducción con MovieZone para: " + titleToSearch);
+  moviezone.search(titleToSearch, 1, function (err, res) {
+    if (err || !res || !res.items || !res.items.length) {
+      console.log("[magis] MovieZone no encontró coincidencias para: " + titleToSearch);
+      return cb(origErr);
+    }
+    var candidate = res.items[0];
+    console.log("[magis] MovieZone coincidencia encontrada: " + candidate.id + " (" + candidate.title + ")");
+    if (candidate.type === "teleplay" || candidate.kind === "serie") {
+      return moviezone.detail(candidate.id, function (dErr, dData) {
+        if (dErr || !dData || !dData.episodes || !dData.episodes.length) {
+          return moviezone.resolve(candidate.id, null, opts, function (rErr, rStream) {
+            if (!rErr && rStream && rStream.url) return cb(null, rStream);
+            cb(origErr);
+          });
+        }
+        var targetEpNum = 1;
+        if (cachedItem && cachedItem.number) {
+          targetEpNum = parseInt(cachedItem.number, 10) || 1;
+        } else if (opts && opts.episodeNumber) {
+          targetEpNum = parseInt(opts.episodeNumber, 10) || 1;
+        }
+        var targetEp = null;
+        for (var i = 0; i < dData.episodes.length; i++) {
+          if (dData.episodes[i].number === targetEpNum) {
+            targetEp = dData.episodes[i];
+            break;
+          }
+        }
+        if (!targetEp) targetEp = dData.episodes[0];
+
+        moviezone.resolve(targetEp.id, candidate.id, opts, function (rErr, rStream) {
+          if (!rErr && rStream && rStream.url) return cb(null, rStream);
+          cb(origErr);
+        });
+      });
+    }
+
+    moviezone.resolve(candidate.id, null, opts, function (rErr, rStream) {
+      if (!rErr && rStream && rStream.url) return cb(null, rStream);
+      cb(origErr);
+    });
+  });
+};
 function resolve(e, r, t, n) {
   if ("function" == typeof t) {
     n = t;
@@ -2037,11 +2109,11 @@ function resolve(e, r, t, n) {
     "false" === String(t.uhd) ||
     "0" === String(t.uhd)
   );
-  loadPlay(e, r, function (e, r) {
-      if (e) return n(e);
-      var s = r.play,
-        a = r.episode,
-        o = rankTracks(r.tracks),
+  loadPlay(e, r, function (eErr, rPlay) {
+      if (eErr) return rescueResolveWithMovieZone(e, r, t, eErr, n);
+      var s = rPlay.play,
+        a = rPlay.episode,
+        o = rankTracks(rPlay.tracks),
         i = parseInt(t.trackIndex, 10);
       (i >= 0 && i < o.length) || (i = 0);
       for (var l = o[i], u = [], d = 0; d < o.length; d++)
@@ -2050,24 +2122,36 @@ function resolve(e, r, t, n) {
         (l.licenseList && l.licenseList[0] && l.licenseList[0].license) || ""
       );
       if (!c)
-        return n(new Error("el portal no devolvió licencia de reproducción"));
-      getSlb(function (e, r) {
-        if (e) return n(e);
-        var t = vodCdns(r);
-        if (!t.length)
-          return n(new Error("el portal no expuso CDN de vod libre"));
-        var o = t[0],
+        return rescueResolveWithMovieZone(
+          e,
+          r,
+          t,
+          new Error("el portal no devolvió licencia de reproducción"),
+          n
+        );
+      getSlb(function (slbErr, slbRes) {
+        if (slbErr) return rescueResolveWithMovieZone(e, r, t, slbErr, n);
+        var tCdns = vodCdns(slbRes);
+        if (!tCdns.length)
+          return rescueResolveWithMovieZone(
+            e,
+            r,
+            t,
+            new Error("el portal no expuso CDN de vod libre"),
+            n
+          );
+        var o = tCdns[0],
           d = "ts" === trim(l.videoFormat).toLowerCase() ? "ts" : "mp4",
           f = "/vod/" + trim(l.contentId) + "_media." + d;
-        function m(e) {
+        var m = function (eAuth) {
           return {
-            "Content-Auth": e,
+            "Content-Auth": eAuth,
             "Content-License": c,
             "User-Agent": UA_CDN,
             App: APP_ID,
             "App-Version": APK_VERSION,
           };
-        }
+        };
         for (var p = o.bases[0] + f, v = [], h = 0; h < t.length; h++)
           for (var g = 0; g < t[h].bases.length; g++)
             (0 === h && 0 === g) ||
