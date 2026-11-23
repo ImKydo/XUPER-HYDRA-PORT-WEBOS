@@ -1,10 +1,10 @@
 {
-  "version": "3.1.76",
+  "version": "3.1.77",
   "name": "XuperTV",
   "minWebos": "1.0.0",
-  "ipkUrl": "https://github.com/cristianco7/XUPER-HYDRA-PORT-WEBOS/releases/download/v3.1.76/com.webosflux.xuptertv.fidelity_3.1.76_all.ipk",
-  "sha256": "57744e57e59ac352de577ea5b311012ed6fd4a241794253b2c35148a27fa4e28",
-  "changelog": "v3.1.76: Riel de Continuar viendo (Watch History) en la pantalla principal con barra de progreso, tiempo transcurrido y reanudación a un clic; overlay de Telemetría en Vivo ('Stats for Nerds') durante la reproducción (buffer real, frames descartados, readyState y DoH) activable con la tecla Azul/Info del control remoto.",
+  "ipkUrl": "https://github.com/cristianco7/XUPER-HYDRA-PORT-WEBOS/releases/download/v3.1.77/com.webosflux.xuptertv.fidelity_3.1.77_all.ipk",
+  "sha256": "584d4a797659ddc51de6399ca64a6cf79a526352fb0964d726b0ba595cf05e27",
+  "changelog": "v3.1.77: Corrección definitiva al error global de sesión (userId y token) en Argentina y zonas geo-bloqueadas: desclasificación de portal200001 como sesión muerta para evitar la revocación y envenenamiento del pool de semillas, auto-purga de deadSeeds en disco, robustez en callback de home/search para MovieZone y actualización a 145 semillas frescas en seeds-fallback.json.",
   "releaseDate": "2026-11-23",
-  "releasedAt": "2026-11-23T04:02:00Z"
+  "releasedAt": "2026-11-23T05:44:00Z"
 }
