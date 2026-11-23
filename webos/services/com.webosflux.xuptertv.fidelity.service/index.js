@@ -160,6 +160,8 @@ function resolveStream(e, r) {
         quality: a.quality,
         hevc: a.hevc,
         uhd: a.uhd,
+        title: a.title || a.name || "",
+        episodeNumber: a.episodeNumber || a.episodeIndex || 0,
       };
     magis.resolve(a.contentId, a.seriesContentId, s, function (s, t) {
       if (s) return fail(e, s);

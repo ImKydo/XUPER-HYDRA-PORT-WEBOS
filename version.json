@@ -1,10 +1,10 @@
 {
-  "version": "3.1.77",
+  "version": "3.1.78",
   "name": "XuperTV",
   "minWebos": "1.0.0",
-  "ipkUrl": "https://github.com/cristianco7/XUPER-HYDRA-PORT-WEBOS/releases/download/v3.1.77/com.webosflux.xuptertv.fidelity_3.1.77_all.ipk",
-  "sha256": "584d4a797659ddc51de6399ca64a6cf79a526352fb0964d726b0ba595cf05e27",
-  "changelog": "v3.1.77: Corrección definitiva al error global de sesión (userId y token) en Argentina y zonas geo-bloqueadas: desclasificación de portal200001 como sesión muerta para evitar la revocación y envenenamiento del pool de semillas, auto-purga de deadSeeds en disco, robustez en callback de home/search para MovieZone y actualización a 145 semillas frescas en seeds-fallback.json.",
+  "ipkUrl": "https://github.com/cristianco7/XUPER-HYDRA-PORT-WEBOS/releases/download/v3.1.78/com.webosflux.xuptertv.fidelity_3.1.78_all.ipk",
+  "sha256": "def603faba76dd6d230891bc7bac373cb62b623b31dc7c7544572c46d13e1bf5",
+  "changelog": "v3.1.78: Rescate integral con MovieZone en reproducción y catálogo ante fallas o bloqueos de Magis: búsqueda y resolución automática por título en resolveStream para evitar pantallas en negro o error 403, fallback preventivo de catálogo a 6s para evitar timeout de 20s en webOS, y renovación completa de seeds-fallback.json con 45 semillas frescas acuñadas (18h TTL) para Argentina y regiones bloqueadas.",
   "releaseDate": "2026-11-23",
-  "releasedAt": "2026-11-23T05:44:00Z"
+  "releasedAt": "2026-11-23T15:45:00Z"
 }
