@@ -66,7 +66,6 @@ var crypto = require("crypto"),
     aaa100080: 1,
     aaa100082: 1,
     aaa100083: 1,
-    portal200001: 1,
   },
   SESSION_MAX_AGE_MS = 216e5,
   ROOT_CODES = {
@@ -952,6 +951,16 @@ function pickSeed(e) {
        a las no revocadas mientras se intenta descargar nuevas */
     r = usableSeeds(!0);
   }
+  if (!r.length && seedPool && seedPool.length) {
+    /* Si todas las semillas quedaron marcadas como muertas en disco (por ejemplo por el bug
+       de portal200001 en versiones anteriores), purgar deadSeeds para recuperar el pool */
+    console.log("[magis] purgando deadSeeds: recuperando pool completo de semillas (" + seedPool.length + ")");
+    deadSeeds = {};
+    try {
+      fs.unlinkSync(SEED_DEAD_FILE);
+    } catch (err) {}
+    r = usableSeeds(!0);
+  }
   if (!r.length) return null;
   for (var t = r.length - 1; t > 0; t--) {
     var n = Math.floor(Math.random() * (t + 1)),
@@ -1304,9 +1313,17 @@ function itemsFromTree(e, r) {
   return n;
 }
 function home(e, r, t) {
-  ("function" == typeof r && ((t = r), (r = 1)),
-    (e = ROOT_CODES[e] ? e : "movies"),
-    (r = parseInt(r, 10) || 1) < 1 && (r = 1));
+  if ("function" == typeof e) {
+    t = e;
+    e = "movies";
+    r = 1;
+  } else if ("function" == typeof r) {
+    t = r;
+    r = 1;
+  }
+  e = ROOT_CODES[e] ? e : "movies";
+  (r = parseInt(r, 10) || 1) < 1 && (r = 1);
+  t = "function" == typeof t ? t : function () {};
   var n = e + ":" + r,
     s = treeCache[n];
   if (s && Date.now() - s.at < TREE_TTL)
@@ -1452,7 +1469,11 @@ function column(e, r, t) {
     }));
 }
 function search(e, r, t) {
-  "function" == typeof r && ((t = r), (r = 1));
+  if ("function" == typeof r) {
+    t = r;
+    r = 1;
+  }
+  t = "function" == typeof t ? t : function () {};
   var n = trim(e);
   if (!n) return t(null, { items: [] });
   var page = Math.max(1, parseInt(r, 10) || 1),
