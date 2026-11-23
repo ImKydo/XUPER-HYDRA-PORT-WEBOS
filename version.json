@@ -1,10 +1,10 @@
 {
-  "version": "3.1.78",
+  "version": "3.1.79",
   "name": "XuperTV",
   "minWebos": "1.0.0",
-  "ipkUrl": "https://github.com/cristianco7/XUPER-HYDRA-PORT-WEBOS/releases/download/v3.1.78/com.webosflux.xuptertv.fidelity_3.1.78_all.ipk",
-  "sha256": "def603faba76dd6d230891bc7bac373cb62b623b31dc7c7544572c46d13e1bf5",
-  "changelog": "v3.1.78: Rescate integral con MovieZone en reproducción y catálogo ante fallas o bloqueos de Magis: búsqueda y resolución automática por título en resolveStream para evitar pantallas en negro o error 403, fallback preventivo de catálogo a 6s para evitar timeout de 20s en webOS, y renovación completa de seeds-fallback.json con 45 semillas frescas acuñadas (18h TTL) para Argentina y regiones bloqueadas.",
+  "ipkUrl": "https://github.com/cristianco7/XUPER-HYDRA-PORT-WEBOS/releases/download/v3.1.79/com.webosflux.xuptertv.fidelity_3.1.79_all.ipk",
+  "sha256": "29981eacd20b51f272df5fd417f7a3b3020ce7821217649e60caf798c546c46a",
+  "changelog": "v3.1.79: Corrección crítica de carátula de carga trabada (se escuchaba audio con carátula fija en webOS 2.x por falta de evento onplaying en WebKit antiguo) agregando descarte inmediato en onloadeddata/oncanplay/ontimeupdate/v() y watchdog de seguridad de 3.5s; soporte completo para rescate y fallback automático ante error de stream código 6 en Modo Fluido y reintento de copias compatibles.",
   "releaseDate": "2026-11-23",
-  "releasedAt": "2026-11-23T15:45:00Z"
+  "releasedAt": "2026-11-23T17:52:00Z"
 }
