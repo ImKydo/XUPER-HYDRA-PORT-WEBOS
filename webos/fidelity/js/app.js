@@ -1,6 +1,6 @@
 !(function () {
   "use strict";
-  var APP_VERSION = "3.1.79";
+  var APP_VERSION = "3.1.80";
   window.APP_VERSION = APP_VERSION;
   /* Iconos vectoriales inline: las fuentes de las TV webOS no incluyen
      glifos ★ ☆ ▶ ⚙ ➕ ni emoji, por eso se dibujan en SVG. */
@@ -2438,11 +2438,13 @@
       if ("player" === X.screen) {
         if (d)
           return (
+            (vodUserPaused = !1),
             xe && xe.paused && (Mr(), si("none"), pi()),
             void (e.preventDefault && e.preventDefault())
           );
         if (c) {
           if (xe && !xe.paused) {
+            vodUserPaused = !0;
             try {
               xe.pause();
             } catch (e) { }
@@ -9609,9 +9611,14 @@
   function di() {
     if (xe)
       if (xe.paused) {
-        ("live" === X.playerMode && (liveUserPaused = !1), Mr(), si("none"), pi());
+        ((vodUserPaused = !1),
+          "live" === X.playerMode && (liveUserPaused = !1),
+          Mr(),
+          si("none"),
+          pi());
       } else {
-        ("live" === X.playerMode && (liveUserPaused = !0));
+        ((vodUserPaused = !0),
+          "live" === X.playerMode && (liveUserPaused = !0));
         try {
           xe.pause();
         } catch (e) { }
@@ -12691,6 +12698,7 @@
           }
         }),
         (xe.onplaying = function () {
+          vodUserPaused = !1;
           try {
             var ptP = window.__xuperTiming;
             ptP &&
@@ -12754,8 +12762,8 @@
           }
         }),
         (xe.onpause = function () {
-          (ri(), "vod" === X.playerMode) &&
-            (sn(
+          ("vod" === X.playerMode) &&
+            sn(
               br ? Cr + (xe.currentTime || 0) : xe.currentTime || 0,
               xe && isFinite(xe.duration) && xe.duration > 0
                 ? xe.duration
@@ -12765,11 +12773,30 @@
                   0
                 ),
               !0
-            ),
-              si("pause"),
-              br && (wr = !0));
+            );
+          if ("vod" === X.playerMode && !vodUserPaused && "player" === X.screen && !X.streamError) {
+            Pr("Cargando buffer…");
+            try {
+              var pr = xe.play();
+              if (pr && pr.catch) {
+                pr.catch(function () {
+                  setTimeout(function () {
+                    if (xe && xe.paused && !vodUserPaused && "vod" === X.playerMode) {
+                      var p2 = xe.play();
+                      p2 && p2.catch && p2.catch(function () { });
+                    }
+                  }, 250);
+                });
+              }
+            } catch (e) { }
+            return;
+          }
+          (ri(),
+            si("pause"),
+            br && (wr = !0));
         }),
         (xe.onplay = function () {
+          vodUserPaused = !1;
           "vod" === X.playerMode &&
             (si("none"),
               ri(),
@@ -13040,6 +13067,7 @@
   }
   function Jr(e, t) {
     if (xe) {
+      vodUserPaused = !1;
       (t &&
         ((X.playerEpisode = t), (X.playerSeasonIndex = X.detailSeason || 0)),
         e && (X.playerItem = e));
@@ -13096,6 +13124,7 @@
       X.playerEpisode.id === a.id,
       n = "detail" === X.screen && xe && !!xe.src && X.playerItem === e && i;
     ((X.playerMode = "vod"),
+      (vodUserPaused = !1),
       e && X.playerItem !== e && _n(),
       e && (X.playerItem = e),
       a && (X.playerEpisode = a),
@@ -13155,6 +13184,7 @@
     liveGuardUntil = 0,
     liveGuardCooldown = 0,
     liveUserPaused = !1,
+    vodUserPaused = !1,
     liveDecodeRetries = 0,
     liveDecodeCooldown = 0,
     liveLogBuf = [],
