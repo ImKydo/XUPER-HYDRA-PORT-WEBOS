@@ -1,10 +1,10 @@
 {
-  "version": "3.1.84",
+  "version": "3.1.85",
   "name": "XuperTV",
   "minWebos": "1.0.0",
-  "ipkUrl": "https://github.com/cristianco7/XUPER-HYDRA-PORT-WEBOS/releases/download/v3.1.84/com.webosflux.xuptertv.fidelity_3.1.84_all.ipk",
-  "sha256": "db6e6bb2104beb03bba1916c731fba97ba57655c516f722dde6abbf12ead4370",
-  "changelog": "v3.1.84: Protección anti-cortes nocturnos estilo Kino y reseteo de identidad estilo Patch NF: (1) Fallback de rescate con cuenta compartida autenticada ante restricciones nocturnas; (2) Rotación y conservación de semillas de vivo con carriedLiveSeed para zapping fluido; (3) Acción y botón de Nueva Identidad en Diagnóstico de red para blanqueo profundo de sesión y tokens.",
+  "ipkUrl": "https://github.com/cristianco7/XUPER-HYDRA-PORT-WEBOS/releases/download/v3.1.85/com.webosflux.xuptertv.fidelity_3.1.85_all.ipk",
+  "sha256": "83e31af5cd5c22b1977343dae7d3dc91fd7de1c6d34907c69cf271dd4854e36c",
+  "changelog": "v3.1.85: Corrección de salto prematuro y en cascada de capítulos en series: (1) Guardia en Qn para ignorar eventos onended si el video no terminó de verdad (cortes prematuros de CDN reconectan en vez de saltar); (2) Aislamiento estricto de historial en Qr por episodeId para evitar heredar la posición del capítulo anterior; (3) Blanqueo garantizado de X.resumePosition=0 al cambiar de capítulo.",
   "releaseDate": "2026-11-24",
-  "releasedAt": "2026-11-24T14:16:00Z"
+  "releasedAt": "2026-11-24T22:38:00Z"
 }
