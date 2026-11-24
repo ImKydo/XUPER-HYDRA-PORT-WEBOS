@@ -1884,6 +1884,7 @@ function xQScore(e) {
     n = trim(e && e.encodeFormat)
       .toLowerCase()
       .replace(/[^a-z0-9]/g, "");
+  if (!xUhdOk && t >= 2000) r += 8000;
   return xHevcOk || !/h265|hevc|av1|vp9|10bit|hdr/.test(n) || (r += 4e3), r;
 }
 function rankTracks(e) {

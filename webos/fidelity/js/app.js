@@ -1,6 +1,6 @@
 !(function () {
   "use strict";
-  var APP_VERSION = "3.1.80";
+  var APP_VERSION = "3.1.81";
   window.APP_VERSION = APP_VERSION;
   /* Iconos vectoriales inline: las fuentes de las TV webOS no incluyen
      glifos ★ ☆ ▶ ⚙ ➕ ni emoji, por eso se dibujan en SVG. */
@@ -8166,7 +8166,15 @@
           ),
           Ba(
             t,
-            284,
+            272,
+            "Calidad preferida",
+            ["Automática (hasta 4K)", "1080p (Recomendada)", "720p (Ahorro)"],
+            "quality",
+            "1080" === X.playback.quality ? 1 : "720" === X.playback.quality ? 2 : 0
+          ),
+          Ba(
+            t,
+            356,
             "Formato de pantalla",
             ["Pantalla completa", "Normal", "16:9", "4:3"],
             "screen",
@@ -8174,13 +8182,13 @@
           ),
           Ba(
             t,
-            380,
+            440,
             "Audio preferido",
             ["Español", "Portugués", "Inglés"],
             "audio",
             X.playback.audio
           ),
-          t.appendChild(i(e("div", "sp-hr"), 0, 476, 1478, 1)),
+          t.appendChild(i(e("div", "sp-hr"), 0, 524, 1478, 1)),
           t.appendChild(e("div", "sp-subtitle-h", "Subtítulos")));
         var a = e(
           "div",
@@ -8197,7 +8205,7 @@
           t.appendChild(a),
           Ba(
             t,
-            562,
+            598,
             "Idioma",
             ["Español", "Portugués", "Inglés"],
             "subLang",
@@ -8205,7 +8213,7 @@
           ),
           Ba(
             t,
-            658,
+            682,
             "Tamaño",
             ["Normal", "Grande", "Pequeño"],
             "size",
@@ -8895,7 +8903,9 @@
               1 === this._index ? "smooth" : "normal"),
               (Cn = {}),
               X.playerItem && xn(X.playerItem))
-            : (X.playback[this._group] = this._index),
+            : "quality" === this._group
+              ? (X.playback.quality = 1 === this._index ? "1080" : 2 === this._index ? "720" : "auto")
+              : (X.playback[this._group] = this._index),
             nn(),
             Y());
           for (var e = t.querySelectorAll(".pb-opt"), a = 0; a < e.length; a++)
@@ -9774,6 +9784,15 @@
   var ln = null;
   function dn(e) {
     var t = ln;
+    if (!t || String(t.id) !== String(e && e.id)) {
+      var hist = (Q && Q.history) || [];
+      for (var h = 0; h < hist.length; h++) {
+        if (String(hist[h].id) === String(e && e.id)) {
+          t = hist[h];
+          break;
+        }
+      }
+    }
     if (t && e && String(t.id) === String(e.id)) {
       X.resumePosition = Math.max(0, Number(t.position) || 0);
       if (!(t.episodeId && e.episodes)) return;
@@ -10890,6 +10909,14 @@
       if (seen[h]) continue;
       seen[h] = !0;
       heights.push(h);
+    }
+    if (!seen[1080]) {
+      seen[1080] = !0;
+      heights.push(1080);
+    }
+    if (!seen[720]) {
+      seen[720] = !0;
+      heights.push(720);
     }
     heights.sort(function (a, b) {
       return b - a;
@@ -12176,11 +12203,17 @@
       var base = br,
         at = Math.max(0, Math.floor(Cr + (xe.currentTime || 0)));
       wr = !1;
+      var pausedDuration = vodPauseTime > 0 ? Date.now() - vodPauseTime : 0;
+      vodPauseTime = 0;
+      if (pausedDuration > 6000 || xe.ended || xe.readyState < 2) {
+        var a = base + "?start=" + at;
+        return (Xi && (a += "&a=" + Xi), jr("Reanudando vídeo…"), void Gr(a));
+      }
       if (!xe.ended && xe.readyState > 0) {
         /* Reanudación instantánea: el relay sigue entregando datos, así que
            basta con play(). Antes siempre se reiniciaba ffmpeg (varios
            segundos de espera al quitar la pausa). Sólo si el vídeo no avanza
-           en 2,5 s se reinicia el relay en la misma posición. */
+           en 1.8 s se reinicia el relay en la misma posición. */
         try {
           var pr = xe.play();
           pr && pr.catch && pr.catch(function () { });
@@ -12192,12 +12225,12 @@
           if (xe.paused || xe.ended) return;
           if ((xe.currentTime || 0) > before + 0.2 || xe.readyState >= 3)
             return;
-          if (Date.now() - startedAt < 1500) return;
+          if (Date.now() - startedAt < 1200) return;
           var url = base + "?start=" + at;
           Xi && (url += "&a=" + Xi);
           jr("Reanudando vídeo…");
           Gr(url);
-        }, 2500);
+        }, 1800);
         return;
       }
       var a = base + "?start=" + at;
@@ -12303,18 +12336,13 @@
     return xe ? (br ? Cr + (xe.currentTime || 0) : xe.currentTime || 0) : 0;
   }
   function Hr() {
+    var meta =
+      (X.playerEpisode && X.playerEpisode.duration && ii(X.playerEpisode.duration)) ||
+      (X.playerItem && X.playerItem.duration && ii(X.playerItem.duration)) ||
+      0;
+    if (br && meta > 0) return meta;
     var e = xe && isFinite(xe.duration) && xe.duration > 0 ? xe.duration : 0;
-    return (
-      !e &&
-      X.playerEpisode &&
-      X.playerEpisode.duration &&
-      (e = ii(X.playerEpisode.duration)),
-      !e &&
-      X.playerItem &&
-      X.playerItem.duration &&
-      (e = ii(X.playerItem.duration)),
-      e || 0
-    );
+    return meta || e || 0;
   }
   function Ur(e) {
     if (Ye) {
@@ -12663,38 +12691,14 @@
             } catch (e) { }
           }
           if ("vod" === X.playerMode) {
-            var a = br ? Cr : xe.currentTime || 0,
-              i =
-                xe && isFinite(xe.duration) && xe.duration > 0
-                  ? xe.duration
-                  : 0,
-              n =
-                X.playerEpisode && X.playerEpisode.duration
-                  ? ii(X.playerEpisode.duration)
-                  : 0,
-              r =
-                X.playerItem && X.playerItem.duration
-                  ? ii(X.playerItem.duration)
-                  : 0;
-            oi(a, i || n || r || 0);
+            var a = br ? Cr : xe.currentTime || 0;
+            oi(a, Hr());
           }
         }),
         (xe.ondurationchange = function () {
           if ("vod" === X.playerMode) {
-            var e = br ? Cr + (xe.currentTime || 0) : xe.currentTime || 0,
-              t =
-                xe && isFinite(xe.duration) && xe.duration > 0
-                  ? xe.duration
-                  : 0,
-              a =
-                X.playerEpisode && X.playerEpisode.duration
-                  ? ii(X.playerEpisode.duration)
-                  : 0,
-              i =
-                X.playerItem && X.playerItem.duration
-                  ? ii(X.playerItem.duration)
-                  : 0;
-            oi(e, t || a || i || 0);
+            var e = br ? Cr + (xe.currentTime || 0) : xe.currentTime || 0;
+            oi(e, Hr());
           }
         }),
         (xe.onplaying = function () {
@@ -12745,33 +12749,16 @@
               "vod" === X.playerMode)
           ) {
             var e = br ? Cr + (xe.currentTime || 0) : xe.currentTime || 0,
-              t =
-                xe && isFinite(xe.duration) && xe.duration > 0
-                  ? xe.duration
-                  : 0,
-              a =
-                X.playerEpisode && X.playerEpisode.duration
-                  ? ii(X.playerEpisode.duration)
-                  : 0,
-              i =
-                X.playerItem && X.playerItem.duration
-                  ? ii(X.playerItem.duration)
-                  : 0,
-              n = t || a || i || 0;
+              n = Hr();
             (oi(e, n), yn(e), sn(e, n));
           }
         }),
         (xe.onpause = function () {
+          vodPauseTime = Date.now();
           ("vod" === X.playerMode) &&
             sn(
               br ? Cr + (xe.currentTime || 0) : xe.currentTime || 0,
-              xe && isFinite(xe.duration) && xe.duration > 0
-                ? xe.duration
-                : ii(
-                  (X.playerEpisode && X.playerEpisode.duration) ||
-                  (X.playerItem && X.playerItem.duration) ||
-                  0
-                ),
+              Hr(),
               !0
             );
           if ("vod" === X.playerMode && !vodUserPaused && "player" === X.screen && !X.streamError) {
@@ -12808,19 +12795,7 @@
                   !xe.paused
                 ) {
                   var e = br ? Cr + (xe.currentTime || 0) : xe.currentTime || 0,
-                    t =
-                      xe && isFinite(xe.duration) && xe.duration > 0
-                        ? xe.duration
-                        : 0,
-                    a =
-                      X.playerEpisode && X.playerEpisode.duration
-                        ? ii(X.playerEpisode.duration)
-                        : 0,
-                    i =
-                      X.playerItem && X.playerItem.duration
-                        ? ii(X.playerItem.duration)
-                        : 0,
-                    n = t || a || i || 0;
+                    n = Hr();
                   (oi(e, n), yn(e), sn(e, n));
                   /* Watchdog de pantalla negra / solo audio:
                      Si el video arranca en Modo Normal, ya lleva >= 3.5 s reproduciéndose (audio suena),
@@ -12847,6 +12822,30 @@
                           "smooth" === X.streamMode &&
                           sr();
                       }, 0);
+                      return;
+                    }
+                  }
+                  /* Watchdog de pantalla negra en Modo Fluido:
+                     Si lleva >= 3.5 s reproduciéndose pero videoWidth === 0, reinicia el relay
+                     en el segundo actual para solicitar un IDR keyframe fresco. */
+                  if (
+                    "player" === X.screen &&
+                    "vod" === X.playerMode &&
+                    ("smooth" === X.streamMode || "relay" === X.streamMode) &&
+                    br &&
+                    xe &&
+                    !xe.paused &&
+                    (xe.currentTime || 0) >= 3.5 &&
+                    xe.videoWidth === 0 &&
+                    X.playerItem
+                  ) {
+                    var smoothNoVideoKey = (Ln(X.playerItem) || Sn(X.playerItem)) + "|smooth_no_video";
+                    if (wn !== smoothNoVideoKey) {
+                      wn = smoothNoVideoKey;
+                      var curAt = Math.max(0, Math.floor(Cr + (xe.currentTime || 0)));
+                      console.log("[xuper-smooth] audio sin video en Modo Fluido, reiniciando en " + curAt);
+                      jr("Sincronizando imagen…");
+                      Gr(br + "?start=" + curAt);
                       return;
                     }
                   }
@@ -12940,6 +12939,16 @@
   function Qr(e, t) {
     var a = yr;
     function i() {
+      if ((!X.resumePosition || X.resumePosition <= 3) && e) {
+        var hist = (Q && Q.history) || [];
+        for (var h = 0; h < hist.length; h++) {
+          if (String(hist[h].id) === String(e.id)) {
+            var pos = Math.floor(Number(hist[h].position) || 0);
+            if (pos > 3) X.resumePosition = pos;
+            break;
+          }
+        }
+      }
       var i = { contentId: e.id, title: e.title || e.name || "" };
       var ptT0 = Date.now();
       if (
@@ -12961,6 +12970,9 @@
          para que la reproducción sea completamente fluida. Si el usuario fuerza 4K
          manualmente en el reproductor (curQuality === "2160"), se respeta. */
       if (((ver > 0 && ver < 3) || legacyModel) && "auto" === curQuality) {
+        panelUhd = !1;
+      }
+      if ("1080" === curQuality || "720" === curQuality) {
         panelUhd = !1;
       }
       ((i.quality = curQuality),
@@ -13045,6 +13057,7 @@
           s = Math.floor(Number(X.resumePosition) || 0);
         if (s > 3 && /127\.0\.0\.1:8787\/s\//.test(o)) {
           o += (o.indexOf("?") >= 0 ? "&" : "?") + "start=" + s;
+          jr("Reanudando desde " + ai(s) + "…");
           X.resumePosition = 0;
         }
         t(o);
@@ -13185,6 +13198,7 @@
     liveGuardCooldown = 0,
     liveUserPaused = !1,
     vodUserPaused = !1,
+    vodPauseTime = 0,
     liveDecodeRetries = 0,
     liveDecodeCooldown = 0,
     liveLogBuf = [],
