@@ -48,6 +48,9 @@ var crypto = require("crypto"),
     "https://raw.githubusercontent.com/cristianco7/XUPER-HYDRA-PORT-WEBOS/seeds/seeds.json",
   SEED_FILE = "/tmp/xuper-seeds.json",
   SEED_DEAD_FILE = "/tmp/xuper-seeds-dead.json",
+  SHARED_EMAIL = "kinoplayer@outlook.es",
+  SHARED_PASSWORD_SALT = "cloudstream",
+  SHARED_PASSWORD_RAW = "Cris2337677",
   SEED_MAX = 200,
   SEED_MIN_LIFE_MS = 3e5,
   SEED_RESCUE_ROUNDS = 3,
@@ -205,6 +208,7 @@ var session = {
   busy: !1,
   seed: null,
   usesSeed: !1,
+  isShared: !1,
   at: 0,
   /* Último motivo por el que falló la activación real del dispositivo.
      Se muestra en Diagnóstico para saber si el portal rechazó v8/active. */
@@ -671,6 +675,7 @@ function saveStoredSession() {
     userId: session.userId,
     userToken: session.userToken,
     snToken: session.snToken,
+    isShared: !!session.isShared,
     at: session.at || Date.now(),
   });
 }
@@ -686,6 +691,7 @@ function loadStoredSession() {
       (session.snToken = String(f.snToken || "")),
       (session.seed = null),
       (session.usesSeed = !1),
+      (session.isShared = !!f.isShared),
       (session.at = Number(f.at) || Date.now()),
       (session.ready = !0));
     return !0;
@@ -706,12 +712,89 @@ function setManualSession(e) {
   session.snToken = "";
   session.seed = null;
   session.usesSeed = !1;
+  session.isShared = !1;
   session.at = Date.now();
   session.ready = !0;
   session.lastError = "";
   saveStoredSession();
   console.log("[magis] sesión manual configurada: userId=" + session.userId);
   return !0;
+}
+function loginSharedAccount(cb) {
+  cb = cb || function () {};
+  var passHash = crypto
+    .createHash("md5")
+    .update(SHARED_PASSWORD_RAW + SHARED_PASSWORD_SALT)
+    .digest("hex");
+  var bean = {
+    accountType: "2",
+    userName: SHARED_EMAIL,
+    password: passHash,
+    type: "1",
+    macAddr: FIXED_MAC,
+    areaCode: "",
+    verificationCode: "",
+    verificationToken: "",
+    matadata: "",
+    signdata: "",
+    channel: "default",
+  };
+  call("v8/login", bean, { baseFields: !1, urgent: !0 }, function (err, res) {
+    if (err) return cb(err);
+    var uid = trim(res && res.userId),
+      tok = trim(res && res.userToken);
+    if (!uid || !tok) return cb(new Error("login sin credenciales"));
+    sessionActTries = 0;
+    session.userId = uid;
+    session.userToken = tok;
+    session.jwtToken = trim((res && res.jwtToken) || "");
+    session.sn = trim((res && res.sn) || session.sn || "").toLowerCase();
+    session.ready = !0;
+    session.seed = null;
+    session.usesSeed = !1;
+    session.isShared = !0;
+    session.at = Date.now();
+    session.lastError = "";
+    saveStoredSession();
+    console.log(
+      "[magis] sesión iniciada exitosamente con cuenta compartida de Kino (protección nocturna)"
+    );
+    cb(null, session);
+  });
+}
+function resetIdentity(cb) {
+  cb = cb || function () {};
+  console.log("[magis] ejecutando reseteo profundo de identidad (estilo Patch NF)...");
+  clearStoredSession();
+  deadSeeds = {};
+  try {
+    fs.unlinkSync(SEED_DEAD_FILE);
+  } catch (err) {}
+  session.ready = !1;
+  session.userId = "";
+  session.userToken = "";
+  session.jwtToken = "";
+  session.snToken = "";
+  session.sn = "";
+  session.seed = null;
+  session.usesSeed = !1;
+  session.isShared = !1;
+  session.at = 0;
+  session.lastError = "";
+  sessionActTries = 0;
+  liveResolveCache = {};
+  carriedLiveSeed = null;
+  liveRotations = {};
+  ensureSession(function (err, sess) {
+    if (err) return cb(err);
+    cb(null, {
+      ok: !0,
+      userId: sess.userId,
+      sn: sess.sn,
+      usesSeed: !!sess.usesSeed,
+      isShared: !!sess.isShared,
+    });
+  });
 }
 function seedIdentity(e) {
   var r = trim(e && e.userToken);
@@ -1212,22 +1295,27 @@ function ensureSession(e) {
   }
   function a(e) {
     var r = {};
-    e && (session.lastError = e.message || session.lastError);
-    (session.usesSeed && session.seed && (r[seedIdentity(session.seed)] = !0),
-      rescueSeed(r, function (r, t) {
-        if (!t)
-          return (
-            console.log("[magis] sin semilla utilizable: " + (e && e.message)),
-            (sessionActTries = 0),
-            s(e)
-          );
-        (console.log(
+    if (e) session.lastError = (e && e.message) || session.lastError;
+    if (session.usesSeed && session.seed) r[seedIdentity(session.seed)] = !0;
+    loginSharedAccount(function (lErr, sSess) {
+      if (!lErr && sSess && sSess.userToken) {
+        sessionActTries = 0;
+        return s(null, session);
+      }
+      rescueSeed(r, function (rErr, t) {
+        if (!t) {
+          console.log("[magis] sin semilla utilizable: " + (e && e.message));
+          sessionActTries = 0;
+          return s(e);
+        }
+        console.log(
           "[magis] sesión por semilla " +
             seedIdentity(t).slice(0, 16) +
             " (bloqueo regional)"
-        ),
-          s(null, session));
-      }));
+        );
+        s(null, session);
+      });
+    });
   }
 }
 function itemFromAsset(e, r, t) {
@@ -2479,7 +2567,9 @@ function fetchM3u(e, r) {
     }));
 }
 var liveResolveCache = {},
-  LIVE_RESOLVE_CACHE_MS = 12e4;
+  LIVE_RESOLVE_CACHE_MS = 12e4,
+  liveRotations = {},
+  carriedLiveSeed = null;
 function firstCall(e, r) {
   var t = 0;
   !(function n(s) {
@@ -2536,9 +2626,28 @@ function resolveLive(e, r, force) {
     return setTimeout(function () {
       r(null, t.stream);
     }, 0);
+  if (carriedLiveSeed && carriedLiveSeed.seed) {
+    var age = Date.now() - (carriedLiveSeed.at || 0);
+    if (
+      age < 36e5 &&
+      (!session.usesSeed ||
+        (session.seed &&
+          seedIdentity(session.seed) !== seedIdentity(carriedLiveSeed.seed)))
+    ) {
+      adoptSeed(carriedLiveSeed.seed);
+    }
+  }
+  var channelKey = String(e);
+  if (!liveRotations[channelKey]) {
+    liveRotations[channelKey] = { attempt: 0, tried: {} };
+  }
+  var rot = liveRotations[channelKey];
+  if (session.usesSeed && session.seed) {
+    rot.tried[seedIdentity(session.seed)] = !0;
+  }
   ensureSession(function (t) {
     if (t) return r(t);
-    var runResolve = function (t, attempt) {
+    var runResolve = function (cb, attempt) {
       attempt = attempt || 0;
       firstCall(
         [
@@ -2552,18 +2661,51 @@ function resolveLive(e, r, force) {
             bean: { channelCode: e, columnId: 0, type: "1" },
           },
         ],
-        function (e, s) {
-          if (e) {
-            var msg = (e && e.message) || "";
-            if (e.portalCode === "portal200001" || /200001|版本已停止使用/i.test(msg)) {
-              e = new Error("Señal temporalmente no disponible en el servidor. Reconectando...");
-              e.portalCode = "portal200001";
+        function (firstErr, s) {
+          if (firstErr) {
+            var msg = (firstErr && firstErr.message) || "";
+            if (
+              firstErr.portalCode === "portal200001" ||
+              /200001|版本已停止使用/i.test(msg)
+            ) {
+              firstErr = new Error(
+                "Señal temporalmente no disponible en el servidor. Reconectando..."
+              );
+              firstErr.portalCode = "portal200001";
             }
-            if (attempt >= 2) return t(e);
+            if (rot.attempt < 3) {
+              rot.attempt++;
+              var nextSeed = pickSeed(rot.tried);
+              if (nextSeed) {
+                rot.tried[seedIdentity(nextSeed)] = !0;
+                adoptSeed(nextSeed);
+                console.log(
+                  "[magis] Live rotación de semilla para canal " +
+                    e +
+                    " (intento " +
+                    rot.attempt +
+                    "/3)"
+                );
+                return runResolve(cb, attempt + 1);
+              }
+            }
+            if (!session.isShared) {
+              console.log(
+                "[magis] Live rotación de semillas agotada; probando cuenta compartida"
+              );
+              var onSharedLogin = function (loginErr, ok) {
+                if (!loginErr && ok) {
+                  return runResolve(cb, attempt + 1);
+                }
+                cb(firstErr);
+              };
+              return loginSharedAccount(onSharedLogin);
+            }
+            if (attempt >= 2) return cb(firstErr);
             resetSessionAfterLiveFailure();
             return ensureSession(function (n) {
-              if (n) return t(e);
-              runResolve(t, attempt + 1);
+              if (n) return cb(firstErr);
+              runResolve(cb, attempt + 1);
             });
           }
           for (
@@ -2576,8 +2718,12 @@ function resolveLive(e, r, force) {
               break;
             }
           if ((!o && a[0] && (o = a[0]), !o || !o.license))
-            return t(new Error("el portal no devolvió licencia para el canal"));
-          t(null, o);
+            return cb(new Error("el portal no devolvió licencia para el canal"));
+          if (session.usesSeed && session.seed) {
+            carriedLiveSeed = { seed: session.seed, at: Date.now() };
+          }
+          delete liveRotations[channelKey];
+          cb(null, o);
         }
       );
     };
@@ -2661,6 +2807,8 @@ module.exports = {
   ensureSession: ensureSession,
   setManualSession: setManualSession,
   resetSessionAfterLiveFailure: resetSessionAfterLiveFailure,
+  loginSharedAccount: loginSharedAccount,
+  resetIdentity: resetIdentity,
   setKinoBearer: setKinoBearer,
   session: session,
   seedStatus: function () {
@@ -2675,6 +2823,7 @@ module.exports = {
       total: seedPool.length,
       freshAt: seedsAt,
       usingSeed: !!session.usesSeed,
+      isShared: !!session.isShared,
       dead: r,
       url: SEED_URL,
       lastError: lastSeedError,
