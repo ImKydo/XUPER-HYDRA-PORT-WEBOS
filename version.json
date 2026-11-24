@@ -1,10 +1,10 @@
 {
-  "version": "3.1.79",
+  "version": "3.1.80",
   "name": "XuperTV",
   "minWebos": "1.0.0",
-  "ipkUrl": "https://github.com/cristianco7/XUPER-HYDRA-PORT-WEBOS/releases/download/v3.1.79/com.webosflux.xuptertv.fidelity_3.1.79_all.ipk",
-  "sha256": "29981eacd20b51f272df5fd417f7a3b3020ce7821217649e60caf798c546c46a",
-  "changelog": "v3.1.79: Corrección crítica de carátula de carga trabada (se escuchaba audio con carátula fija en webOS 2.x por falta de evento onplaying en WebKit antiguo) agregando descarte inmediato en onloadeddata/oncanplay/ontimeupdate/v() y watchdog de seguridad de 3.5s; soporte completo para rescate y fallback automático ante error de stream código 6 en Modo Fluido y reintento de copias compatibles.",
+  "ipkUrl": "https://github.com/cristianco7/XUPER-HYDRA-PORT-WEBOS/releases/download/v3.1.80/com.webosflux.xuptertv.fidelity_3.1.80_all.ipk",
+  "sha256": "d52b3ea0fa3e5b329464bb8e0437bc8d2fad60d598ce8fee03b8a976fafbe35d",
+  "changelog": "v3.1.80: Protección contra pausas involuntarias en VOD (vodUserPaused): reanudación automática instantánea ante vacíos de buffer o cortes de inactividad de conexión CDN (60s idle timeout) en televisores OLED y webOS modernos sin necesidad de pulsar Play manualmente.",
   "releaseDate": "2026-11-23",
-  "releasedAt": "2026-11-23T17:52:00Z"
+  "releasedAt": "2026-11-24T02:42:00Z"
 }
