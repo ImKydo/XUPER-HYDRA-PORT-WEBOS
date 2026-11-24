@@ -1,6 +1,6 @@
 !(function () {
   "use strict";
-  var APP_VERSION = "3.1.83";
+  var APP_VERSION = "3.1.84";
   window.APP_VERSION = APP_VERSION;
   /* Iconos vectoriales inline: las fuentes de las TV webOS no incluyen
      glifos ★ ☆ ▶ ⚙ ➕ ni emoji, por eso se dibujan en SVG. */
@@ -8284,6 +8284,8 @@
         i(r, 346, 188, 320, 60);
         var q = e("div", "dg-btn dg-report-btn focusable", "Ver TV en vivo");
         i(q, 680, 188, 300, 60);
+        var btnReset = e("div", "dg-btn dg-report-btn focusable", "Nueva Identidad");
+        i(btnReset, 994, 188, 300, 60);
         var o = e("div", "dg-summary", 'Pulsa "Analizar red" para empezar.');
         i(o, 52, 262, 1380, 64);
         var s = e("div", "dg-head");
@@ -8421,6 +8423,29 @@
                   rt(q));
               },
               8e3
+            );
+          }),
+          (btnReset._activate = function () {
+            (o.className = "dg-summary"),
+              (o.textContent = "Restableciendo identidad y renovando sesión...");
+            P(
+              "setSession",
+              { action: "reset" },
+              function (err, res) {
+                if (err) {
+                  (o.className = "dg-summary err"),
+                    (o.textContent =
+                      "Error al restablecer identidad: " + Ka((err && err.message) || err));
+                  Yt("Error al restablecer identidad");
+                } else {
+                  (o.className = "dg-summary ok"),
+                    (o.textContent =
+                      "Identidad restablecida con éxito. Nueva sesión activa.");
+                  Yt("Nueva identidad asignada");
+                }
+                rt(btnReset);
+              },
+              15e3
             );
           }),
           (r._activate = function () {
@@ -8649,6 +8674,7 @@
           t.appendChild(n),
           t.appendChild(r),
           t.appendChild(q),
+          t.appendChild(btnReset),
           t.appendChild(o),
           t.appendChild(s),
           t.appendChild(l),
