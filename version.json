@@ -1,10 +1,10 @@
 {
-  "version": "3.1.80",
+  "version": "3.1.82",
   "name": "XuperTV",
   "minWebos": "1.0.0",
-  "ipkUrl": "https://github.com/cristianco7/XUPER-HYDRA-PORT-WEBOS/releases/download/v3.1.80/com.webosflux.xuptertv.fidelity_3.1.80_all.ipk",
-  "sha256": "d52b3ea0fa3e5b329464bb8e0437bc8d2fad60d598ce8fee03b8a976fafbe35d",
-  "changelog": "v3.1.80: Protección contra pausas involuntarias en VOD (vodUserPaused): reanudación automática instantánea ante vacíos de buffer o cortes de inactividad de conexión CDN (60s idle timeout) en televisores OLED y webOS modernos sin necesidad de pulsar Play manualmente.",
-  "releaseDate": "2026-11-23",
-  "releasedAt": "2026-11-24T02:42:00Z"
+  "ipkUrl": "https://github.com/cristianco7/XUPER-HYDRA-PORT-WEBOS/releases/download/v3.1.82/com.webosflux.xuptertv.fidelity_3.1.82_all.ipk",
+  "sha256": "850d0b0d81659d13e72cb51c7e0b6fb94d229714f48948e618f9ca66753ce621",
+  "changelog": "v3.1.82: Mitigación automática de cortes nocturnos en TV en Vivo (portal200001): (1) Rotación suave y automática de sesiones/semillas en segundo plano ante portal200001 sin congelar la reproducción ni quemar el pool de semillas; (2) Reintento automático de conexión en el reproductor de canales en vivo con mensajes limpios en español; (3) Corrección de validación de semillas en mint-seeds.js independiente de MovieZone para garantizar semillas 100% activas.",
+  "releaseDate": "2026-11-24",
+  "releasedAt": "2026-11-24T05:05:00Z"
 }
