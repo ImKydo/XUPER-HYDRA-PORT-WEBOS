@@ -1,6 +1,6 @@
 !(function () {
   "use strict";
-  var APP_VERSION = "3.1.84";
+  var APP_VERSION = "3.1.85";
   window.APP_VERSION = APP_VERSION;
   /* Iconos vectoriales inline: las fuentes de las TV webOS no incluyen
      glifos ★ ☆ ▶ ⚙ ➕ ni emoji, por eso se dibujan en SVG. */
@@ -10650,6 +10650,7 @@
     }
   }
   function Xn(e) {
+    autoNextKey = "";
     var t = X.playerItem;
     if (t && e) {
       var a = Vn(t),
@@ -10680,7 +10681,7 @@
         (X.playerEpisode = t),
         (X.detailEpisode = t),
         (X.playerSeasonIndex = X.detailSeason || 0),
-        (autoNextKey = ""),
+        (X.resumePosition = 0),
         Ce && we && ao(),
         Jn(e),
         X.episodeSwitchTimer && clearTimeout(X.episodeSwitchTimer),
@@ -10731,9 +10732,36 @@
   function Qn() {
     var e = X.playerItem;
     if (e && x(e) && "player" === X.screen) {
+      /* Protección 1: No cambiar de capítulo si el video no terminó de verdad.
+         Si el CDN o relay se desconectó a mitad del capítulo, el navegador dispara 'ended'
+         porque se cerró la conexión HTTP. En ese caso NO se debe cambiar de capítulo,
+         sino reconectar la emisión en el segundo actual. */
+      var cur = 0,
+        dur = Hr();
+      if (xe) {
+        cur = br ? Cr + (xe.currentTime || 0) : xe.currentTime || 0;
+      }
+      if (dur > 60 && cur < Math.min(dur * 0.95, dur - 30)) {
+        console.warn(
+          "[vod] onended prematuro a los " +
+            Math.round(cur) +
+            "s de " +
+            Math.round(dur) +
+            "s. Reconectando capítulo actual..."
+        );
+        if (cur > 3) {
+          X.resumePosition = Math.floor(cur);
+        }
+        jr("Reconectando vídeo…");
+        sr();
+        return;
+      }
       var t =
         String(e.id || "") + "|" + String((X.playerEpisode && X.playerEpisode.id) || "");
-      if (t && t === autoNextKey) return;
+      if (t && t === autoNextKey) {
+        console.warn("[vod] Bloqueado salto repetido para capítulo " + t);
+        return;
+      }
       autoNextKey = t;
       for (
         var a = (function (e) {
@@ -12966,10 +12994,21 @@
     var a = yr;
     function i() {
       if ((!X.resumePosition || X.resumePosition <= 3) && e) {
+        var isSeries = x(e);
+        var curEpId = X.playerEpisode && String(X.playerEpisode.id);
         var hist = (Q && Q.history) || [];
         for (var h = 0; h < hist.length; h++) {
           if (String(hist[h].id) === String(e.id)) {
+            // En series, la posición guardada SOLO aplica si corresponde al MISMO capítulo
+            if (isSeries && curEpId && hist[h].episodeId && String(hist[h].episodeId) !== curEpId) {
+              break;
+            }
             var pos = Math.floor(Number(hist[h].position) || 0);
+            var dur = Math.floor(Number(hist[h].duration) || 0);
+            // Si el contenido ya terminó (a menos de 25s del final), empezar desde 0
+            if (dur > 60 && pos >= dur - 25) {
+              pos = 0;
+            }
             if (pos > 3) X.resumePosition = pos;
             break;
           }
