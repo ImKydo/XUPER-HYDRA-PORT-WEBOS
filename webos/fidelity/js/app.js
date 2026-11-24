@@ -1,6 +1,6 @@
 !(function () {
   "use strict";
-  var APP_VERSION = "3.1.81";
+  var APP_VERSION = "3.1.82";
   window.APP_VERSION = APP_VERSION;
   /* Iconos vectoriales inline: las fuentes de las TV webOS no incluyen
      glifos ★ ☆ ▶ ⚙ ➕ ni emoji, por eso se dibujan en SVG. */
@@ -13373,7 +13373,7 @@
           xe.load();
         }
       } catch (errZap) { }
-      var a = function () {
+      var doResolveLive = function () {
         var t = ++Zr;
         (jr("Cargando señal " + (e.name || "") + "…"),
           P(
@@ -13381,21 +13381,34 @@
             e.streamUrl
               ? { streamUrl: e.streamUrl, channelCode: e.channelCode || "", force: force ? 1 : 0, name: e.name || "" }
               : { channelCode: e.channelCode, force: force ? 1 : 0, name: e.name || "" },
-            function (e, a) {
+            function (errLive, resPayload) {
               if (t === Zr) {
-                if (e || !a || !1 === a.returnValue) {
+                if (errLive || !resPayload || !1 === resPayload.returnValue) {
                   clearLiveStallWatch();
                   try {
                     xe && (xe.pause(), xe.removeAttribute("src"), xe.load());
                   } catch (errErr) { }
-                  return (
-                    (X.streamError =
-                      "No se pudo conectar con la señal" + (e ? ": " + e : "")),
-                    void jr(X.streamError)
-                  );
+                  var errStr = String(errLive || "");
+                  var is200001 = /200001|版本已停止使用/i.test(errStr) || errStr.indexOf("portal200001") !== -1;
+                  var errMsg = is200001
+                    ? "Señal temporalmente no disponible en el servidor. Reconectando…"
+                    : ("No se pudo conectar con la señal" + (errLive ? ": " + errLive : ""));
+                  X.streamError = errMsg;
+                  jr(X.streamError);
+                  if (is200001 && "live" === X.playerMode && !window.__liveRetrying200001) {
+                    window.__liveRetrying200001 = true;
+                    eo = setTimeout(function () {
+                      window.__liveRetrying200001 = false;
+                      if ("live" === X.playerMode && t === Zr) {
+                        console.log("[live] auto-reintentando conexión tras respuesta del servidor...");
+                        doResolveLive();
+                      }
+                    }, 4000);
+                  }
+                  return;
                 }
-                D("live", a);
-                var i = a.proxyPath || a.url;
+                D("live", resPayload);
+                var i = resPayload.proxyPath || resPayload.url;
                 if (!i) {
                   clearLiveStallWatch();
                   try {
@@ -13411,7 +13424,7 @@
             }
           ));
       };
-      t ? a() : (eo = setTimeout(a, 180));
+      t ? doResolveLive() : (eo = setTimeout(doResolveLive, 180));
     }
   }
   function ao() {

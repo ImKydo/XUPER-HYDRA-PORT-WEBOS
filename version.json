@@ -1,10 +1,10 @@
 {
-  "version": "3.1.81",
+  "version": "3.1.82",
   "name": "XuperTV",
   "minWebos": "1.0.0",
-  "ipkUrl": "https://github.com/cristianco7/XUPER-HYDRA-PORT-WEBOS/releases/download/v3.1.81/com.webosflux.xuptertv.fidelity_3.1.81_all.ipk",
-  "sha256": "83c893767c363ace307063873052e50c55bf3508e7b6464d24b07faef91bf0d8",
-  "changelog": "v3.1.81: Solución integral de reproducción para Modo Normal y Modo Fluido en webOS 5 (UN7300), webOS 6.5 y 4K: (1) Opciones fijas de 1080p y 720p en el reproductor y en Ajustes para evitar la caída a <30 FPS por decodificación forzada de 4K pesado en MPEG-TS crudo; (2) Corrección de la barra de tiempo en Modo Fluido (lee duración total del título en vez de los 40 s del pipe); (3) Punto de reanudación e historial guardado respetados al iniciar y cambiar de reproductor; (4) Despausa instantánea sin congelamiento en Modo Fluido y watchdog automático contra audio sin video.",
-  "releaseDate": "2026-11-23",
-  "releasedAt": "2026-11-24T04:24:00Z"
+  "ipkUrl": "https://github.com/cristianco7/XUPER-HYDRA-PORT-WEBOS/releases/download/v3.1.82/com.webosflux.xuptertv.fidelity_3.1.82_all.ipk",
+  "sha256": "850d0b0d81659d13e72cb51c7e0b6fb94d229714f48948e618f9ca66753ce621",
+  "changelog": "v3.1.82: Mitigación automática de cortes nocturnos en TV en Vivo (portal200001): (1) Rotación suave y automática de sesiones/semillas en segundo plano ante portal200001 sin congelar la reproducción ni quemar el pool de semillas; (2) Reintento automático de conexión en el reproductor de canales en vivo con mensajes limpios en español; (3) Corrección de validación de semillas en mint-seeds.js independiente de MovieZone para garantizar semillas 100% activas.",
+  "releaseDate": "2026-11-24",
+  "releasedAt": "2026-11-24T05:05:00Z"
 }

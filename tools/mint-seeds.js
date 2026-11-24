@@ -172,7 +172,7 @@ function probeProxy(proxy, cb) {
     if (done) return;
     done = true;
     cb(new Error("timeout"));
-  }, 9000);
+  }, 4000);
 
   magis.ensureSession(function (err) {
     if (done) return;
@@ -207,11 +207,11 @@ function ensureWorkingRoute(cb) {
       }
       log("reunidos " + list.length + " proxies candidatos de LatAm. Filtrando TCP CONNECT en paralelo...");
 
-      var candidates = list.slice(0, 150);
+      var candidates = list.slice(0, 50);
       var live = [];
       var tested = 0;
       candidates.forEach(function (p) {
-        testConnect(p, "cloudflare.com", 443, 6000, function (err3, ok) {
+        testConnect(p, "cloudflare.com", 443, 3500, function (err3, ok) {
           if (!err3 && ok) {
             live.push(p);
           }
@@ -256,7 +256,7 @@ function mintOne(cb) {
     if (finished) return;
     finished = true;
     cb(new Error("timeout acuñando la semilla"));
-  }, 90000);
+  }, 35000);
 
   function finish(err, seed) {
     if (finished) return;
@@ -270,11 +270,11 @@ function mintOne(cb) {
     var s = magis.session;
     if (s.usesSeed) return finish(new Error("el portal devolvió una semilla en vez de activar (zona bloqueada)"));
     if (!s.userId || !s.userToken) return finish(new Error("activación incompleta"));
-    magis.home("movies", 1, function (err2, res) {
+    magis.call("v3/searchByName", { value: "a", type: "0", pageSize: 5 }, { urgent: true }, function (err2, res) {
       if (err2) return finish(err2);
-      var list = res && res.items ? res.items : res;
+      var list = (res && res.contents) || (res && res.items) || res;
       var n = (list && list.length) || 0;
-      if (n < 1) return finish(new Error("el catálogo vino vacío: sesión sin acceso"));
+      if (n < 1) return finish(new Error("la búsqueda de catálogo vino vacía: sesión sin acceso"));
       finish(null, {
         sn: String(s.sn || "").toLowerCase(),
         userId: String(s.userId),

@@ -542,6 +542,7 @@ function call(e, r, t, n) {
         s();
         var i = a && a.portalCode,
           l = i && SESSION_DEAD[i],
+          isVerRefused = "portal200001" === i || /200001|版本已停止使用/i.test((a && a.message) || ""),
           u =
             a &&
             /未登录|sesi[oó]n|login|token.*expir|invalid.*sn/i.test(
@@ -550,6 +551,7 @@ function call(e, r, t, n) {
         if (
           a &&
           !1 !== t.baseFields &&
+          !isVerRefused &&
           ("aaa100028" === i || "aaa100027" === i || l || u) &&
           !t._sessionRetried
         )
@@ -586,7 +588,7 @@ function call(e, r, t, n) {
         if (
           a &&
           !1 !== t.baseFields &&
-          (i === GEO_BLOCKED || l || u) &&
+          (i === GEO_BLOCKED || isVerRefused || l || u) &&
           (t._seedTries || 0) < SEED_RESCUE_ROUNDS
         ) {
           SESSION_DEAD[i] &&
@@ -2461,7 +2463,15 @@ function firstCall(e, r) {
     if (t >= e.length) return r(s || new Error("el portal no respondió"));
     var a = e[t++];
     call(a.path, a.bean, { urgent: !0 }, function (e, t) {
-      if (e) return n(e);
+      if (e) {
+        if (
+          e.portalCode === "portal200001" ||
+          /200001|版本已停止使用/i.test((e && e.message) || "")
+        ) {
+          return r(e);
+        }
+        return n(e);
+      }
       r(null, t);
     });
   })(null);
@@ -2505,7 +2515,8 @@ function resolveLive(e, r, force) {
     }, 0);
   ensureSession(function (t) {
     if (t) return r(t);
-    !(function r(t, n) {
+    var runResolve = function (t, attempt) {
+      attempt = attempt || 0;
       firstCall(
         [
           { path: "v4/startPlayLive", bean: { channelCode: e, type: "1" } },
@@ -2519,14 +2530,19 @@ function resolveLive(e, r, force) {
           },
         ],
         function (e, s) {
-          if (e)
-            return n
-              ? t(e)
-              : (resetSessionAfterLiveFailure(),
-                ensureSession(function (n) {
-                  if (n) return t(e);
-                  r(t, !0);
-                }));
+          if (e) {
+            var msg = (e && e.message) || "";
+            if (e.portalCode === "portal200001" || /200001|版本已停止使用/i.test(msg)) {
+              e = new Error("Señal temporalmente no disponible en el servidor. Reconectando...");
+              e.portalCode = "portal200001";
+            }
+            if (attempt >= 2) return t(e);
+            resetSessionAfterLiveFailure();
+            return ensureSession(function (n) {
+              if (n) return t(e);
+              runResolve(t, attempt + 1);
+            });
+          }
           for (
             var a = (s && s.liveAddressList) || [], o = null, i = 0;
             i < a.length;
@@ -2541,7 +2557,8 @@ function resolveLive(e, r, force) {
           t(null, o);
         }
       );
-    })(function (t, n) {
+    };
+    runResolve(function (t, n) {
       if (t) return r(t);
       var s = n.playCode || e,
         a = n.license,
