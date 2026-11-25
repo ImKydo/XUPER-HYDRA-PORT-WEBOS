@@ -202,6 +202,10 @@ function ensureWorkingRoute(cb) {
       log("conexión directa funcional (zona no bloqueada)");
       return cb(null);
     }
+    if (err && err.portalCode === "portal200001") {
+      log("rechazo de versión del portal (portal200001): " + (err.message || "versión no aceptada"));
+      return cb(err);
+    }
     log("conexión directa bloqueada por región (portal100024); buscando proxy regional LatAm para GitHub Actions...");
     fetchLatamProxies(function (err2, list) {
       if (!list || !list.length) {
@@ -275,7 +279,11 @@ function mintOne(cb) {
     if (!s.userId || !s.userToken) return finish(new Error("activación incompleta"));
     magis.call("v3/searchByName", { value: "a", type: "0", pageSize: 5 }, { urgent: true }, function (err2, res) {
       if (err2) return finish(err2);
-      var list = (res && res.contents) || (res && res.items) || res;
+      var list =
+        (res && res.searchItemList) ||
+        (res && res.contents) ||
+        (res && res.items) ||
+        res;
       var n = (list && list.length) || 0;
       if (n < 1) return finish(new Error("la búsqueda de catálogo vino vacía: sesión sin acceso"));
       finish(null, {
