@@ -14,8 +14,10 @@ var crypto = require("crypto"),
       return null;
     }
   })(),
-  KEY_HEX = "e7af1ed7de1ffddd7bd3fe37ebdffde9ef3fe1ae39edfeb8",
+  KEY_HEX = "db5ddfdb869cff5e1beffe1cd37fdadb4f7fdfcdde69dd5b",
   HOSTS = [
+    "edastu.udigkkrc.com",
+    "brkhzs.udigkkrc.com",
     "mptec.dhkrxuzcy.com",
     "ftmrmy.jdfey0cd.com",
     "fuxok.nguvmqhpk.com",
@@ -27,9 +29,10 @@ var crypto = require("crypto"),
   ],
   PORTAL_CODE = "masnew",
   APP_ID = "com.android.msandroid",
-  APK_VERSION = "49902",
-  SPKG_VER = "2025-08-07 05:40:11_36_16_",
-  APK_VER_HEADER = "43404",
+  APK_VERSION = "49920",
+  SPKG_VER = "2024-12-06 10:43:45_33_13_",
+  APK_VER_HEADER = "49920",
+  CLIENT_META_SALT = "213f24ac-14b7-4c03-a209-383ead1b014f",
   USER_AGENT = "okhttp/3.12.12",
   CONTENT_TYPE = "application/json;charset=utf-8",
   SNTOKEN_SALT = "ntFT65w6itH!lHCPw7D=@qnsFC5adD28",
@@ -326,8 +329,34 @@ function post(e, r, t) {
       a < s.length ||
       (o <= 0 && c(l || new Error(e + ": el portal no respondió")));
   }
+  function randomUuidV4() {
+    var b = crypto.randomBytes(16),
+      hex = [],
+      idx;
+    b[6] = (b[6] & 15) | 64;
+    b[8] = (b[8] & 63) | 128;
+    for (idx = 0; idx < 16; idx++) {
+      hex.push((b[idx] < 16 ? "0" : "") + b[idx].toString(16));
+    }
+    return (
+      hex.slice(0, 4).join("") +
+      "-" +
+      hex.slice(4, 6).join("") +
+      "-" +
+      hex.slice(6, 8).join("") +
+      "-" +
+      hex.slice(8, 10).join("") +
+      "-" +
+      hex.slice(10, 16).join("")
+    );
+  }
   function m(r, t, s) {
     var a = "http" === t,
+      traceId = randomUuidV4(),
+      clientMeta = crypto
+        .createHash("md5")
+        .update(traceId + CLIENT_META_SALT)
+        .digest("hex"),
       u = {
         hostname: r,
         servername: r,
@@ -345,6 +374,8 @@ function post(e, r, t) {
           apk: APP_ID,
           apkVer: APK_VER_HEADER,
           spkgVer: SPKG_VER,
+          "X-Request-Trace": traceId,
+          "X-Client-Meta": clientMeta,
           "User-Agent": USER_AGENT,
           "Content-Type": CONTENT_TYPE,
           "Content-Length": Buffer.byteLength(n),
@@ -607,6 +638,21 @@ function call(e, r, t, n) {
               (d[seedIdentity(session.seed)] = !0),
             rescueSeed(d, function (s, o) {
               if (!o) {
+                if (!t._sharedRetried) {
+                  t._sharedRetried = !0;
+                  return loginSharedAccount(function (lErr) {
+                    if (!lErr) return call(e, r, t, n);
+                    session.ready = !1;
+                    session.userId = "";
+                    session.userToken = "";
+                    session.snToken = "";
+                    session.seed = null;
+                    session.usesSeed = !1;
+                    session.at = 0;
+                    clearStoredSession();
+                    return n(a);
+                  });
+                }
                 session.ready = !1;
                 session.userId = "";
                 session.userToken = "";
