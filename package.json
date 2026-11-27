@@ -13,7 +13,7 @@
     "tokens": "node tools/css-tokens.mjs --write",
     "nogap": "node tools/gen-nogap.mjs --write",
     "ipk": "node tools/build-ipk.mjs",
-    "test": "node --test tests/unit/",
+    "test": "node --test \"tests/unit/*.test.mjs\"",
     "test:e2e": "node tests/e2e/smoke.mjs",
     "serve": "node tools/serve.mjs",
     "perf": "node tools/perf/measure.mjs --throttle=4 --out=docs/perf/latest.json",

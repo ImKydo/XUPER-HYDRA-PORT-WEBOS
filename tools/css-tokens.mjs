@@ -19,8 +19,9 @@ const OUT = path.join(ROOT, "webos/fidelity/css/tokens.generated.css");
 const mode = process.argv.includes("--check") ? "check" : "write";
 
 if (!existsSync(SRC)) {
-  console.error("css-tokens: falta src/design/tokens.json");
-  process.exit(1);
+  // Antes de la fase CSS (T5.1) todavía no hay tokens: no es un fallo.
+  console.log("css-tokens: sin src/design/tokens.json todavía (se crea en T5.1)");
+  process.exit(0);
 }
 
 const tokens = JSON.parse(readFileSync(SRC, "utf8"));

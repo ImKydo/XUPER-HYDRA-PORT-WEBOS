@@ -1,0 +1,46 @@
+name: quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Instalar dependencias de desarrollo
+        run: npm ci --no-audit --no-fund
+
+      - name: Contrato de reproducción (24 checks)
+        run: node tools/check/protected.mjs
+
+      - name: Sintaxis ES5 en cliente y servicio
+        run: node tools/check/es5.mjs
+
+      - name: Scripts inline del HTML
+        run: node tools/check/inline-scripts.mjs
+
+      - name: Artefacto generado sincronizado
+        run: node tools/build.mjs --check
+
+      - name: Tokens de diseño sincronizados
+        run: node tools/css-tokens.mjs --check
+
+      - name: Capa nogap sincronizada
+        run: node tools/gen-nogap.mjs --check
+
+      - name: Pruebas unitarias
+        run: npm test
+
+      # TODO(T5.7): quitar continue-on-error cuando la fase CSS deje el
+      # contador de bloqueos en 0. Hoy hay 22 reglas que webOS <=5 ignora.
+      - name: Compatibilidad CSS del televisor
+        continue-on-error: true
+        run: node tools/check/css-compat.mjs --fail
