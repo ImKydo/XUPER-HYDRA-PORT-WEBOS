@@ -462,6 +462,15 @@
       "date": "2026-11-27"
     },
     {
+      "id": "T6.14",
+      "phase": "F6",
+      "title": "Instalación y validación en televisor real",
+      "status": "done",
+      "commit": "e46fd05",
+      "evidence": "LG 55UT7300PSA webOS 25: arranque 1920x1080 DPR2, dcl 1785 ms; 3 bugs de dispositivo corregidos (down desde Inicio, imagen del hero, versión del servicio)",
+      "date": "2026-11-27"
+    },
+    {
       "id": "T7.1",
       "phase": "F7",
       "title": "Geometría pura + pruebas",

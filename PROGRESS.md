@@ -3,7 +3,7 @@
 Plan: `.hermes/plans/2026-11-26_224922-xupertv-v2-reconstruccion-verificada.md`
 Actualizado: 2026-11-27T06:49:10.518Z
 
-**Avance global: 46/55 tareas (84 %)**
+**Avance global: 47/56 tareas (84 %)**
 
 | Fase | Hechas | Total |
 |---|---|---|
@@ -13,7 +13,7 @@ Actualizado: 2026-11-27T06:49:10.518Z
 | F3 | 3 | 4 |
 | F4 | 4 | 7 |
 | F5 | 6 | 7 |
-| F6 | 13 | 13 |
+| F6 | 14 | 14 |
 | F7 | 0 | 4 |
 
 ## F0
@@ -101,6 +101,7 @@ Actualizado: 2026-11-27T06:49:10.518Z
 | ✔ | T6.11 | Marca ZephyrTV | done | `1e0ab60` | icono 256/512 + marca 144; nombre en appinfo/index/arranque/barra; textos y errores sin XuperTV; créditos al código base | 2026-11-27 |
 | ✔ | T6.12 | Documentar la nueva navegación | done | `1e0ab60` | docs/engineering/navegacion.md con estructura, marca y por qué se retiraron las pestañas | 2026-11-27 |
 | ✔ | T6.13 | Portada (hero) en Inicio, Películas y Series | done | `d7846d8` | hero a sangre con degradados, sinopsis recortada, respaldo backdrop->landscape->poster; foco con teclado real: abajo->fila, arriba->portada, Enter->ficha; smoke 6/6 home 111 enfocables | 2026-11-27 |
+| ✔ | T6.14 | Instalación y validación en televisor real | done | `e46fd05` | LG 55UT7300PSA webOS 25: arranque 1920x1080 DPR2, dcl 1785 ms; 3 bugs de dispositivo corregidos (down desde Inicio, imagen del hero, versión del servicio) | 2026-11-27 |
 
 ## F7
 
