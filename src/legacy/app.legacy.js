@@ -3534,6 +3534,26 @@
     }
     return !1;
   }
+  var PLACEHOLDER_SRC = "assets/img/placeholder.png";
+  /* Antes, si el CDN fallaba la imagen se ocultaba y la tarjeta quedaba negra
+     (complete: true, naturalWidth: 0). Ahora se reintenta una vez por http://
+     —webOS viejo falla solo con TLS— y, si tampoco, se pinta un placeholder. */
+  function attachPoster(img, src, card) {
+    if (!img) return img;
+    img.setAttribute("decoding", "async");
+    img.setAttribute("data-poster-src", src);
+    img.onerror = function () {
+      if (this.src && 0 === this.src.indexOf("https://") && !this._httpFallback) {
+        this._httpFallback = !0;
+        this.src = this.src.replace("https://", "http://");
+        return;
+      }
+      this.onerror = null;
+      if (card) card.classList.add("is-img-error");
+      this.src = PLACEHOLDER_SRC;
+    };
+    return img;
+  }
   function xt(t, a, n, r, o, s) {
     var l = createEl(
       "div",
@@ -3543,21 +3563,7 @@
     );
     if ((placeAbsolute(l, a, n, r, o), t.poster)) {
       var d = createEl("img", "p-img");
-      (d.setAttribute("data-poster-src", t.poster),
-        (d.onerror = function () {
-          if (
-            this.src &&
-            0 === this.src.indexOf("https://") &&
-            !this._httpFallback
-          )
-            return (
-              (this._httpFallback = !0),
-              void (this.src = this.src.replace("https://", "http://"))
-            );
-          this.style.display = "none";
-          if (l) l.classList.add("is-img-error");
-        }),
-        l.appendChild(d));
+      (attachPoster(d, t.poster, l), l.appendChild(d));
     }
     return (
       s.gold ||
@@ -5215,21 +5221,7 @@
     var d = t ? t.landscape || t.poster : "";
     if (d) {
       var c = createEl("img", "bento-img");
-      (c.setAttribute("data-poster-src", d),
-        (c.onerror = function () {
-          if (
-            this.src &&
-            0 === this.src.indexOf("https://") &&
-            !this._httpFallback
-          )
-            return (
-              (this._httpFallback = !0),
-              void (this.src = this.src.replace("https://", "http://"))
-            );
-          this.style.display = "none";
-          if (l) l.classList.add("is-img-error");
-        }),
-        l.appendChild(c));
+      (attachPoster(c, d, l), l.appendChild(c));
     }
     return (
       s.shade && l.appendChild(createEl("div", "bento-shade")),
@@ -5690,15 +5682,7 @@
       placeAbsolute(card, 264 * c, 0, 244, 360);
       if (itemData.poster) {
         var img = createEl("img", "p-img");
-        img.setAttribute("data-poster-src", itemData.poster);
-        img.onerror = function () {
-          if (this.src && 0 === this.src.indexOf("https://") && !this._httpFallback) {
-            this._httpFallback = !0;
-            return void (this.src = this.src.replace("https://", "http://"));
-          }
-          this.style.display = "none";
-          if (card) card.classList.add("is-img-error");
-        };
+        attachPoster(img, itemData.poster, card);
         card.appendChild(img);
       }
       card.appendChild(createEl("div", "p-shade"));
@@ -6104,15 +6088,7 @@
 
         if (it.poster) {
           var pImg = createEl("img", "p-img");
-          pImg.setAttribute("data-poster-src", it.poster);
-          pImg.onerror = function () {
-            if (this.src && 0 === this.src.indexOf("https://") && !this._httpFallback) {
-              this._httpFallback = !0;
-              this.src = this.src.replace("https://", "http://");
-              return;
-            }
-            this.style.display = "none";
-          };
+          attachPoster(pImg, it.poster, card);
           card.appendChild(pImg);
         }
 
