@@ -1,9 +1,9 @@
 # Progreso — XuperTV webOS
 
 Plan: `.hermes/plans/2026-11-26_224922-xupertv-v2-reconstruccion-verificada.md`
-Actualizado: 2026-11-27T06:23:37.588Z
+Actualizado: 2026-11-27T06:49:10.518Z
 
-**Avance global: 42/55 tareas (76 %)**
+**Avance global: 46/55 tareas (84 %)**
 
 | Fase | Hechas | Total |
 |---|---|---|
@@ -13,7 +13,7 @@ Actualizado: 2026-11-27T06:23:37.588Z
 | F3 | 3 | 4 |
 | F4 | 4 | 7 |
 | F5 | 6 | 7 |
-| F6 | 9 | 13 |
+| F6 | 13 | 13 |
 | F7 | 0 | 4 |
 
 ## F0
@@ -90,11 +90,11 @@ Actualizado: 2026-11-27T06:23:37.588Z
 |---|---|---|---|---|---|---|
 | ✔ | T6.1 | Tipografía y truncado | done | `f724c09` | auditoria de desbordes: 4 defectos corregidos; segunda pasada 0 | 2026-11-27 |
 | ✔ | T6.2 | Un solo lenguaje de foco | done | `ab01bb3` | hover=foco unificado; anchos 107,74,155,118,172 identicos en 5 estados | 2026-11-27 |
-| · | T6.3 | Safe area (overscan 5 %) | pending |  |  |  |
-| · | T6.4 | Estados de carga, error y vacío | pending |  |  |  |
+| ✔ | T6.3 | Safe area (overscan 5 %) | done | `ee70956` | safe-area.mjs: 47 textos en banda del 5%; decision documentada (16:9 + --strict) | 2026-11-27 |
+| ✔ | T6.4 | Estados de carga, error y vacío | done | `ee70956` | vacio de busqueda verificado; estado vacio de catalogo añadido; aviso de portal caido | 2026-11-27 |
 | ✔ | T6.5 | Carrusel de 7 + asomo | done | `f724c09` | paso 254, tarjeta 234x346: 7 completas + 46 px de asomo | 2026-11-27 |
-| · | T6.6 | Issue #83: retomar, favoritos y Back | pending |  |  |  |
-| · | T6.7 | Regresión visual | pending |  |  |  |
+| ✔ | T6.6 | Issue #83: retomar, favoritos y Back | done | `ee70956` | favoritos guardan ficha (3/3 con ids fuera del catalogo); fila Mi lista; Back vuelve a la misma tarjeta | 2026-11-27 |
+| ✔ | T6.7 | Regresión visual | done | `ee70956` | visual-layout.mjs: 7 pantallas, 30 cajas, tolerancia 8 px; en npm run layout y CI | 2026-11-27 |
 | ✔ | T6.8 | Navegación de cinco pestañas con Categorías | done | `1e0ab60` | 8 pestañas -> 5; Kids/Anime/Novelas dentro de Categorías; panel abre con Kids/Anime/Novelas + géneros | 2026-11-27 |
 | ✔ | T6.9 | Seguir viendo e Historial en Ajustes | done | `1e0ab60` | riel 'Seguir viendo' primero en Inicio sólo con progreso; Historial fuera de la barra, en Ajustes -> Mi lista | 2026-11-27 |
 | ✔ | T6.10 | Cabecera sin reloj ni wifi y buscar accesible | done | `1e0ab60` | reloj y wifi fuera; acciones de cabecera reducidas a buscar y cuenta; sin icono de filtro duplicado | 2026-11-27 |

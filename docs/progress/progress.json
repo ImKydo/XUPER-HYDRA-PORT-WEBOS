@@ -1,6 +1,6 @@
 {
   "plan": ".hermes/plans/2026-11-26_224922-xupertv-v2-reconstruccion-verificada.md",
-  "updatedAt": "2026-11-27T06:23:37.588Z",
+  "updatedAt": "2026-11-27T06:49:10.518Z",
   "tasks": [
     {
       "id": "T0.1",
@@ -366,19 +366,19 @@
       "id": "T6.3",
       "phase": "F6",
       "title": "Safe area (overscan 5 %)",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "ee70956",
+      "evidence": "safe-area.mjs: 47 textos en banda del 5%; decision documentada (16:9 + --strict)",
+      "date": "2026-11-27"
     },
     {
       "id": "T6.4",
       "phase": "F6",
       "title": "Estados de carga, error y vacío",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "ee70956",
+      "evidence": "vacio de busqueda verificado; estado vacio de catalogo añadido; aviso de portal caido",
+      "date": "2026-11-27"
     },
     {
       "id": "T6.5",
@@ -393,19 +393,19 @@
       "id": "T6.6",
       "phase": "F6",
       "title": "Issue #83: retomar, favoritos y Back",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "ee70956",
+      "evidence": "favoritos guardan ficha (3/3 con ids fuera del catalogo); fila Mi lista; Back vuelve a la misma tarjeta",
+      "date": "2026-11-27"
     },
     {
       "id": "T6.7",
       "phase": "F6",
       "title": "Regresión visual",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "ee70956",
+      "evidence": "visual-layout.mjs: 7 pantallas, 30 cajas, tolerancia 8 px; en npm run layout y CI",
+      "date": "2026-11-27"
     },
     {
       "id": "T6.8",
