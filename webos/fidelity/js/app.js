@@ -120,7 +120,7 @@
       UHD: "uhd",
       Extra: "extra",
     };
-  function c(e, t, a) {
+  function seedDemoCatalog(e, t, a) {
     for (var i = 1; i <= t; i++) {
       var n = s[(a + i) % s.length],
         o = s[(a + i + 3) % s.length];
@@ -145,13 +145,13 @@
       });
     }
   }
-  (c("Destacado", 5, 1),
-    c("Película", 7, 2),
-    c("Serie", 7, 3),
-    c("Gratis", 5, 4),
-    c("Infantil", 8, 5),
-    c("UHD", 4, 6),
-    c("Extra", 4, 7));
+  (seedDemoCatalog("Destacado", 5, 1),
+    seedDemoCatalog("Película", 7, 2),
+    seedDemoCatalog("Serie", 7, 3),
+    seedDemoCatalog("Gratis", 5, 4),
+    seedDemoCatalog("Infantil", 8, 5),
+    seedDemoCatalog("UHD", 4, 6),
+    seedDemoCatalog("Extra", 4, 7));
   var p = window.XUPERTV_API || {},
     u = /[?&]service=([^&]+)/.exec(window.location.search || "");
   u && (p.devServiceUrl = decodeURIComponent(u[1]));
@@ -269,7 +269,7 @@
       (e.volumeCount && parseInt(e.volumeCount, 10) > 1)
     );
   }
-  function T(e, t) {
+  function normalizeCatalogItem(e, t) {
     var a = (e = e || {}).genres || e.genre || [];
     ("string" == typeof a && (a = a.split(",")),
       "[object Array]" !== Object.prototype.toString.call(a) && (a = []));
@@ -499,7 +499,7 @@
     }
     return out;
   }
-  function k(e) {
+  function parseSeasonFromTitle(e) {
     if (!e || !isMovieItem(e)) return null;
     var t = String(e.title || e.alias || "")
       .replace(/\s+/g, " ")
@@ -512,12 +512,12 @@
     var i = parseInt(a[2] || a[3], 10);
     return !i || i > 99 ? null : { title: a[1].replace(/\s+$/, ""), number: i };
   }
-  function L(e, a, i) {
+  function mergeCatalogItems(e, a, i) {
     if (!e.length) return !1;
     for (var r = {}, s = 0; s < l.length; s++) r[String(l[s].id)] = l[s];
     l.splice(0, l.length);
     for (var d = [], c = 0; c < e.length; c++) {
-      var p = T(e[c], c + 1);
+      var p = normalizeCatalogItem(e[c], c + 1);
       i && !1 !== e[c].portal && (p._portal = !0);
       var u = r[String(p.id)];
       (u &&
@@ -530,7 +530,7 @@
     for (
       var f = (function (e) {
         for (var t = {}, a = [], i = 0; i < e.length; i++) {
-          var n = k(e[i]); n
+          var n = parseSeasonFromTitle(e[i]); n
             ? (t[(r = normalizeText(n.title))] || (t[r] = { title: n.title, items: [] }),
               t[r].items.push({ item: e[i], number: n.number }))
             : a.push(e[i]);
@@ -596,7 +596,7 @@
             r = !(!X.focus || !closestMatch(X.focus, "#home-notify")),
             o = !(!X.focus || !closestMatch(X.focus, ".home-page"));
           if (
-            ((He = []), (Ue = []), renderHomeScreen(), bt(X.tab, !1), "home" === X.screen)
+            ((He = []), (Ue = []), renderHomeScreen(), selectHomeTab(X.tab, !1), "home" === X.screen)
           ) {
             if (i && Ue[X.tab]) setFocus(Ue[X.tab], !0);
             else if (r) {
@@ -616,17 +616,17 @@
             }
           }
         }
-        ce && (_a(), X.searchQuery && Pa());
+        ce && (_a(), X.searchQuery && runSearch());
         X.detail && renderDetailScreen(X.detail);
       })(),
       !0
     );
   }
-  function M() {
+  function bundledCatalog() {
     var e = window.XUPERTV_CATALOG;
     return e ? toArray(e) : [];
   }
-  function I() {
+  function hasServiceBridge() {
     return (
       !window.PalmServiceBridge ||
       (window.webOS && window.webOS.service) ||
@@ -711,7 +711,7 @@
     }
   }
   var A = { live: null, vod: null };
-  function D(e, t) {
+  function rememberLastStream(e, t) {
     try {
       if (!t) return;
       var a = t.url || "";
@@ -720,7 +720,7 @@
       A[e] = { url: a, headers: t.headers || {} };
     } catch (e) { }
   }
-  function P(e, t, a, i) {
+  function serviceCall(e, t, a, i) {
     var n = p.serviceId || "com.webosflux.xuptertv.fidelity.service",
       r = !1,
       o = i || parseInt(p.timeoutMs, 10) || 2e4,
@@ -757,7 +757,7 @@
           null
         );
       }, o + 1e3)),
-        I() && window.PalmServiceBridge)
+        hasServiceBridge() && window.PalmServiceBridge)
     )
       try {
         return (
@@ -804,7 +804,7 @@
         !0)
       : (l("El servicio XuperTV no está disponible", null), !1);
   }
-  function O(e) {
+  function indexCatalogById(e) {
     var t = {},
       a = [],
       i = {};
@@ -836,7 +836,7 @@
       }
       for (
         var p = (function () {
-          for (var e = M(), t = [], a = 0; a < e.length; a++)
+          for (var e = bundledCatalog(), t = [], a = 0; a < e.length; a++)
             if (e[a] && e[a].streamUrl) {
               var i = {};
               for (var n in e[a])
@@ -851,10 +851,10 @@
         u++
       )
         l.push(p[u]);
-      l.length && L(l, "portal", !0);
+      l.length && mergeCatalogItems(l, "portal", !0);
     }
   }
-  function q() {
+  function refreshCatalog() {
     if (!f.refreshing) {
       ((f.refreshing = !0), (f.error = null));
       var e = {},
@@ -865,7 +865,7 @@
           return (
             (f.refreshing = !1),
             (f.lastSync = Date.now()),
-            O(e),
+            indexCatalogById(e),
             a &&
             f.retryTimer &&
             (clearTimeout(f.retryTimer), (f.retryTimer = null)),
@@ -878,13 +878,13 @@
                   "El portal de XuperTV no respondió. Reintentando en 20 segundos…"
                 ),
                 (f.retryTimer = setTimeout(function () {
-                  ((f.retryTimer = null), q());
+                  ((f.retryTimer = null), refreshCatalog());
                 }, 2e4)))
             )
           );
         var n = h[t++],
           r = function (t) {
-            P("home", { root: n }, function (o, s) {
+            serviceCall("home", { root: n }, function (o, s) {
               if (!o && s && !1 !== s.returnValue && s.items && s.items.length)
                 return ((e[n] = s.items), f.roots++, (a = !0), i());
               t < 2
@@ -898,20 +898,20 @@
       })();
     }
   }
-  function N() {
+  function loadPortalSnapshot() {
     var e,
       t = (e = window.XUPERTV_PORTAL) ? toArray(e) : [];
-    (t.length && L(t, "portal-snapshot", !0),
+    (t.length && mergeCatalogItems(t, "portal-snapshot", !0),
       !1 !== p.refresh
-        ? q()
+        ? refreshCatalog()
         : t.length || (v.error = "Sin snapshot del portal"));
   }
-  function R(e, t) {
-    return L(M(), e || "bundled")
+  function fallbackToBundledCatalog(e, t) {
+    return mergeCatalogItems(bundledCatalog(), e || "bundled")
       ? (t && (v.error = t), !0)
       : ((v.error = t || "No hay catálogo local ni remoto"), !1);
   }
-  function V() {
+  function loadCatalog() {
     if (p.enabled)
       if ("portal" !== p.mode)
         if ("static" !== p.mode) {
@@ -932,9 +932,9 @@
                         (a ? String(a) : "La API rechazó la petición")
                         : "";
                     })(t);
-                    if (e || a || !L(toArray(t), "api")) {
+                    if (e || a || !mergeCatalogItems(toArray(t), "api")) {
                       var i = e || a || "La API no devolvió películas";
-                      R("bundled-fallback", i) || (v.error = i);
+                      fallbackToBundledCatalog("bundled-fallback", i) || (v.error = i);
                     }
                   },
                   "xuper" === p.mode
@@ -942,17 +942,17 @@
                     : null
                 ))
               : p.useBundledCatalog
-                ? R("bundled", null)
+                ? fallbackToBundledCatalog("bundled", null)
                 : (v.error = "Falta baseUrl/catalogUrl del catálogo autorizado")
             : (v.error =
               "Falta la sesión XuperTV (userId, userToken y portalCode)");
-        } else R("bundled", null);
-      else N();
+        } else fallbackToBundledCatalog("bundled", null);
+      else loadPortalSnapshot();
   }
-  function H(e, t) {
+  function mergeItemFields(e, t) {
     var a = e && e._seriesGroup ? e.id : null,
       i = e && e._seriesGroup ? e._seriesTitle : null,
-      n = T(t, e.id);
+      n = normalizeCatalogItem(t, e.id);
     for (var r in n)
       Object.prototype.hasOwnProperty.call(n, r) &&
         "—" !== n[r] &&
@@ -966,7 +966,7 @@
         (e.alias = i),
         (e.seasons = e._catalogSeasons || e.seasons));
   }
-  function U(e, t) {
+  function ensureDetailLoaded(e, t) {
     if (((t = t || function () { }), !e)) return t(null);
     if (e._detailsLoaded) return t(e);
     if (e._detailLoading)
@@ -978,12 +978,12 @@
       return (
         (e._detailLoading = !0),
         (e._detailWait = [t]),
-        void P("detail", { contentId: e.id }, function (t, a) {
+        void serviceCall("detail", { contentId: e.id }, function (t, a) {
           if (
             ((e._detailLoading = !1), !t && a && !1 !== a.returnValue && a.item)
           ) {
             if (
-              (H(e, a.item),
+              (mergeItemFields(e, a.item),
                 (e.episodes = a.episodes || []),
                 (e.seasons = e._catalogSeasons || a.seasons || []),
                 e.seasonId || (e.seasonId = e.id),
@@ -1043,7 +1043,7 @@
                 r = n.length ? n[0] : i && (i.item || i.movie || i);
               r &&
                 "object" == typeof r &&
-                (H(e, r),
+                (mergeItemFields(e, r),
                   (e._detailsLoaded = !0),
                   X.detail === e &&
                   "detail" === X.screen &&
@@ -1222,7 +1222,7 @@
   var $ = "xuper_local_profile_v1",
     G = "xuper_global_playback_v1",
     Q = { id: "", createdAt: 0, history: [] };
-  function J(e, t) {
+  function readJsonStorage(e, t) {
     try {
       var a = localStorage.getItem(e);
       return a ? JSON.parse(a) : t;
@@ -1230,22 +1230,22 @@
       return t;
     }
   }
-  function K(e, t) {
+  function writeJsonStorage(e, t) {
     try {
       localStorage.setItem(e, JSON.stringify(t));
     } catch (e) { }
   }
-  function Y() {
-    K(G, X.playback);
+  function savePlaybackState() {
+    writeJsonStorage(G, X.playback);
   }
-  function Z(e) {
+  function toggleFavorite(e) {
     if (!e || !e.id) return !1;
     var t = String(e.id),
       a = !X.favs[t];
     return (
       a ? (X.favs[t] = !0) : delete X.favs[t],
       (Q.favs = X.favs),
-      K($, Q),
+      writeJsonStorage($, Q),
       a
     );
   }
@@ -1281,12 +1281,12 @@
     return (
       a ? (X.liveFavorites[t] = !0) : delete X.liveFavorites[t],
       (Q.liveFavorites = X.liveFavorites),
-      K($, Q),
+      writeJsonStorage($, Q),
       a
     );
   }
   !(function () {
-    var e = J(G, null);
+    var e = readJsonStorage(G, null);
     if (e)
       for (var t in X.playback)
         X.playback.hasOwnProperty(t) &&
@@ -1303,7 +1303,7 @@
         localStorage.setItem("xuper_legacy_smooth_v1", "1");
         X.playback.streamMode = "smooth";
         X.streamMode = "smooth";
-        K(G, X.playback);
+        writeJsonStorage(G, X.playback);
       } else if (!e && isLegacyTv) {
         X.playback.streamMode = "smooth";
         X.streamMode = "smooth";
@@ -1316,15 +1316,15 @@
       if (!localStorage.getItem("xuper_subtitle_pref_v2")) {
         X.playback.subtitle = !1;
         localStorage.setItem("xuper_subtitle_pref_v2", "1");
-        K(G, X.playback);
+        writeJsonStorage(G, X.playback);
       }
     } catch (e) { }
-    var a = J($, null);
+    var a = readJsonStorage($, null);
     (a && a.id
       ? ((Q = a).history && Q.history.length) || (Q.history = [])
       : ((Q.id = "TV-" + String(Date.now()).slice(-8)),
         (Q.createdAt = Date.now()),
-        K($, Q)),
+        writeJsonStorage($, Q)),
       Q.favs || (Q.favs = {}),
       Q.liveFavorites || (Q.liveFavorites = {}),
       Q.uiScaleMode || (Q.uiScaleMode = "auto"),
@@ -1887,7 +1887,7 @@
   if (typeof X !== "undefined") {
     X.dialogManager = DialogManager;
   }
-  function st(e) {
+  function ensureValidFocus(e) {
     if (X.focus) {
       if (!at(X.focus)) {
         var screenElem = document.getElementById("screen-" + X.screen) || document;
@@ -2055,7 +2055,7 @@
                                   e && "search" === e.screen
                                     ? (lt("search"), setFocus(e.focus))
                                     : (lt("home"),
-                                      bt(X.tab, !1),
+                                      selectHomeTab(X.tab, !1),
                                       e && e.focus && at(e.focus)
                                         ? setFocus(e.focus)
                                         : Ue[X.tab] && setFocus(Ue[X.tab])));
@@ -2077,7 +2077,7 @@
               }
               lt("home");
               var destTab = (typeof X.tab === "number" && X.tab >= 0) ? X.tab : 0;
-              bt(destTab, !1);
+              selectHomeTab(destTab, !1);
               var homeTarget = (Ue && Ue[destTab]) || (Ue && Ue[0]) || findFirstFocusable(byId("screen-home"));
               if (homeTarget) setFocus(homeTarget);
               return;
@@ -2102,12 +2102,12 @@
               }
               return (
                 lt("home"),
-                bt(X.tab, !1),
+                selectHomeTab(X.tab, !1),
                 void (Ue[X.tab] && setFocus(Ue[X.tab]))
               );
             }
             if ("home" === X.screen) {
-              if (0 !== X.tab) return (bt(0, !0), void (Ue[0] && setFocus(Ue[0])));
+              if (0 !== X.tab) return (selectHomeTab(0, !0), void (Ue[0] && setFocus(Ue[0])));
               window.webOSTV && window.webOSTV.platformBack
                 ? window.webOSTV.platformBack()
                 : window.PalmSystem &&
@@ -2156,7 +2156,7 @@
               setFocus(r.focus);
             } else {
               (lt("home"),
-                bt(X.tab, !1),
+                selectHomeTab(X.tab, !1),
                 r && r.focus && at(r.focus)
                   ? setFocus(r.focus)
                   : Ue[X.tab] && setFocus(Ue[X.tab]));
@@ -2265,7 +2265,7 @@
       }
       lt("home");
       var destTab = (typeof X.tab === "number" && X.tab >= 0) ? X.tab : 0;
-      bt(destTab, !1);
+      selectHomeTab(destTab, !1);
       var homeTarget = (Ue && Ue[destTab]) || (Ue && Ue[0]) || findFirstFocusable(t("screen-home"));
       if (homeTarget) setFocus(homeTarget);
       return;
@@ -2308,7 +2308,7 @@
       lastBackKeyDown = Date.now();
       lt("home");
       var destTab = (typeof X.tab === "number" && X.tab >= 0) ? X.tab : 0;
-      bt(destTab, !1);
+      selectHomeTab(destTab, !1);
       var homeTarget = (Ue && Ue[destTab]) || (Ue && Ue[0]) || findFirstFocusable(t("screen-home"));
       if (homeTarget) setFocus(homeTarget);
       return;
@@ -2375,13 +2375,13 @@
     if (Ht)
       return (
         37 === t
-          ? st("left")
+          ? ensureValidFocus("left")
           : 38 === t
-            ? st("up")
+            ? ensureValidFocus("up")
             : 39 === t
-              ? st("right")
+              ? ensureValidFocus("right")
               : 40 === t
-                ? st("down")
+                ? ensureValidFocus("down")
                 : 13 === t || 32 === t
                   ? pt()
                   : (i = !1),
@@ -2390,23 +2390,23 @@
     if (X.categoryPickerOpen)
       return (
         37 === t
-          ? st("left")
+          ? ensureValidFocus("left")
           : 38 === t
-            ? st("up")
+            ? ensureValidFocus("up")
             : 39 === t
-              ? st("right")
+              ? ensureValidFocus("right")
               : 40 === t
-                ? st("down")
+                ? ensureValidFocus("down")
                 : 13 === t || 32 === t
                   ? pt()
                   : (i = !1),
         void (i && e.preventDefault && e.preventDefault())
       );
     if (X.episodeBrowserOpen) {
-      if (37 === t) st("left");
-      else if (38 === t) st("up");
-      else if (39 === t) st("right");
-      else if (40 === t) st("down");
+      if (37 === t) ensureValidFocus("left");
+      else if (38 === t) ensureValidFocus("up");
+      else if (39 === t) ensureValidFocus("right");
+      else if (40 === t) ensureValidFocus("down");
       else if (13 === t || 32 === t) pt();
       else i = !1;
       i && e.preventDefault && e.preventDefault();
@@ -2482,24 +2482,24 @@
         if (ji)
           return (
             37 === t
-              ? st("left")
+              ? ensureValidFocus("left")
               : 38 === t
-                ? st("up")
+                ? ensureValidFocus("up")
                 : 39 === t
-                  ? st("right")
-                  : 40 === t && st("down"),
+                  ? ensureValidFocus("right")
+                  : 40 === t && ensureValidFocus("down"),
             void (e.preventDefault && e.preventDefault())
           );
         if (zi)
           return (
             Dn(),
             37 === t
-              ? st("left")
+              ? ensureValidFocus("left")
               : 38 === t
-                ? st("up")
+                ? ensureValidFocus("up")
                 : 39 === t
-                  ? st("right")
-                  : 40 === t && st("down"),
+                  ? ensureValidFocus("right")
+                  : 40 === t && ensureValidFocus("down"),
             void (e.preventDefault && e.preventDefault())
           );
         if ("vod" === X.playerMode) {
@@ -2559,12 +2559,12 @@
             )
               return (
                 37 === t
-                  ? st("left")
+                  ? ensureValidFocus("left")
                   : 38 === t
-                    ? st("up")
+                    ? ensureValidFocus("up")
                     : 39 === t
-                      ? st("right")
-                      : 40 === t && st("down"),
+                      ? ensureValidFocus("right")
+                      : 40 === t && ensureValidFocus("down"),
                 void (e.preventDefault && e.preventDefault())
               );
             if (38 === t) {
@@ -2619,10 +2619,10 @@
           }
         }
       }
-      if (37 === t) st("left");
-      else if (38 === t) st("up");
-      else if (39 === t) st("right");
-      else if (40 === t) st("down");
+      if (37 === t) ensureValidFocus("left");
+      else if (38 === t) ensureValidFocus("up");
+      else if (39 === t) ensureValidFocus("right");
+      else if (40 === t) ensureValidFocus("down");
       else if (13 === t || 32 === t) {
         if (X.episodeBrowserOpen) return void pt();
         ji
@@ -2670,7 +2670,7 @@
       !a.classList.contains("is-active") &&
       (a.classList.add("is-active"), (X.screen = "home")));
     try {
-      bt(0, !1);
+      selectHomeTab(0, !1);
     } catch (e) {
       console.error("selectTab error:", e);
     }
@@ -2975,11 +2975,11 @@
         t.appendChild(ne));
     },
     function (e) {
-      var t = ha("destacado"),
+      var t = filterByCategory("destacado"),
         heroPool = selectHeroItems(t, 10),
         a = heroPool.slice(0, 6),
         i = !(!a[0] || !a[0]._portal);
-      fa(e, a, { titles: i, dots: i ? 4 : 0, shade: i, pool: heroPool });
+      renderBentoCard(e, a, { titles: i, dots: i ? 4 : 0, shade: i, pool: heroPool });
       var n = t.filter(function (it) {
         for (var k = 0; k < a.length; k++) if (a[k] && a[k].id === it.id) return false;
         return true;
@@ -2993,11 +2993,11 @@
         });
     },
     function (e) {
-      var t = ha("pelicula"),
+      var t = filterByCategory("pelicula"),
         heroPool = selectHeroItems(t, 10),
         a = heroPool.slice(0, 6),
         i = !(!a[0] || !a[0]._portal);
-      fa(e, a, { titles: i, dots: i ? 4 : 0, shade: i, pool: heroPool });
+      renderBentoCard(e, a, { titles: i, dots: i ? 4 : 0, shade: i, pool: heroPool });
       var n = t.filter(function (it) {
         for (var k = 0; k < a.length; k++) if (a[k] && a[k].id === it.id) return false;
         return true;
@@ -3011,11 +3011,11 @@
         });
     },
     function (e) {
-      var t = ha("serie"),
+      var t = filterByCategory("serie"),
         heroPool = selectHeroItems(t, 10),
         a = heroPool.slice(0, 6),
         i = !(!a[0] || !a[0]._portal);
-      fa(e, a, { titles: i, dots: i ? 3 : 2, shade: i, pool: heroPool });
+      renderBentoCard(e, a, { titles: i, dots: i ? 3 : 2, shade: i, pool: heroPool });
       var n = t.filter(function (it) {
         for (var k = 0; k < a.length; k++) if (a[k] && a[k].id === it.id) return false;
         return true;
@@ -3029,11 +3029,11 @@
         });
     },
     function (e) {
-      var t = ha("infantil"),
+      var t = filterByCategory("infantil"),
         heroPool = selectHeroItems(t, 10),
         a = heroPool.slice(0, 6),
         i = !(!a[0] || !a[0]._portal);
-      fa(e, a, { titles: i, dots: i ? 3 : 2, shade: i, pool: heroPool });
+      renderBentoCard(e, a, { titles: i, dots: i ? 3 : 2, shade: i, pool: heroPool });
       var n = t.filter(function (it) {
         for (var k = 0; k < a.length; k++) if (a[k] && a[k].id === it.id) return false;
         return true;
@@ -3047,11 +3047,11 @@
         });
     },
     function (e) {
-      var t = ha("anime"),
+      var t = filterByCategory("anime"),
         heroPool = selectHeroItems(t, 10),
         a = heroPool.slice(0, 6),
         i = !(!a[0] || !a[0]._portal);
-      fa(e, a, { titles: i, dots: i ? 3 : 2, shade: i, pool: heroPool });
+      renderBentoCard(e, a, { titles: i, dots: i ? 3 : 2, shade: i, pool: heroPool });
       var n = t.filter(function (it) {
         for (var k = 0; k < a.length; k++) if (a[k] && a[k].id === it.id) return false;
         return true;
@@ -3065,12 +3065,12 @@
         });
     },
     function (t) {
-      var a = ha("novela");
+      var a = filterByCategory("novela");
       if (a.length) {
         var heroPool = selectHeroItems(a, 10);
         var hero = heroPool.slice(0, 6);
         var hasPortal = !(!hero[0] || !hero[0]._portal);
-        fa(t, hero, { titles: hasPortal, dots: hasPortal ? 3 : 2, shade: hasPortal, pool: heroPool });
+        renderBentoCard(t, hero, { titles: hasPortal, dots: hasPortal ? 3 : 2, shade: hasPortal, pool: heroPool });
         var remaining = a.filter(function (it) {
           for (var k = 0; k < hero.length; k++) if (hero[k] && hero[k].id === it.id) return false;
           return true;
@@ -3106,7 +3106,7 @@
     if (z[idx] && z[idx].action) return;
     tabSwitchTimer = setTimeout(function () {
       tabSwitchTimer = null;
-      bt(idx, !1);
+      selectHomeTab(idx, !1);
     }, 260);
   }
   function mt(e) {
@@ -3159,7 +3159,7 @@
                 if ("history" === z[e].action)
                   return ((We = "history"), Ha(), void Ua(1, !0));
                 if (X.tab !== e) {
-                  bt(e, !1);
+                  selectHomeTab(e, !1);
                 }
                 if (0 === e) {
                   var t = Fe.filter(function (e) {
@@ -3196,7 +3196,7 @@
                   if ("history" === z[e].action)
                     return ((We = "history"), Ha(), Ua(1, !0), !0);
                   if (X.tab !== e) {
-                    bt(e, !1);
+                    selectHomeTab(e, !1);
                   }
                   if (0 === e) {
                     var a = Fe.filter(function (e) {
@@ -3325,8 +3325,8 @@
       e.textContent = i + ":" + pad2(o) + " " + n;
     }
   }
-  window.switchTab = bt;
-  function bt(e, t) {
+  window.switchTab = selectHomeTab;
+  function selectHomeTab(e, t) {
     if (X.channelsOpen || (Se && Se.classList.contains("is-active"))) {
       ro();
     }
@@ -3347,7 +3347,7 @@
         }
       }
 
-      (a.page >= 0 && mt(a.page), 0 === a.page ? Wt(F[X.channel]) : jt());
+      (a.page >= 0 && mt(a.page), 0 === a.page ? scheduleHomePreview(F[X.channel]) : jt());
       for (var r = 0; r < He.length; r++)
         (He[r].classList.remove("is-entering", "from-left", "from-right"),
           He[r].classList.toggle("is-current", r === a.page));
@@ -3995,7 +3995,7 @@
       } catch (e) { }
     }
   }
-  function Wt(e) {
+  function scheduleHomePreview(e) {
     (Rt && clearTimeout(Rt),
       (Rt = setTimeout(function () {
         ((Rt = null),
@@ -4019,14 +4019,14 @@
                 (ie.classList.add("is-preview-loading"),
                   qt &&
                   (qt.textContent = "Cargando " + (e.name || "canal") + "…"),
-                  P(
+                  serviceCall(
                     "resolveLive",
                     e.streamUrl
                       ? { streamUrl: e.streamUrl }
                       : { channelCode: e.channelCode },
                     function (e, t) {
                       if (a === Nt && "home" === X.screen && 0 === X.tab) {
-                        !e && t && D("live", t);
+                        !e && t && rememberLastStream("live", t);
                         var i =
                           !e &&
                           t &&
@@ -4111,7 +4111,7 @@
           return settle();
         }
         if (!addon.url) return settle();
-        P("fetchM3u", { url: addon.url }, function (err, res) {
+        serviceCall("fetchM3u", { url: addon.url }, function (err, res) {
           var chans =
             res && res.channels ? addonFilterChannels(addon, res.channels) : [];
           for (var k2 = 0; k2 < chans.length; k2++) out.push(chans[k2]);
@@ -4129,7 +4129,7 @@
       F[0] && ae && (ae.textContent = F[0].name),
       "player" === X.screen &&
       "live" === X.playerMode &&
-      (ao(), to(F[0], !0)),
+      (renderPlayerInfoBar(), to(F[0], !0)),
       done && done());
   }
   function loadAddonCategory(cat, done) {
@@ -4168,7 +4168,7 @@
         r = !1,
         fails = 0;
       !(function e() {
-        P(
+        serviceCall(
           "liveChannels",
           { columnId: a, pageNum: n, pageSize: 20 },
           function (o, s) {
@@ -4202,8 +4202,8 @@
                     "player" === X.screen && X.channelsOpen && renderLiveChannelList()),
                   F[X.channel] && ae && (ae.textContent = F[X.channel].name),
                   "player" === X.screen && "live" === X.playerMode
-                    ? ((isFirstPage || isLastPage) && ao())
-                    : isFirstPage && Wt(F[X.channel]));
+                    ? ((isFirstPage || isLastPage) && renderPlayerInfoBar())
+                    : isFirstPage && scheduleHomePreview(F[X.channel]));
               }
               if (
                 (r ||
@@ -4212,7 +4212,7 @@
                     (function (e) {
                       It && Lt.length
                         ? e && e(null, Lt)
-                        : P("liveCategories", {}, function (t, a) {
+                        : serviceCall("liveCategories", {}, function (t, a) {
                           var i = [];
                           if (a && a.categories && a.categories.length)
                             for (var n = 0; n < a.categories.length; n++) {
@@ -4460,10 +4460,10 @@
       "player" === X.screen
         ? (!(function () {
           if (!Ce) return;
-          ao();
+          renderPlayerInfoBar();
         })(),
           "live" === X.playerMode && to(F[e], !!t))
-        : "home" === X.screen && 0 === X.tab && Wt(F[e]));
+        : "home" === X.screen && 0 === X.tab && scheduleHomePreview(F[e]));
   }
   function visibleLiveIndexes() {
     for (var e = [], t = 0; t < F.length; t++)
@@ -4552,7 +4552,7 @@
                 (o.textContent =
                   "Por favor no apagues la TV ni salgas de la aplicación.");
               var l = p.serviceId || "com.webosflux.xuptertv.fidelity.service";
-              if (I() && window.PalmServiceBridge)
+              if (hasServiceBridge() && window.PalmServiceBridge)
                 try {
                   return void window.webOS.service.request("luna://" + l, {
                     method: "applyUpdate",
@@ -4793,7 +4793,7 @@
           ? (e && Bt) || openUpdateDialog(i)
           : e || Yt("Tienes la versión más reciente (v" + a + ")"));
     }
-    P(
+    serviceCall(
       "checkUpdate",
       { currentVersion: a },
       function (n, r) {
@@ -5023,7 +5023,7 @@
           ((s._activate = function () {
             r ||
               ((s.textContent = "Instalando…"),
-                ca(t, function (e, t) {
+                loadAddonChannels(t, function (e, t) {
                   e
                     ? ((s.textContent = "Error"),
                       setTimeout(function () {
@@ -5091,7 +5091,7 @@
           a = e ? (e.value || "").trim() : "";
         a && /^https?:\/\//i.test(a)
           ? ((c.textContent = "Descargando…"),
-            ca(
+            loadAddonChannels(
               {
                 id: "custom_" + Date.now(),
                 name: "Lista Personalizada",
@@ -5116,7 +5116,7 @@
       bindMagicActivate(p);
     }
   }
-  function ca(e, t) {
+  function loadAddonChannels(e, t) {
     var curated = curatedAddonChannels(e);
     if (curated && curated.length) {
       /* Addon curado: no hay descarga. Se guarda su lista de señales para que
@@ -5150,7 +5150,7 @@
       (kt(list), t && t(null, curated.length));
       return;
     }
-    P("fetchM3u", { url: e.url }, function (a, i) {
+    serviceCall("fetchM3u", { url: e.url }, function (a, i) {
       var chans = i && i.channels ? addonFilterChannels(e, i.channels) : [];
       if (!a && chans.length) {
         for (var n = _t(), r = !1, o = 0; o < n.length; o++)
@@ -5226,7 +5226,7 @@
       o.appendChild(createEl("span", "bento-dot" + (s === r ? " is-active" : "")));
     return o;
   }
-  function fa(e, t, a) {
+  function renderBentoCard(e, t, a) {
     a = a || {};
     var i = t.length ? t : l;
     if (i.length) {
@@ -5391,7 +5391,7 @@
     }
     return true;
   }
-  function ha(e) {
+  function filterByCategory(e) {
     var t,
       a = [],
       seen = {};
@@ -5879,7 +5879,7 @@
       },
       next = function () {
         if (page > 2) return finish();
-        P("search", { value: info.query, pageNum: page++ }, function (err, result) {
+        serviceCall("search", { value: info.query, pageNum: page++ }, function (err, result) {
           var list = !err && result && result.items ? result.items : [];
           for (var i = 0; i < list.length; i++) collected.push(list[i]);
           list.length ? setTimeout(next, 30) : finish();
@@ -6484,7 +6484,7 @@
     (n && setFocus(n),
       e._detailsLoaded
         ? void 0
-        : U(e, function (item) {
+        : ensureDetailLoaded(e, function (item) {
           item &&
             "detail" === X.screen &&
             X.detail === item &&
@@ -6807,7 +6807,7 @@
           if ("fullscreen" === e) Kr(t, X.detailEpisode);
           else if ("language" === e) er(t);
           else if ("favorite" === e) {
-            var a = Z(t);
+            var a = toggleFavorite(t);
             this.classList.toggle("is-selected", a);
             var i = this.querySelector(".detail-btn-label");
             i && (i.textContent = a ? "En favoritos" : "Favorito");
@@ -6927,11 +6927,11 @@
                   X.detailRange = 0;
                   X.detailEpisode = null;
                   jr("Cargando temporada…");
-                  P("detail", { contentId: sItem.id }, function (err, res) {
+                  serviceCall("detail", { contentId: sItem.id }, function (err, res) {
                     if (!err && res && !1 !== res.returnValue) {
                       var pSeasons = (t.seasons && t.seasons.length > 1) ? t.seasons : t._catalogSeasons;
                       var pCat = t._catalogSeasons;
-                      res.item && H(t, res.item);
+                      res.item && mergeItemFields(t, res.item);
                       if (pCat) t._catalogSeasons = pCat;
                       if (pSeasons && pSeasons.length) {
                         t.seasons = pSeasons;
@@ -7283,11 +7283,11 @@
             X.detailRange = 0;
             X.detailEpisode = null;
             jr("Cargando temporada…");
-            P("detail", { contentId: sData.id }, function (err, res) {
+            serviceCall("detail", { contentId: sData.id }, function (err, res) {
               if (!err && res && !1 !== res.returnValue) {
                 var pSeasons = (item.seasons && item.seasons.length > 1) ? item.seasons : item._catalogSeasons;
                 var pCat = item._catalogSeasons;
-                res.item && H(item, res.item);
+                res.item && mergeItemFields(item, res.item);
                 if (pCat) item._catalogSeasons = pCat;
                 if (pSeasons && pSeasons.length) {
                   item.seasons = pSeasons;
@@ -7378,7 +7378,7 @@
       var k = e.keyCode || e.which;
       if (13 === k) {
         try { me.blur(); } catch (err) { }
-        Pa();
+        runSearch();
         var res = findFirstFocusable(he) || (byId("search-suggestions") && findFirstFocusable(byId("search-suggestions")));
         if (res) setFocus(res);
         e.preventDefault && e.preventDefault();
@@ -7387,7 +7387,7 @@
     me._activate = function () {
       setFocus(me);
       if (X.searchQuery && X.searchQuery.trim().length > 0) {
-        Pa();
+        runSearch();
         var res = findFirstFocusable(he) || (byId("search-suggestions") && findFirstFocusable(byId("search-suggestions")));
         if (res) setFocus(res);
       } else {
@@ -7457,7 +7457,7 @@
                 ? Aa("")
                 : "del" === e
                   ? Aa(X.searchQuery.slice(0, -1))
-                  : Pa();
+                  : runSearch();
           };
         })(n[r].cls)),
         i.appendChild(o));
@@ -7851,7 +7851,7 @@
     }
   }
   function Aa(e) {
-    ((X.searchQuery = e), Ea(), Pa());
+    ((X.searchQuery = e), Ea(), runSearch());
   }
   function Da() {
     try { if (me && me.blur) me.blur(); } catch (err) { }
@@ -7868,7 +7868,7 @@
       ve && ve.classList.remove("is-active"),
       pe && pe.classList.remove("is-hidden"));
   }
-  function Pa() {
+  function runSearch() {
     var e = X.searchQuery || "",
       t = normalizeText(e.trim());
     if (t) {
@@ -7921,7 +7921,7 @@
       ) {
         var s = ++X.searchSeq;
         X.searchTimer = setTimeout(function () {
-          P("search", { value: e.trim() }, function (e, t) {
+          serviceCall("search", { value: e.trim() }, function (e, t) {
             if (
               s === X.searchSeq &&
               !e &&
@@ -7933,7 +7933,7 @@
               for (var i = a.slice(), n = {}, r = 0; r < i.length; r++)
                 n[String(i[r].id)] = !0;
               for (var o = 0; o < t.items.length; o++) {
-                var l = T(t.items[o], i.length + 1);
+                var l = normalizeCatalogItem(t.items[o], i.length + 1);
                 n[String(l.id)] || ((n[String(l.id)] = !0), i.push(l));
               }
               qa(i);
@@ -7948,9 +7948,9 @@
   }
   var Oa = 10;
   function qa(e) {
-    ((X.searchMatches = e || []), (X.searchPage = 0), Na(0, -1));
+    ((X.searchMatches = e || []), (X.searchPage = 0), renderSearchResults(0, -1));
   }
-  function Na(e, t) {
+  function renderSearchResults(e, t) {
     var i = X.searchMatches || [];
     if (
       (pe.classList.add("is-hidden"),
@@ -7979,14 +7979,14 @@
         (r > 1 ? "  ·  Página " + (o + 1) + "/" + r : ""));
     for (var d = s; d < l; d++) {
       var c = d - s,
-        p = ka(T(i[d], d + 1), c),
+        p = ka(normalizeCatalogItem(i[d], d + 1), c),
         u = p.querySelector(".poster");
       (u &&
         (function (e, t) {
           u._onMove = function (a) {
             return "down" === a && e >= 5 && l < i.length
-              ? (Na(o + 1, t), !0)
-              : "up" === a && e < 5 && s > 0 && (Na(o - 1, 5 + t), !0);
+              ? (renderSearchResults(o + 1, t), !0)
+              : "up" === a && e < 5 && s > 0 && (renderSearchResults(o - 1, 5 + t), !0);
           };
         })(c, c % 5),
         he.appendChild(p));
@@ -8084,9 +8084,9 @@
         ye.appendChild(l),
         je.push(l));
     }
-    for (var p in (((ze = {}).profile = za()),
-      (ze.history = ja()),
-      (ze.addons = Wa()),
+    for (var p in (((ze = {}).profile = renderAccountPanel()),
+      (ze.history = renderHistoryPanel()),
+      (ze.addons = renderAddonsPanel()),
       (ze.share = (function () {
         var t = createEl("div", "settings-panel share-panel");
         (t.appendChild(createEl("div", "share-head", "Compartir XuperTV")),
@@ -8206,7 +8206,7 @@
             ((X.playback.subtitle = !X.playback.subtitle),
               (a.className =
                 "sp-switch focusable " + (X.playback.subtitle ? "on" : "off")),
-              Y(),
+              savePlaybackState(),
               setFocus(a));
           }),
           t.appendChild(a),
@@ -8256,7 +8256,7 @@
                   ((X.playback.style =
                     ["white", "yellow", "cyan"][this._index] || "white"),
                     nn(),
-                    Y());
+                    savePlaybackState());
                   for (
                     var e = t.querySelectorAll(".pb-opt"), a = 0;
                     a < e.length;
@@ -8316,7 +8316,7 @@
             runDiagnostics(n, o, l);
           }),
           (q._activate = function () {
-            P(
+            serviceCall(
               "liveLog",
               { events: [] },
               function (err, data) {
@@ -8435,7 +8435,7 @@
           (btnReset._activate = function () {
             (o.className = "dg-summary"),
               (o.textContent = "Restableciendo identidad y renovando sesión...");
-            P(
+            serviceCall(
               "setSession",
               { action: "reset" },
               function (err, res) {
@@ -8718,7 +8718,7 @@
           (a._activate = function () {
             ((X.adultEnabled = !X.adultEnabled),
               (Q.adultEnabled = X.adultEnabled),
-              K($, Q),
+              writeJsonStorage($, Q),
               (a.className =
                 "sp-switch focusable " + (X.adultEnabled ? "on" : "off")),
               (i.textContent = X.adultEnabled
@@ -8767,7 +8767,7 @@
               r.appendChild(createEl("span", null, a.label)),
               (r._activate = function () {
                 ((Q.uiScaleMode = a.id),
-                  K($, Q),
+                  writeJsonStorage($, Q),
                   applyViewportScale(),
                   Yt(
                     "hd" === a.id
@@ -8896,13 +8896,13 @@
       (r && r.classList.toggle("is-history-view", "history" === n),
         "profile" === n && ze.profile && be)
     ) {
-      var o = za();
+      var o = renderAccountPanel();
       (be.replaceChild(o, ze.profile), (ze.profile = o));
     } else if ("history" === n && ze.history && be) {
-      var s = ja();
+      var s = renderHistoryPanel();
       (be.replaceChild(s, ze.history), (ze.history = s));
     } else if ("addons" === n && ze.addons && be) {
-      var l = Wa();
+      var l = renderAddonsPanel();
       (be.replaceChild(l, ze.addons), (ze.addons = l));
     } else
       "netdiag" === n &&
@@ -8940,7 +8940,7 @@
               ? (X.playback.quality = 1 === this._index ? "1080" : 2 === this._index ? "720" : "auto")
               : (X.playback[this._group] = this._index),
             nn(),
-            Y());
+            savePlaybackState());
           for (var e = t.querySelectorAll(".pb-opt"), a = 0; a < e.length; a++)
             e[a]._group === this._group &&
               e[a].classList.toggle("is-checked", e[a]._index === this._index);
@@ -8949,7 +8949,7 @@
     }
     t.appendChild(s);
   }
-  function za() {
+  function renderAccountPanel() {
     var t = createEl("div", "settings-panel account-panel");
     var header = createEl("div", "account-header-row");
     var a = createEl("div", "account-avatar");
@@ -9025,7 +9025,7 @@
     t.appendChild(l);
     return t;
   }
-  function ja() {
+  function renderHistoryPanel() {
     for (
       var t = createEl("div", "settings-panel history-panel"),
       a = createEl("div", "history-tabs"),
@@ -9095,7 +9095,7 @@
       );
     return (t.appendChild(d), t);
   }
-  function Wa() {
+  function renderAddonsPanel() {
     var t = createEl("div", "settings-panel addons-panel");
     t.appendChild(createEl("div", "sp-title", "Addons y Listas M3U"));
     t.appendChild(
@@ -9435,7 +9435,7 @@
           ((s = !0),
             o("ping no respondió en 25 segundos (el servicio no arrancó)"));
       }, 25e3);
-    P(
+    serviceCall(
       "ping",
       {},
       function (e, t) {
@@ -9462,7 +9462,7 @@
             "ping respondió, pero netdiag no devolvió resultado en 45 segundos"
           );
       }, 45e3);
-    P(
+    serviceCall(
       "netdiag",
       (function () {
         var e = window.__xuperViewport || {},
@@ -9679,7 +9679,7 @@
       we && (we.classList.remove("is-active"), (we.style.display = "none"));
       return;
     }
-    ao();
+    renderPlayerInfoBar();
     ((X.infobar = !0),
       "vod" === X.playerMode
         ? (Me && Me.classList.add("is-active"),
@@ -9810,7 +9810,7 @@
           d++
         )
           String(l[d].id) !== o && s.push(l[d]);
-        ((Q.history = s), K($, Q));
+        ((Q.history = s), writeJsonStorage($, Q));
       }
     }
   }
@@ -9853,7 +9853,7 @@
           }
         if (s || (a && normalizeText(n.title || "") === a)) return ((ln = e), void ba(n));
       }
-      var c = T(
+      var c = normalizeCatalogItem(
         {
           id: e.id,
           title: e.title,
@@ -10032,7 +10032,7 @@
         n = { contentId: a },
         r = e.seasonId || e.id;
       (i && i.id && r && i.id !== r && (n.seriesContentId = r),
-        P("mediaInfo", n, function (e, t) {
+        serviceCall("mediaInfo", n, function (e, t) {
           var i = vn[a] || [];
           delete vn[a];
           var n = !e && t && !1 !== t.returnValue ? t : null;
@@ -10369,7 +10369,7 @@
               ? ((t._wait = t._wait || []), void t._wait.push(a))
               : ((t._loading = !0),
                 (t._wait = [a]),
-                void P("detail", { contentId: t.id }, function (e, a) {
+                void serviceCall("detail", { contentId: t.id }, function (e, a) {
                   t._loading = !1;
                   var i =
                     !e && a && !1 !== a.returnValue && a.episodes
@@ -10415,7 +10415,7 @@
       if (!((t.episodes && t.episodes.length) || t._detailsLoaded))
         return (
           jr("Cargando capítulos…"),
-          void U(t, function () {
+          void ensureDetailLoaded(t, function () {
             "player" === X.screen &&
               (!X.playerEpisode &&
                 t.episodes &&
@@ -10504,7 +10504,7 @@
                   Ii.appendChild(a));
               })(n);
           })(0, i),
-            jn(t, n));
+            loadEpisodesPanel(t, n));
         })());
       var i =
         (Ai ? Ai.querySelector(".pe-ep.is-current") : null) ||
@@ -10550,14 +10550,14 @@
     return o === X.episodeBrowserPage
       ? !1
       : ((X.episodeBrowserPage = o),
-        jn(a, i),
+        loadEpisodesPanel(a, i),
         setTimeout(function () {
           var e = Ai && (Ai.querySelectorAll(".pe-ep")[t || 0] || findFirstFocusable(Ai));
           e && setFocus(e);
         }, 0),
         !0);
   }
-  function jn(t, i) {
+  function loadEpisodesPanel(t, i) {
     if (Ai && i) {
       removeAllChildren(Ai);
       var r =
@@ -10571,7 +10571,7 @@
             if (
               X.episodeBrowserOpen &&
               Vn(t)[X.browserSeason] === i &&
-              (jn(t, i), closestMatch(X.focus, "#pe-episodes"))
+              (loadEpisodesPanel(t, i), closestMatch(X.focus, "#pe-episodes"))
             ) {
               var a = Ai.querySelector(".pe-ep.is-current") || findFirstFocusable(Ai);
               a && setFocus(a);
@@ -10649,7 +10649,7 @@
         })(),
         Di &&
         (Di.textContent = "Episodios · Temporada " + (i[e].number || e + 1)),
-        jn(a, i[e]),
+        loadEpisodesPanel(a, i[e]),
         t)
     ) {
       var n = Ai ? Ai.querySelector(".pe-ep.is-current") || findFirstFocusable(Ai) : null;
@@ -10689,7 +10689,7 @@
         (X.detailEpisode = t),
         (X.playerSeasonIndex = X.detailSeason || 0),
         (X.resumePosition = 0),
-        Ce && we && ao(),
+        Ce && we && renderPlayerInfoBar(),
         Jn(e),
         X.episodeSwitchTimer && clearTimeout(X.episodeSwitchTimer),
         (X.episodeSwitchSeq = (X.episodeSwitchSeq || 0) + 1));
@@ -10874,11 +10874,11 @@
       var t = e || bn();
       ("detail" === X.screen && (t = X.detail || t),
         ar(),
-        ir(),
+        renderCodecToggle(),
         gn(),
         mi.classList.add("is-active"),
         Mn(t, function () {
-          ji && (ar(), ir());
+          ji && (ar(), renderCodecToggle());
         }));
       var a = (Pi && Pi.querySelector(".focusable")) || Oi || Fi;
       if (zi && hi) {
@@ -11002,7 +11002,7 @@
         (b.setAttribute("data-quality", opt.value),
           opt.value === cur && b.classList.add("is-selected"),
           (b._activate = function () {
-            ((X.playback.quality = opt.value), (X.trackIndex = 0), Y(), ir());
+            ((X.playback.quality = opt.value), (X.trackIndex = 0), savePlaybackState(), renderCodecToggle());
             "player" === X.screen &&
               "vod" === X.playerMode &&
               (jr("Cambiando calidad a " + opt.label + "…"), sr());
@@ -11010,7 +11010,7 @@
           ZiOptsQuality.appendChild(b));
       })(opts[k]);
   }
-  function ir() {
+  function renderCodecToggle() {
     var t = En(un[Ln(bn())]);
     refreshQualityOptions();
     if (Oi) {
@@ -11035,7 +11035,7 @@
             ((a.textContent = nr(t.lang || "Sub")),
               Qi && Qi.url === t.url && a.classList.add("is-selected"),
               (a._activate = function () {
-                ((Qi = t), (Ji = !0), (Ki = !0), mn(t), ir(), Dn());
+                ((Qi = t), (Ji = !0), (Ki = !0), mn(t), renderCodecToggle(), Dn());
               }),
               Vi.appendChild(a));
           })(t[r]);
@@ -11442,15 +11442,15 @@
           /* Guarda la elección del espectador: se mantiene en los próximos
              títulos hasta que vuelva a desactivar los subtítulos. */
           X.playback.subtitle = Ji;
-          Y();
-          (ir(), Dn());
+          savePlaybackState();
+          (renderCodecToggle(), Dn());
         }),
         Hi)
     )
       for (var r = Hi.querySelectorAll(".dps-btn"), o = 0; o < r.length; o++)
         (function (e) {
           e._activate = function () {
-            ((Zi = e.getAttribute("data-size") || "normal"), gn(), ir());
+            ((Zi = e.getAttribute("data-size") || "normal"), gn(), renderCodecToggle());
           };
         })(r[o]);
     if (Ui)
@@ -11459,9 +11459,9 @@
           e._activate = function () {
             ((en = e.getAttribute("data-style") || "white"),
               (X.playback.style = en),
-              Y(),
+              savePlaybackState(),
               gn(),
-              ir());
+              renderCodecToggle());
           };
         })(s[l]);
     if (ZiOptsBg)
@@ -11470,9 +11470,9 @@
           e._activate = function () {
             ((enBg = e.getAttribute("data-bg") || "outline"),
               (X.playback.subtitleBg = enBg),
-              Y(),
+              savePlaybackState(),
               gn(),
-              ir());
+              renderCodecToggle());
           };
         })(s2[l2]);
     (Fi &&
@@ -11899,7 +11899,7 @@
                   renderLiveChannelRow(liveFavoritesOnly);
                   if (Fe[0] && at(Fe[0])) {
                     setFocus(Fe[0]);
-                    Wt(F[0]);
+                    scheduleHomePreview(F[0]);
                   } else {
                     var homeFastCat = document.querySelector(".live-fast .f-cat");
                     if (homeFastCat && at(homeFastCat)) setFocus(homeFastCat);
@@ -12327,7 +12327,7 @@
   function Nr() {
     ((Or = !1), qr && (clearTimeout(qr), (qr = null)));
   }
-  function Rr() {
+  function scheduleSearch() {
     if (((Er = null), xe && Ir)) {
       if (br) {
         /* Modo Fluido no admite seek dentro del pipe: cada búsqueda reinicia el
@@ -12387,7 +12387,7 @@
     }
     ((Ir += e),
       Er && clearTimeout(Er),
-      (Er = setTimeout(Rr, 800)),
+      (Er = setTimeout(scheduleSearch, 800)),
       si(e > 0 ? "forward" : "backward"),
       setTimeout(function () {
         si("none");
@@ -12481,7 +12481,7 @@
           (i.open("GET", e + "/media/abort", !0), i.send());
         } catch (e) { }
       try {
-        P("abortMedia", {}, function () { });
+        serviceCall("abortMedia", {}, function () { });
       } catch (e) { }
     }
     if (((gr = ""), (mr = ""), xe)) {
@@ -12592,7 +12592,7 @@
                   ),
                     (xr = !0),
                     (X.streamMode = "normal"),
-                    K(STREAM_MODE_KEY, "normal"),
+                    writeJsonStorage(STREAM_MODE_KEY, "normal"),
                     /* No rebotar Normal → Fluido para este título: ya se
                        comprobó que el relay no arranca aquí. */
                     (wn =
@@ -12657,7 +12657,7 @@
               (smoothFallbackKey = sfKey),
               (wn = Ln(sfItem) || Sn(sfItem) || wn),
               (X.streamMode = "normal"),
-              K(STREAM_MODE_KEY, "normal"),
+              writeJsonStorage(STREAM_MODE_KEY, "normal"),
               Lr(),
               jr("Modo Fluido no pudo abrir el vídeo; volviendo a Modo Normal…"),
               void setTimeout(function () {
@@ -13089,7 +13089,7 @@
           i.forceRelay = !1;
           i.playbackMode = "normal";
           jr("Modo Fluido no respondió, usando Modo Normal…");
-          return void P("resolve", i, done);
+          return void serviceCall("resolve", i, done);
         }
         if (resErr || !n || !1 === n.returnValue)
           return (
@@ -13098,7 +13098,7 @@
             jr(X.streamError),
             t("")
           );
-        (D("vod", n),
+        (rememberLastStream("vod", n),
           (e.streamMime = n.mime || ""),
           (e.streamCodec = n.codec || ""),
           n.duration > 0
@@ -13134,7 +13134,7 @@
         }
         t(o);
       };
-      P(i.forceRelay ? "resolveSmooth" : "resolve", i, done);
+      serviceCall(i.forceRelay ? "resolveSmooth" : "resolve", i, done);
     }
     if (
       isMovieItem(e) &&
@@ -13144,7 +13144,7 @@
     )
       return (
         jr("Cargando capítulos…"),
-        void U(e, function () {
+        void ensureDetailLoaded(e, function () {
           a === yr && i();
         })
       );
@@ -13221,7 +13221,7 @@
       o && o.classList.remove("is-active"),
       (X.screen = "player"),
       Ce.classList.add("is-vod"),
-      ao(),
+      renderPlayerInfoBar(),
       setFocus(Ce),
       vi(),
       n
@@ -13247,10 +13247,10 @@
         we.classList.remove("is-active"),
         Se.classList.remove("is-active"),
         Ce.classList.toggle("is-vod", "vod" === e),
-        ao(),
+        renderPlayerInfoBar(),
         lt("player"),
         setFocus(Ce),
-        ao(),
+        renderPlayerInfoBar(),
         "vod" === e
           ? (vi(), showLoadingBackdrop(X.playerItem, "Cargando " + ((X.playerItem && X.playerItem.title) || "") + "…"), Jr(X.playerItem, X.playerEpisode))
           : (pi(), to(F[X.channel])))
@@ -13300,7 +13300,7 @@
           liveLogBuf = [];
           if (!batch.length) return;
           try {
-            P("liveLog", { events: batch }, function () { }, 8e3);
+            serviceCall("liveLog", { events: batch }, function () { }, 8e3);
           } catch (e) { }
         }, 1500));
     } catch (e) { }
@@ -13448,7 +13448,7 @@
       var doResolveLive = function () {
         var t = ++Zr;
         (jr("Cargando señal " + (e.name || "") + "…"),
-          P(
+          serviceCall(
             "resolveLive",
             e.streamUrl
               ? { streamUrl: e.streamUrl, channelCode: e.channelCode || "", force: force ? 1 : 0, name: e.name || "" }
@@ -13479,7 +13479,7 @@
                   }
                   return;
                 }
-                D("live", resPayload);
+                rememberLastStream("live", resPayload);
                 var i = resPayload.proxyPath || resPayload.url;
                 if (!i) {
                   clearLiveStallWatch();
@@ -13499,7 +13499,7 @@
       t ? doResolveLive() : (eo = setTimeout(doResolveLive, 180));
     }
   }
-  function ao() {
+  function renderPlayerInfoBar() {
     var e = "live" === X.playerMode,
       t = F[X.channel] || {},
       a = we.querySelector(".pi-index"),
@@ -13590,7 +13590,7 @@
     liveSearchText = "";
     ((X.channelsOpen = !1),
       Se && Se.classList.remove("is-active"),
-      "player" === X.screen && (ao(), pi(), setFocus(Ce)));
+      "player" === X.screen && (renderPlayerInfoBar(), pi(), setFocus(Ce)));
   }
   function applyViewportScale() {
     var e = byId("app");
@@ -13773,7 +13773,7 @@
     } catch (e) { }
     try {
       !(function () {
-        if (I()) {
+        if (hasServiceBridge()) {
           var e = p.serviceId || "com.webosflux.xuptertv.fidelity.service";
           try {
             window.webOS.service.request("luna://" + e, {
@@ -13798,7 +13798,7 @@
       })();
     } catch (e) { }
     try {
-      P("prewarm", {}, function () { });
+      serviceCall("prewarm", {}, function () { });
     } catch (e) { }
     var e, a;
     ((e = byId("welcome-loading-img")),
@@ -13816,7 +13816,7 @@
             "assets/original/welcome/img_welcome_loading" + a + ".png");
       }, 250)));
     try {
-      V();
+      loadCatalog();
     } catch (e) {
       console.error("loadVodCatalog error:", e);
     }
@@ -13837,9 +13837,9 @@
         channels: F,
         api: v,
         portal: f,
-        service: P,
-        refreshPortal: q,
-        reloadVod: V,
+        service: serviceCall,
+        refreshPortal: refreshCatalog,
+        reloadVod: loadCatalog,
         skipWelcome: vt,
         show: function (e) {
           "home" === e
@@ -13855,7 +13855,7 @@
                     : lt(e);
         },
         selectTab: function (e) {
-          (vt(), bt(e, !0));
+          (vt(), selectHomeTab(e, !0));
         },
         openDetail: function (e) {
           ba(l[e] || l[0]);
@@ -13897,8 +13897,8 @@
         if ("welcome" === o) return;
         (vt(),
           void 0 !== t.tab
-            ? bt(parseInt(t.tab, 10) || 0, !0)
-            : (bt(0, !1), (typeof Ue !== "undefined" && Ue && Ue[0] ? setFocus(Ue[0]) : (ne && setFocus(ne)))));
+            ? selectHomeTab(parseInt(t.tab, 10) || 0, !0)
+            : (selectHomeTab(0, !1), (typeof Ue !== "undefined" && Ue && Ue[0] ? setFocus(Ue[0]) : (ne && setFocus(ne)))));
         "detail" === o
           ? ba(l[parseInt(t.vod, 10) || 0])
           : "search" === o
