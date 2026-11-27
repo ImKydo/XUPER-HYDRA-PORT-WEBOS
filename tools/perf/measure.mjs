@@ -12,12 +12,10 @@
 //
 // Salida: JSON por stdout (y archivo si --out). Código de salida 0 siempre,
 // salvo error de infraestructura: este script MIDE, no aprueba ni reprueba.
-import { createServer } from "node:http";
-import { spawn } from "node:child_process";
-import { readFile, writeFile, mkdir } from "node:fs/promises";
-import { createReadStream } from "node:fs";
+import { writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { sleep, serve, launchChromium } from "./cdp.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const APP_DIR = path.join(ROOT, "webos/fidelity");
@@ -33,144 +31,6 @@ const THROTTLE = Number(args.throttle || 4);
 const OUT = args.out;
 const URL_PATH = args.url || "?screen=home&tab=1";
 const SCENES = String(args.scenes || "boot,focus,leak").split(",");
-
-const MIME = {
-  ".html": "text/html; charset=utf-8",
-  ".js": "application/javascript; charset=utf-8",
-  ".css": "text/css; charset=utf-8",
-  ".json": "application/json; charset=utf-8",
-  ".png": "image/png",
-  ".jpg": "image/jpeg",
-  ".jpeg": "image/jpeg",
-  ".gif": "image/gif",
-  ".webp": "image/webp",
-  ".svg": "image/svg+xml",
-  ".otf": "font/otf",
-  ".woff": "font/woff",
-  ".woff2": "font/woff2",
-  ".mp4": "video/mp4",
-};
-
-/* ---------------- servidor estático ---------------- */
-function serve(dir) {
-  return new Promise((resolve) => {
-    const server = createServer(async (req, res) => {
-      const urlPath = decodeURIComponent(req.url.split("?")[0]);
-      const rel = urlPath === "/" ? "index.html" : urlPath.replace(/^\/+/, "");
-      const abs = path.join(dir, rel);
-      if (!abs.startsWith(dir)) {
-        res.writeHead(403).end("forbidden");
-        return;
-      }
-      try {
-        await readFile(abs);
-      } catch {
-        res.writeHead(404).end("not found");
-        return;
-      }
-      res.writeHead(200, {
-        "Content-Type": MIME[path.extname(abs).toLowerCase()] || "application/octet-stream",
-        "Cache-Control": "no-store",
-      });
-      createReadStream(abs).pipe(res);
-    });
-    server.listen(0, "127.0.0.1", () => resolve({ server, port: server.address().port }));
-  });
-}
-
-/* ---------------- cliente CDP mínimo ---------------- */
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
-async function freePort() {
-  const s = createServer();
-  await new Promise((r) => s.listen(0, "127.0.0.1", r));
-  const p = s.address().port;
-  await new Promise((r) => s.close(r));
-  return p;
-}
-
-class Browser {
-  constructor(port) {
-    this.port = port;
-    this.id = 0;
-    this.pending = new Map();
-    this.events = new Map();
-  }
-
-  async connect() {
-    let info = null;
-    for (let i = 0; i < 60; i++) {
-      try {
-        info = await (await fetch(`http://127.0.0.1:${this.port}/json/version`)).json();
-        break;
-      } catch {
-        await sleep(200);
-      }
-    }
-    if (!info) throw new Error("Chromium no respondió en el puerto de depuración");
-
-    this.ws = new WebSocket(info.webSocketDebuggerUrl);
-    await new Promise((res, rej) => {
-      this.ws.addEventListener("open", res, { once: true });
-      this.ws.addEventListener("error", rej, { once: true });
-    });
-    this.ws.addEventListener("message", (ev) => {
-      const msg = JSON.parse(ev.data);
-      if (msg.id && this.pending.has(msg.id)) {
-        this.pending.get(msg.id)(msg);
-        this.pending.delete(msg.id);
-        return;
-      }
-      const list = this.events.get(msg.method) || [];
-      for (const fn of list) fn(msg.params);
-    });
-    return info.Browser;
-  }
-
-  on(method, fn) {
-    if (!this.events.has(method)) this.events.set(method, []);
-    this.events.get(method).push(fn);
-  }
-
-  send(method, params = {}, sessionId) {
-    return new Promise((res) => {
-      const id = ++this.id;
-      this.pending.set(id, res);
-      this.ws.send(JSON.stringify({ id, method, params, ...(sessionId ? { sessionId } : {}) }));
-    });
-  }
-
-  async newPage() {
-    const { result } = await this.send("Target.createTarget", { url: "about:blank" });
-    const { result: att } = await this.send("Target.attachToTarget", {
-      targetId: result.targetId,
-      flatten: true,
-    });
-    return { sid: att.sessionId, targetId: result.targetId };
-  }
-
-  async eval(sid, expression) {
-    const { result } = await this.send(
-      "Runtime.evaluate",
-      { expression, returnByValue: true, awaitPromise: true },
-      sid
-    );
-    if (result.exceptionDetails) throw new Error(JSON.stringify(result.exceptionDetails));
-    return result.result.value;
-  }
-
-  async goto(sid, url) {
-    const loaded = new Promise((r) => this.on("Page.loadEventFired", r));
-    await this.send("Page.navigate", { url }, sid);
-    await Promise.race([loaded, sleep(15000)]);
-  }
-
-  close() {
-    try {
-      this.ws.close();
-    } catch {}
-  }
-}
 
 /* ---------------- escenas ---------------- */
 const READ_NAV = `(() => {
@@ -246,31 +106,16 @@ async function main() {
   const { server, port: httpPort } = await serve(APP_DIR);
   const base = `http://127.0.0.1:${httpPort}/index.html${URL_PATH}`;
 
-  const debugPort = await freePort();
-  const chrome = spawn(
-    process.env.CHROMIUM || "chromium",
-    [
-      "--headless=new",
-      "--no-sandbox",
-      "--disable-gpu",
-      "--hide-scrollbars",
-      "--mute-audio",
-      `--remote-debugging-port=${debugPort}`,
-      "--window-size=1920,1080",
-      "about:blank",
-    ],
-    { stdio: "ignore" }
-  );
+  const chrome = await launchChromium({ width: 1920, height: 1080 });
+  const browser = chrome.browser;
 
   const result = {
     generatedAt: new Date().toISOString(),
-    target: { url: URL_PATH, throttle: THROTTLE, chromium: null },
+    target: { url: URL_PATH, throttle: THROTTLE, chromium: chrome.product },
     scenes: {},
   };
 
-  const browser = new Browser(debugPort);
   try {
-    result.target.chromium = await browser.connect();
     for (const scene of SCENES) {
       const { sid, targetId } = await browser.newPage();
       await browser.send("Page.enable", {}, sid);
@@ -306,8 +151,7 @@ async function main() {
       await browser.send("Target.closeTarget", { targetId }).catch(() => {});
     }
   } finally {
-    browser.close();
-    chrome.kill("SIGKILL");
+    chrome.close();
     server.close();
   }
 
