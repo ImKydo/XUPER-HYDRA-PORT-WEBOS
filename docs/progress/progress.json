@@ -1,6 +1,6 @@
 {
   "plan": ".hermes/plans/2026-11-26_224922-xupertv-v2-reconstruccion-verificada.md",
-  "updatedAt": "2026-11-27T03:42:10.995Z",
+  "updatedAt": "2026-11-27T04:00:41.578Z",
   "tasks": [
     {
       "id": "T0.1",
@@ -186,37 +186,37 @@
       "id": "T3.1",
       "phase": "F3",
       "title": "Dual-bus `palm://` (issue #22)",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "d921cc1",
+      "evidence": "palm:// tras denied; dual-bus 2/2; pendiente TV webOS 3 real",
+      "date": "2026-11-27"
     },
     {
       "id": "T3.2",
       "phase": "F3",
       "title": "Diagnóstico de la escala en webOS 3.4 (issue #18)",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
+      "status": "blocked",
+      "commit": "3e7a8cf",
+      "evidence": "fila Pantalla en Diagnostico; decision requiere datos de TV webOS 3.4",
       "date": null
     },
     {
       "id": "T3.3",
       "phase": "F3",
       "title": "Comparación de versión (\"SERVICIO DESACTUALIZADO\")",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "331f4d8",
+      "evidence": "version-check 3/3: no avisa con v3.1.86, si avisa con v3.0.0",
+      "date": "2026-11-27"
     },
     {
       "id": "T3.4",
       "phase": "F3",
       "title": "Matriz de compatibilidad en CI (patrón TiviBro)",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "39261b3",
+      "evidence": "14 archivos + inline sin APIs fuera de Chromium 38; 7 tests",
+      "date": "2026-11-27"
     },
     {
       "id": "T4.1",

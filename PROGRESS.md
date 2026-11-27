@@ -1,16 +1,16 @@
 # Progreso — XuperTV webOS
 
 Plan: `.hermes/plans/2026-11-26_224922-xupertv-v2-reconstruccion-verificada.md`
-Actualizado: 2026-11-27T03:42:10.995Z
+Actualizado: 2026-11-27T04:00:41.578Z
 
-**Avance global: 20/49 tareas (41 %)**
+**Avance global: 23/49 tareas (47 %)**
 
 | Fase | Hechas | Total |
 |---|---|---|
 | F0 | 10 | 10 |
 | F1 | 5 | 5 |
 | F2 | 5 | 5 |
-| F3 | 0 | 4 |
+| F3 | 3 | 4 |
 | F4 | 0 | 7 |
 | F5 | 0 | 7 |
 | F6 | 0 | 7 |
@@ -55,10 +55,10 @@ Actualizado: 2026-11-27T03:42:10.995Z
 
 | | ID | Tarea | Estado | Commit | Evidencia | Fecha |
 |---|---|---|---|---|---|---|
-| · | T3.1 | Dual-bus `palm://` (issue #22) | pending |  |  |  |
-| · | T3.2 | Diagnóstico de la escala en webOS 3.4 (issue #18) | pending |  |  |  |
-| · | T3.3 | Comparación de versión ("SERVICIO DESACTUALIZADO") | pending |  |  |  |
-| · | T3.4 | Matriz de compatibilidad en CI (patrón TiviBro) | pending |  |  |  |
+| ✔ | T3.1 | Dual-bus `palm://` (issue #22) | done | `d921cc1` | palm:// tras denied; dual-bus 2/2; pendiente TV webOS 3 real | 2026-11-27 |
+| ✖ | T3.2 | Diagnóstico de la escala en webOS 3.4 (issue #18) | blocked | `3e7a8cf` | fila Pantalla en Diagnostico; decision requiere datos de TV webOS 3.4 |  |
+| ✔ | T3.3 | Comparación de versión ("SERVICIO DESACTUALIZADO") | done | `331f4d8` | version-check 3/3: no avisa con v3.1.86, si avisa con v3.0.0 | 2026-11-27 |
+| ✔ | T3.4 | Matriz de compatibilidad en CI (patrón TiviBro) | done | `39261b3` | 14 archivos + inline sin APIs fuera de Chromium 38; 7 tests | 2026-11-27 |
 
 ## F4
 

@@ -118,16 +118,23 @@ function cmdSet() {
 
 function cmdNext() {
   const state = load();
-  const next = state.tasks.find((t) => t.status !== "done" && t.status !== "dropped");
+  const open = state.tasks.filter((t) => t.status !== "done" && t.status !== "dropped");
+  const blocked = open.filter((t) => t.status === "blocked");
+  // Una tarea bloqueada no es "lo siguiente": depende de algo externo. Se
+  // informa aparte para que el avance no se quede esperando.
+  const next = open.find((t) => t.status !== "blocked");
   if (!next) {
-    console.log("No queda nada pendiente.");
+    console.log("No queda nada pendiente que se pueda hacer sin desbloquear:");
+    for (const t of blocked) console.log(`  ${t.id} — ${t.title}`);
     return;
   }
   const phase = state.tasks.filter((t) => t.phase === next.phase);
   const done = phase.filter((t) => t.status === "done").length;
   console.log(`Siguiente: ${next.id} — ${next.title}`);
   console.log(`Fase ${next.phase}: ${done}/${phase.length} completadas`);
-  if (next.status === "blocked") console.log(`(bloqueada: ${next.evidence || "sin motivo anotado"})`);
+  for (const t of blocked) {
+    console.log(`(bloqueada) ${t.id} — ${t.evidence || "sin motivo anotado"}`);
+  }
 }
 
 function cmdRender() {
