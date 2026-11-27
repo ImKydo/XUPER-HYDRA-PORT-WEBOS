@@ -18,21 +18,28 @@ import { parseRules, flexGapRules, isZeroLength } from "./css-parse.mjs";
 import { APP_FIDELITY } from "./check/lib.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const SRC = path.join(ROOT, APP_FIDELITY, "css/app.css");
+// Se leen las dos capas servidas: legacy.css trae las reglas heredadas con
+// `gap` y app.css las nuevas. Antes sólo miraba app.css y generaba 0 reglas.
+const SOURCES = ["css/legacy.css", "css/app.css"].map((f) => path.join(ROOT, APP_FIDELITY, f));
 const OUT = path.join(ROOT, APP_FIDELITY, "css/nogap.css");
 const mode = process.argv.includes("--check") ? "check" : "write";
 
-if (!existsSync(SRC)) {
-  console.error("gen-nogap: falta webos/fidelity/css/app.css (la consolidación CSS aún no se aplicó)");
-  process.exit(0);
+for (const src of SOURCES) {
+  if (!existsSync(src)) {
+    console.error(`gen-nogap: falta ${path.relative(ROOT, src)}`);
+    process.exit(0);
+  }
 }
 
-const rules = parseRules(readFileSync(SRC, "utf8"), "app.css");
+let rules = [];
+for (const src of SOURCES) {
+  rules = rules.concat(parseRules(readFileSync(src, "utf8"), path.basename(src)));
+}
 const candidates = flexGapRules(rules);
 
 const out = [
   "/* GENERADO por tools/gen-nogap.mjs — no editar a mano.",
-  "   Sólo se aplica con la clase .nogap (webOS < 22). Fuente: app.css. */",
+  "   Sólo se aplica con la clase .nogap (webOS < 22). Fuente: legacy.css + app.css. */",
   "",
 ];
 
@@ -53,7 +60,7 @@ for (const { rule, row, col, column } of candidates) {
 }
 
 const text = out.join("\n") + "\n";
-const count = out.length - 4;
+const count = out.length - 3; // 3 líneas de cabecera
 
 if (mode === "check") {
   const current = existsSync(OUT) ? readFileSync(OUT, "utf8") : "";

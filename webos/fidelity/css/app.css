@@ -1,0 +1,1002 @@
+/* =========================================================================
+   app.css — capa visual propia (v3.2.x)
+   -------------------------------------------------------------------------
+   Se carga DESPUÉS de legacy.css, que ya no lleva !important, así que aquí
+   no hace falta ninguno. Ese es el contrato de este archivo: cero !important.
+
+   Reglas del proyecto:
+   - Nada de var(): Chromium 38 (webOS 3) no las soporta. Los valores salen de
+     src/design/tokens.json y se escriben literales.
+   - Nada de gap en flex, grid, backdrop-filter ni filter: se caen en webOS <=5.
+   - No se toca position/left/top/width/height de los contenedores que coloca
+     el JS: aquí sólo se pinta por encima (color, borde, radio, sombra, tipo).
+
+   Orden: base → foco → barra superior → TV en vivo → pósters y carruseles →
+   detalle → búsqueda → ajustes → reproductor → diálogos.
+   ========================================================================= */
+
+/* ---------------------------------------------------------------- base -- */
+html,
+body {
+  background: #07070b;
+  color: #f4f5f8;
+  font-family: "LG Smart UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  background: #07070b;
+}
+
+.screen {
+  background: #07070b;
+}
+
+::selection {
+  background: #e11d2e;
+  color: #ffffff;
+}
+
+/* En un TV el scroll lo mueve el mando: la barra no aporta y ensucia. */
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* --------------------------------------------------------------- foco --- */
+/* Un único lenguaje de foco en toda la app: anillo blanco de 3px, elevación
+   y un halo suave. Antes cada pantalla inventaba el suyo (unas con outline,
+   otras con borde, otras con box-shadow) y en el sofá no se sabía qué estaba
+   seleccionado. */
+.is-focused,
+.focusable.is-focused {
+  outline: none;
+  box-shadow: 0 0 0 3px #ffffff, 0 10px 30px rgba(0, 0, 0, 0.65);
+  z-index: 40;
+}
+
+.is-focused.poster,
+.is-focused.bento {
+  box-shadow: 0 0 0 3px #ffffff, 0 18px 44px rgba(0, 0, 0, 0.8);
+}
+
+/* Relleno tenue para lo que no tiene superficie propia (filas, celdas). */
+.live-row.is-focused,
+.pc-row.is-focused,
+.settings-item.is-focused,
+.detail-btn.is-focused,
+.fast-btn.is-focused,
+.kb-key.is-focused {
+  background-color: rgba(255, 255, 255, 0.14);
+}
+
+/* --------------------------------------------------- barra superior ----- */
+/* Pestañas: pastillas sobre una barra translúcida. La activa es blanca con
+   texto negro, como en Apple TV / Prime Video. */
+.home-tabs {
+  width: 1478px;
+  background: rgba(10, 10, 15, 0.94);
+  border-bottom: 1px solid #262633;
+}
+
+.tab-item {
+  color: #98a0ae;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0 8px;
+}
+
+.tab-item .tab-title {
+  color: inherit;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.tab-item .tab-icon svg {
+  width: 22px;
+  height: 22px;
+  color: inherit;
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.home-tabs .tab-item.is-selected {
+  background: #f4f5f8;
+  color: #07070b;
+}
+
+.home-tabs .tab-item.is-selected .tab-title {
+  color: #07070b;
+}
+
+.home-tabs .tab-item.is-focused {
+  background: #ffffff;
+  color: #07070b;
+  box-shadow: 0 0 0 3px #ffffff, 0 10px 26px rgba(0, 0, 0, 0.55);
+}
+
+.home-tabs .tab-item.is-focused .tab-title {
+  color: #07070b;
+}
+
+/* Cabecera: marca y reloj. */
+.home-notify {
+  color: #98a0ae;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.home-notify .notify-time,
+#notify-time {
+  color: #f4f5f8;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.notify-item {
+  border-radius: 14px;
+  border: 1px solid #262633;
+  background: #12121b;
+  color: #f4f5f8;
+  font-size: 20px;
+}
+
+.notify-item.is-focused {
+  border-color: #ffffff;
+}
+
+/* --------------------------------------------------------- TV en vivo --- */
+.live-main {
+  border-radius: 22px;
+  background: #0c0c12;
+  border: 1px solid #262633;
+  overflow: hidden;
+}
+
+.live-frame {
+  border-radius: 18px;
+  background: #000000;
+}
+
+.live-logo {
+  opacity: 0.9;
+  border-radius: 12px;
+}
+
+.live-preview-status,
+.live-list-status {
+  color: #98a0ae;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.live-info {
+  background: -webkit-linear-gradient(top, rgba(7, 7, 11, 0) 0%, rgba(7, 7, 11, 0.92) 72%);
+  background: linear-gradient(to bottom, rgba(7, 7, 11, 0) 0%, rgba(7, 7, 11, 0.92) 72%);
+  border-radius: 0 0 22px 22px;
+}
+
+/* Acciones rápidas: sólo el SVG, sin el PNG de fondo que se duplicaba. */
+.live-fast .fast-btn {
+  background-image: none;
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid #262633;
+  border-radius: 999px;
+  color: #f4f5f8;
+  font-size: 20px;
+  font-weight: 600;
+  padding: 0 24px;
+}
+
+.live-fast .fast-btn.f-all,
+.live-fast .fast-btn.f-fav,
+.live-fast .fast-btn.f-srch,
+.live-fast .fast-btn.f-cat,
+.live-fast .fast-btn.f-all.is-focused,
+.live-fast .fast-btn.f-fav.is-focused,
+.live-fast .fast-btn.f-srch.is-focused,
+.live-fast .fast-btn.f-cat.is-focused {
+  background-image: none;
+}
+
+.live-fast .fast-btn svg {
+  width: 24px;
+  height: 24px;
+  color: inherit;
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.live-fast .fast-btn.is-focused {
+  background-color: #ffffff;
+  border-color: #ffffff;
+  color: #07070b;
+}
+
+.live-fast .fast-btn.is-focused svg {
+  color: #07070b;
+  fill: #07070b;
+  stroke: #07070b;
+}
+
+.live-fast .fast-btn.is-active {
+  background-color: rgba(225, 29, 46, 0.22);
+  border-color: #e11d2e;
+  color: #f4f5f8;
+}
+
+/* Lista de canales. */
+.live-list {
+  border-radius: 18px;
+  background: #0c0c12;
+  border: 1px solid #262633;
+}
+
+.live-row {
+  border-radius: 12px;
+  color: #f4f5f8;
+  font-size: 22px;
+  font-weight: 500;
+  border: 1px solid transparent;
+}
+
+.live-row.is-selected {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: #262633;
+}
+
+.live-row.is-focused {
+  background: #f4f5f8;
+  color: #07070b;
+}
+
+/* -------------------------------------------------- pósters y rieles --- */
+.poster {
+  border-radius: 14px;
+  background: #12121b;
+  overflow: hidden;
+}
+
+.poster .p-img {
+  border-radius: 14px;
+  background: #12121b;
+}
+
+.poster .p-shade {
+  background: -webkit-linear-gradient(top, rgba(7, 7, 11, 0) 46%, rgba(7, 7, 11, 0.88) 100%);
+  background: linear-gradient(to bottom, rgba(7, 7, 11, 0) 46%, rgba(7, 7, 11, 0.88) 100%);
+  border-radius: 0 0 14px 14px;
+}
+
+.poster .p-title {
+  color: #f4f5f8;
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+}
+
+.poster.is-img-error {
+  background: #12121b;
+  border: 1px solid #262633;
+}
+
+/* Bento (destacados). */
+.bento {
+  border-radius: 18px;
+  background: #12121b;
+  overflow: hidden;
+}
+
+.bento .bento-img {
+  border-radius: 18px;
+}
+
+.bento .bento-shade {
+  background: -webkit-linear-gradient(top, rgba(7, 7, 11, 0) 30%, rgba(7, 7, 11, 0.9) 100%);
+  background: linear-gradient(to bottom, rgba(7, 7, 11, 0) 30%, rgba(7, 7, 11, 0.9) 100%);
+  border-radius: 18px;
+}
+
+.bento .bento-title {
+  color: #f4f5f8;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.15;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+}
+
+.bento .bento-badge {
+  background: #e11d2e;
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 4px 14px;
+}
+
+.bento-dot {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+}
+
+.bento-dot.is-active {
+  background: #ffffff;
+}
+
+/* Ver más de una fila. */
+.see-more {
+  color: #98a0ae;
+  font-size: 20px;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0 18px;
+}
+
+.see-more.is-focused {
+  background: #f4f5f8;
+  color: #07070b;
+}
+
+/* Rieles del catálogo. */
+.catalog-rail {
+  padding: 6px 0;
+}
+
+.catalog-rail-title,
+.home-section-title,
+.section-title {
+  color: #f4f5f8;
+  font-size: 30px;
+  font-weight: 700;
+}
+
+/* ------------------------------------------------------------ detalle --- */
+.detail-title {
+  color: #f4f5f8;
+  font-size: 52px;
+  font-weight: 800;
+  line-height: 1.08;
+}
+
+.detail-meta,
+.detail-info-line {
+  color: #98a0ae;
+  font-size: 21px;
+  font-weight: 500;
+}
+
+.detail-range {
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #f4f5f8;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 2px 10px;
+}
+
+.detail-genre,
+.detail-chip {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  color: #f4f5f8;
+  font-size: 19px;
+  font-weight: 600;
+  padding: 4px 16px;
+}
+
+.detail-synopsis {
+  color: #b9c0cc;
+  font-size: 22px;
+  line-height: 1.5;
+}
+
+.detail-score {
+  background: #f5c451;
+  color: #14140f;
+  border-radius: 12px;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.detail-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  color: #f4f5f8;
+  font-size: 21px;
+  font-weight: 600;
+  padding: 0 26px;
+}
+
+.detail-btn.is-primary,
+.detail-btn.detail-play {
+  background: #f4f5f8;
+  border-color: #f4f5f8;
+  color: #07070b;
+  font-weight: 700;
+}
+
+.detail-btn.is-focused {
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #07070b;
+}
+
+.detail-btn svg {
+  width: 26px;
+  height: 26px;
+  color: inherit;
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.detail-player {
+  border-radius: 20px;
+  background: #0c0c12;
+  border: 1px solid #262633;
+  overflow: hidden;
+}
+
+.detail-episode {
+  border-radius: 12px;
+  border: 1px solid transparent;
+}
+
+.detail-episode.is-focused {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #ffffff;
+}
+
+.detail-episode .ep-num {
+  color: #98a0ae;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.detail-episode .ep-title {
+  color: #f4f5f8;
+  font-size: 21px;
+  font-weight: 600;
+}
+
+.detail-season-btn {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid #262633;
+  color: #f4f5f8;
+  font-size: 20px;
+  font-weight: 600;
+  padding: 0 20px;
+}
+
+.detail-season-btn.is-focused,
+.detail-season-btn.is-selected {
+  background: #f4f5f8;
+  color: #07070b;
+  border-color: #f4f5f8;
+}
+
+/* ----------------------------------------------------------- búsqueda --- */
+.search-keyboard {
+  background: #0c0c12;
+  border: 1px solid #262633;
+  border-radius: 20px;
+}
+
+.kb-key {
+  border-radius: 10px;
+  background: #1a1a26;
+  border: 1px solid #262633;
+  color: #f4f5f8;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.kb-key.is-focused {
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #07070b;
+}
+
+.kb-action {
+  border-radius: 999px;
+  background: #1a1a26;
+  border: 1px solid #262633;
+  color: #f4f5f8;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.kb-action.is-focused {
+  background: #ffffff;
+  color: #07070b;
+  border-color: #ffffff;
+}
+
+.url-kb-input,
+.da-input {
+  background: #12121b;
+  border: 1px solid #3a3a4c;
+  border-radius: 12px;
+  color: #f4f5f8;
+  font-size: 22px;
+}
+
+.url-kb-input.is-focused,
+.da-input.is-focused {
+  border-color: #ffffff;
+}
+
+/* ------------------------------------------------------------ ajustes --- */
+.settings-menu {
+  background: #0c0c12;
+  border-right: 1px solid #262633;
+}
+
+.settings-item {
+  border-radius: 12px;
+  color: #b9c0cc;
+  font-size: 22px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.settings-item.is-selected {
+  background: rgba(255, 255, 255, 0.07);
+  color: #f4f5f8;
+}
+
+.settings-item.is-focused {
+  background: #f4f5f8;
+  color: #07070b;
+}
+
+.settings-item.is-focused .settings-text,
+.settings-item.is-focused .settings-icon {
+  color: #07070b;
+}
+
+.settings-icon svg {
+  width: 26px;
+  height: 26px;
+  color: inherit;
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.settings-right,
+.settings-panel {
+  background: #07070b;
+}
+
+.settings-panel .sp-title {
+  color: #f4f5f8;
+  font-size: 40px;
+  font-weight: 800;
+}
+
+.settings-panel .sp-desc,
+.sp-global-note {
+  color: #98a0ae;
+  font-size: 21px;
+  line-height: 1.45;
+}
+
+.settings-group {
+  color: #98a0ae;
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Filas de opciones dentro de un panel. */
+.pb-row {
+  background: #12121b;
+  border: 1px solid #262633;
+  border-radius: 16px;
+}
+
+.pb-label {
+  color: #f4f5f8;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.pb-opt {
+  border-radius: 999px;
+  border: 1px solid #3a3a4c;
+  color: #b9c0cc;
+  font-size: 20px;
+  font-weight: 600;
+  padding: 4px 18px;
+}
+
+.pb-opt.is-checked {
+  border-color: #e11d2e;
+  color: #ffffff;
+  background: rgba(225, 29, 46, 0.18);
+}
+
+.pb-opt.is-focused {
+  border-color: #ffffff;
+  background: #ffffff;
+  color: #07070b;
+}
+
+/* Interruptores y selectores. */
+.dps-switch,
+.dps-btn {
+  border-radius: 999px;
+  border: 1px solid #3a3a4c;
+  background: #1a1a26;
+  color: #f4f5f8;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.dps-switch.is-on,
+.dps-btn.is-on {
+  background: #e11d2e;
+  border-color: #e11d2e;
+  color: #ffffff;
+}
+
+.dps-btn.is-focused {
+  border-color: #ffffff;
+}
+
+/* Diagnóstico. */
+.dg-summary {
+  color: #b9c0cc;
+  font-size: 21px;
+  line-height: 1.4;
+}
+
+.dg-row {
+  border-bottom: 1px solid #1e1e2a;
+  color: #f4f5f8;
+  font-size: 19px;
+}
+
+.dg-host {
+  color: #f4f5f8;
+  font-weight: 600;
+}
+
+.dg-local,
+.dg-ip {
+  color: #98a0ae;
+}
+
+.dg-state.ok {
+  color: #3dd68c;
+}
+
+.dg-state.warn {
+  color: #f5c451;
+}
+
+.dg-state.bad {
+  color: #ef4444;
+}
+
+.dg-head {
+  color: #6b7280;
+  font-size: 17px;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-bottom: 1px solid #262633;
+}
+
+.dg-env {
+  color: #6b7280;
+  font-size: 17px;
+}
+
+/* Cuenta y addons. */
+.account-header-row,
+.account-avatar {
+  border-radius: 18px;
+}
+
+.account-avatar svg {
+  border-radius: 999px;
+  background: #1a1a26;
+  color: #98a0ae;
+}
+
+.account-action-btn {
+  border-radius: 12px;
+  background: #12121b;
+  border: 1px solid #262633;
+  color: #f4f5f8;
+  font-size: 21px;
+  font-weight: 600;
+}
+
+.account-action-btn.is-focused {
+  background: #ffffff;
+  color: #07070b;
+}
+
+.badge-vip {
+  background: #3b82f6;
+  color: #ffffff;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 800;
+  padding: 2px 10px;
+}
+
+.da-preset-item {
+  background: #12121b;
+  border: 1px solid #262633;
+  border-radius: 16px;
+}
+
+.da-preset-name {
+  color: #f4f5f8;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.da-preset-desc {
+  color: #98a0ae;
+  font-size: 19px;
+}
+
+.da-preset-btn {
+  border-radius: 999px;
+  background: #1a1a26;
+  border: 1px solid #3a3a4c;
+  color: #f4f5f8;
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.da-preset-btn.is-focused {
+  background: #ffffff;
+  color: #07070b;
+  border-color: #ffffff;
+}
+
+/* ------------------------------------------------------- reproductor --- */
+.player-channels {
+  background: rgba(7, 7, 11, 0.96);
+  border: 1px solid #262633;
+  border-radius: 20px;
+}
+
+.player-channels .pc-toolbar {
+  border-bottom: 1px solid #262633;
+}
+
+.pc-row {
+  border-radius: 10px;
+  color: #f4f5f8;
+  font-size: 21px;
+  border: 1px solid transparent;
+}
+
+.pc-row.is-focused {
+  background: #f4f5f8;
+  color: #07070b;
+}
+
+.pc-cat-pill {
+  border-radius: 999px;
+  background: #1a1a26;
+  border: 1px solid #262633;
+  color: #b9c0cc;
+  font-size: 19px;
+  font-weight: 600;
+  padding: 0 18px;
+}
+
+.pc-cat-pill.is-focused,
+.pc-cat-pill.is-active {
+  background: #ffffff;
+  color: #07070b;
+  border-color: #ffffff;
+}
+
+.player-categories {
+  background: rgba(7, 7, 11, 0.97);
+  border: 1px solid #262633;
+  border-radius: 20px;
+}
+
+.pcat-tile {
+  border-radius: 14px;
+  background: #12121b;
+  border: 1px solid #262633;
+  color: #f4f5f8;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.pcat-tile.is-focused {
+  background: #ffffff;
+  color: #07070b;
+  border-color: #ffffff;
+}
+
+.player-infobar,
+.player-vod-infobar {
+  background: -webkit-linear-gradient(top, rgba(7, 7, 11, 0) 0%, rgba(7, 7, 11, 0.9) 100%);
+  background: linear-gradient(to bottom, rgba(7, 7, 11, 0) 0%, rgba(7, 7, 11, 0.9) 100%);
+}
+
+.pi-name {
+  color: #f4f5f8;
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.pi-index {
+  color: #98a0ae;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.psv-btn,
+.psv-ep-btn {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f4f5f8;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.psv-btn.is-focused,
+.psv-ep-btn.is-focused {
+  background: #ffffff;
+  color: #07070b;
+  border-color: #ffffff;
+}
+
+.psv-ep-btn.is-selected {
+  background: rgba(225, 29, 46, 0.3);
+  border-color: #e11d2e;
+}
+
+.telemetry-hud {
+  background: rgba(7, 7, 11, 0.86);
+  border: 1px solid #262633;
+  border-radius: 12px;
+  color: #98a0ae;
+  font-size: 16px;
+}
+
+/* --------------------------------------------------- diálogos y avisos -- */
+.dialog,
+.dialog-box,
+.du-box {
+  background: #12121b;
+  border: 1px solid #2a2a38;
+  border-radius: 22px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.75);
+}
+
+.du-title,
+.dialog-title {
+  color: #f4f5f8;
+  font-size: 34px;
+  font-weight: 800;
+}
+
+.du-version-subtitle,
+.du-changelog,
+.dialog-text {
+  color: #b9c0cc;
+  font-size: 21px;
+  line-height: 1.45;
+}
+
+.toast,
+.home-toast {
+  background: rgba(18, 18, 27, 0.97);
+  border: 1px solid #2a2a38;
+  border-radius: 999px;
+  color: #f4f5f8;
+  font-size: 20px;
+  font-weight: 600;
+  padding: 10px 24px;
+}
+
+/* --------------------------------------------------------------- fin --- */
+
+/* La barra entra en estado .is-collapsed: sus reglas tienen mas especificidad
+   que las de arriba y devolvian el rojo de la capa heredada. */
+.home-tabs.is-collapsed {
+  width: 1478px;
+}
+
+.home-tabs.is-collapsed .tab-item.is-selected {
+  background: #f4f5f8;
+  background-image: none;
+  border-color: #f4f5f8;
+  color: #07070b;
+}
+
+.home-tabs.is-collapsed .tab-item.is-selected .tab-title {
+  color: #07070b;
+}
+
+.home-tabs.is-collapsed .tab-item.is-focused {
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #07070b;
+}
+
+.home-tabs.is-collapsed .tab-item.is-focused .tab-title {
+  color: #07070b;
+}
+
+/* Los titulos de seccion traian un acento vertical rojo+amarillo de la capa
+   heredada. En el lenguaje nuevo el titulo se basta solo. */
+.catalog-rail-title::before,
+.home-section-title::before,
+.section-title::before,
+.catalog-rail-title::after,
+.home-section-title::after,
+.section-title::after {
+  display: none;
+}
+
+/* Tarjeta sin imagen: superficie visible en vez de un agujero negro. */
+.bento.is-img-error {
+  background: #15151f;
+  border: 1px solid #262633;
+}
+
+.bento.is-img-error .bento-img {
+  opacity: 0;
+}
+
+.bento.is-img-error .bento-title {
+  color: #f4f5f8;
+}
+
+/* El item seleccionado se pinta blanco al enfocar: si los hijos conservan el
+   color heredado, el texto queda blanco sobre blanco (ilegible). */
+.settings-item.is-focused,
+.settings-item.is-focused * {
+  color: #07070b;
+}
+
+.settings-item.is-focused svg {
+  color: #07070b;
+  fill: #07070b;
+  stroke: #07070b;
+}
+
+.settings-item.is-selected .settings-item-name,
+.settings-item.is-selected .settings-text {
+  color: #f4f5f8;
+}
+
+/* El avatar traia un aro rojo de la capa heredada que competia con el anillo
+   blanco de foco. */
+.account-avatar.is-focused {
+  border-color: transparent;
+  box-shadow: 0 0 0 3px #ffffff, 0 12px 32px rgba(0, 0, 0, 0.7);
+}
+
+/* Los textos del item usan clases propias (.settings-label/.settings-desc) con
+   mas especificidad que el comodin; se fijan una a una. */
+.settings-item.is-focused .settings-text,
+.settings-item.is-focused .settings-label,
+.settings-item.is-focused .settings-desc,
+.settings-item.is-focused .settings-name {
+  color: #07070b;
+}
+
+#screen-settings .account-avatar.is-focused {
+  border-color: transparent;
+  box-shadow: 0 0 0 3px #ffffff, 0 12px 32px rgba(0, 0, 0, 0.7);
+}

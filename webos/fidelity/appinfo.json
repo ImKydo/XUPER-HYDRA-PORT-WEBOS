@@ -7,7 +7,7 @@
   "title": "Xuper Port webOS",
   "icon": "images/icon-xuper-cristiancodev.png",
   "largeIcon": "images/icon-large-xuper-cristiancodev.png",
-  "resolution": "1280x720",
+  "resolution": "1920x1080",
   "bgColor": "#000000",
   "bgImage": "",
   "spinnerOnLaunch": false,

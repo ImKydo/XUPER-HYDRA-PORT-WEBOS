@@ -1,0 +1,73 @@
+/* GENERADO por tools/css-tokens.mjs — no editar a mano.
+   Valores literales: compatible con Chromium 38 (webOS 1.x–3.x).
+   Fuente: src/design/tokens.json */
+
+:root { /* sólo informativo; ningún valor depende de variables */ }
+
+/* space */
+.s-0 { padding: 0; }
+.s-1 { padding: 4px; }
+.s-2 { padding: 8px; }
+.s-3 { padding: 12px; }
+.s-4 { padding: 16px; }
+.s-5 { padding: 24px; }
+.s-6 { padding: 32px; }
+.s-7 { padding: 48px; }
+.s-8 { padding: 64px; }
+
+/* gap */
+.g-1 { margin-right: 8px; }
+.g-2 { margin-right: 12px; }
+.g-3 { margin-right: 16px; }
+.g-4 { margin-right: 24px; }
+.g-5 { margin-right: 32px; }
+
+/* font */
+.t-micro { font-size: 18px; }
+.t-caption { font-size: 20px; }
+.t-body { font-size: 24px; }
+.t-subtitle { font-size: 28px; }
+.t-title { font-size: 36px; }
+.t-display { font-size: 48px; }
+.t-hero { font-size: 64px; }
+
+/* line */
+.lh-tight { line-height: 1.1; }
+.lh-normal { line-height: 1.35; }
+.lh-relaxed { line-height: 1.55; }
+
+/* radius */
+.r-sm { border-radius: 8px; }
+.r-md { border-radius: 14px; }
+.r-lg { border-radius: 22px; }
+.r-pill { border-radius: 999px; }
+
+/* color */
+.c-bg { color: #07070b; }
+.bg-bg { background-color: #07070b; }
+.c-bgAlt { color: #0c0c12; }
+.bg-bgAlt { background-color: #0c0c12; }
+.c-surface { color: #12121b; }
+.bg-surface { background-color: #12121b; }
+.c-surface2 { color: #1a1a26; }
+.bg-surface2 { background-color: #1a1a26; }
+.c-line { color: #262633; }
+.bg-line { background-color: #262633; }
+.c-text { color: #f4f5f8; }
+.bg-text { background-color: #f4f5f8; }
+.c-muted { color: #98a0ae; }
+.bg-muted { background-color: #98a0ae; }
+.c-dim { color: #6b7280; }
+.bg-dim { background-color: #6b7280; }
+.c-accent { color: #e11d2e; }
+.bg-accent { background-color: #e11d2e; }
+.c-accentSoft { color: #ff4d5e; }
+.bg-accentSoft { background-color: #ff4d5e; }
+.c-gold { color: #f5c451; }
+.bg-gold { background-color: #f5c451; }
+.c-blue { color: #3b82f6; }
+.bg-blue { background-color: #3b82f6; }
+.c-ok { color: #3dd68c; }
+.bg-ok { background-color: #3dd68c; }
+.c-bad { color: #ef4444; }
+.bg-bad { background-color: #ef4444; }

@@ -15,19 +15,20 @@
 // negativos. El resto de características se evalúa por bloque.
 //
 // Uso: node tools/check/css-compat.mjs [--fail]
-import { readFileSync, readdirSync } from "node:fs";
+import { readFileSync, readdirSync, existsSync } from "node:fs";
 import path from "node:path";
 import { ROOT, APP_FIDELITY } from "./lib.mjs";
 import { parseRules, flexGapRules } from "../css-parse.mjs";
 
 const CSS_DIR = path.posix.join(APP_FIDELITY, "css");
 const ALL = readdirSync(path.join(ROOT, CSS_DIR)).filter((f) => f.endsWith(".css"));
-// Tras la consolidación sólo se sirven estas tres; antes, las tres capas históricas.
-const CONSOLIDATED = ["app.css", "tokens.generated.css", "nogap.css"];
-const LEGACY = ["style.css", "ui-refresh.css", "clean.css"];
+// Se analiza TODO lo que el televisor carga de verdad. Tras la consolidación
+// son app.css + tokens.generated.css + nogap.css, PERO legacy.css sigue
+// sirviéndose debajo: dejarla fuera del análisis ocultaba sus backdrop-filter.
+const SERVED = ["app.css", "tokens.generated.css", "nogap.css", "legacy.css"];
 const files = ALL.some((f) => f === "app.css")
-  ? ALL.filter((f) => CONSOLIDATED.includes(f))
-  : ALL.filter((f) => LEGACY.includes(f));
+  ? ALL.filter((f) => SERVED.includes(f))
+  : ALL.filter((f) => ["style.css", "ui-refresh.css", "clean.css"].includes(f));
 
 let rules = [];
 let totalLines = 0;
@@ -41,12 +42,37 @@ console.log(`CSS analizado: ${files.length} archivos, ${rules.length} reglas, ${
 
 /* ---------- gap en flex (resuelto por cascada) ---------- */
 const gapRules = flexGapRules(rules);
-let blockers = gapRules.length;
+
+// La capa nogap compensa el gap con márgenes en los televisores viejos. Una
+// regla con gap sólo es bloqueante si NO tiene su equivalente en nogap.css.
+const nogapPath = path.join(ROOT, CSS_DIR, "nogap.css");
+const nogapSelectors = new Set();
+if (existsSync(nogapPath)) {
+  // Los comentarios mencionan `.nogap` y rompen el recorte del selector.
+  const src = readFileSync(nogapPath, "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  for (const m of src.matchAll(/\.nogap\s+([^{]+?)\s*>\s*\*\s*\+\s*\*/g)) {
+    for (const part of m[1].split(",")) nogapSelectors.add(part.trim());
+  }
+}
+const uncovered = gapRules.filter((g) => {
+  const sels = g.rule.selector.split(",").map((x) => x.trim());
+  return !sels.every((sel) => nogapSelectors.has(sel));
+});
+
+let blockers = uncovered.length;
 if (gapRules.length) {
-  console.log(
-    `BLOQ  ${"flex-gap".padEnd(16)} ${String(gapRules.length).padStart(4)} reglas  (Chromium 84+) — en flex se ignora: los elementos quedan pegados`
-  );
-  for (const g of gapRules.slice(0, 3)) console.log(`        ${g.rule.selector.slice(0, 70)}`);
+  const covered = gapRules.length - uncovered.length;
+  if (covered) {
+    console.log(
+      `COMP  ${"flex-gap".padEnd(16)} ${String(covered).padStart(4)} reglas  compensadas por css/nogap.css (márgenes en webOS < 22)`
+    );
+  }
+  if (uncovered.length) {
+    console.log(
+      `BLOQ  ${"flex-gap".padEnd(16)} ${String(uncovered.length).padStart(4)} reglas  (Chromium 84+) — sin compensar: los elementos quedan pegados`
+    );
+    for (const g of uncovered.slice(0, 3)) console.log(`        ${g.rule.selector.slice(0, 70)}`);
+  }
 }
 
 /* ---------- resto de características (por bloque) ---------- */
@@ -83,7 +109,8 @@ for (const feat of FEATURES) {
 }
 
 const impCount = files.reduce((n, f) => {
-  const src = readFileSync(path.join(ROOT, CSS_DIR, f), "utf8");
+  // Sin comentarios: app.css explica en su cabecera que no usa ninguno.
+  const src = readFileSync(path.join(ROOT, CSS_DIR, f), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
   return n + (src.match(/!important/g) || []).length;
 }, 0);
 

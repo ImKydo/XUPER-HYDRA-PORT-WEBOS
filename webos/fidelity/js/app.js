@@ -13659,7 +13659,7 @@
         i = a.w,
         n = a.h,
         r = Math.min(i / 1920, n / 1080),
-        displayScale = (Q && Q.uiScaleMode === "hd" && i > 1280) ? (2 / 3) : 1;
+        displayScale = (Q && Q.uiScaleMode === "hd" && i > 1280 && i < 1920) ? (2 / 3) : 1;
       r *= displayScale;
       ((!isFinite(r) || r <= 0) && (r = 1), (r = Math.round(1e4 * r) / 1e4));
       var o = Math.max(0, Math.round((i - 1920 * r) / 2)),
@@ -13678,10 +13678,21 @@
         }));
     }
   }
+  /* Chromium < 84 ignora `gap` dentro de flex y los elementos quedan pegados.
+     CSS.supports("gap","1px") devuelve true en Chromium 53 aunque el gap en
+     flex no funcione, así que manda la versión del motor. Si no se puede leer
+     el UA, se activa igual: un margen de más es mucho menos grave que dos
+     elementos encimados. */
+  function needsNogapLayer() {
+    var m = /Chrome\/(\d+)/.exec(navigator.userAgent || "");
+    if (!m) return !0;
+    return parseInt(m[1], 10) < 84;
+  }
   function bootstrapApp() {
     var welcomeVersion = byId("screen-welcome");
     welcomeVersion = welcomeVersion && welcomeVersion.querySelector(".welcome-version");
     welcomeVersion && (welcomeVersion.textContent = "v" + APP_VERSION);
+    if (needsNogapLayer()) document.documentElement.className += " nogap";
     applyViewportScale();
     window.addEventListener("resize", applyViewportScale, !1);
     window.addEventListener("orientationchange", applyViewportScale, !1);

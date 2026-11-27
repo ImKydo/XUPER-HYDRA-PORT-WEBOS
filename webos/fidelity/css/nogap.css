@@ -1,0 +1,18 @@
+/* GENERADO por tools/gen-nogap.mjs — no editar a mano.
+   Sólo se aplica con la clase .nogap (webOS < 22). Fuente: legacy.css + app.css. */
+
+.nogap .home-notify > * + *{margin-left:12px;margin-top:12px}
+.nogap .live-info .live-channel > * + *{margin-left:16px;margin-top:16px}
+.nogap .pi-now > * + *{margin-left:14px;margin-top:14px}
+.nogap .psv-header-tips > * + *{margin-left:10px;margin-top:10px}
+.nogap .psv-tip-pill > * + *{margin-left:6px;margin-top:6px}
+.nogap .psv-title > * + *{margin-left:8px;margin-top:8px}
+.nogap .psv-ep-num-wrap > * + *{margin-left:5px;margin-top:5px}
+.nogap .psv-all-episodes-btn > * + *{margin-left:6px;margin-top:6px}
+.nogap .psv-btn > * + *{margin-left:10px;margin-top:10px}
+.nogap .dps-options > * + *{margin-left:12px;margin-top:12px}
+.nogap .player-channels .pc-toolbar > * + *{margin-left:10px;margin-top:10px}
+.nogap .live-fast > * + *,
+.nogap #screen-home.is-rail-open .live-fast > * + *{margin-left:14px;margin-top:14px}
+.nogap .section-sidebar-btn > * + *{margin-left:12px;margin-top:12px}
+.nogap .detail-player-center-btn > * + *{margin-left:10px;margin-top:10px}

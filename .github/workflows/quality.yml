@@ -45,8 +45,5 @@ jobs:
       - name: Pruebas unitarias
         run: npm test
 
-      # TODO(T5.7): quitar continue-on-error cuando la fase CSS deje el
-      # contador de bloqueos en 0. Hoy hay 22 reglas que webOS <=5 ignora.
       - name: Compatibilidad CSS del televisor
-        continue-on-error: true
         run: node tools/check/css-compat.mjs --fail
