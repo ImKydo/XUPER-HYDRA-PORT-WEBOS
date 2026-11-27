@@ -1,9 +1,9 @@
 # Progreso — XuperTV webOS
 
 Plan: `.hermes/plans/2026-11-26_224922-xupertv-v2-reconstruccion-verificada.md`
-Actualizado: 2026-11-27T04:00:41.578Z
+Actualizado: 2026-11-27T04:21:28.814Z
 
-**Avance global: 23/49 tareas (47 %)**
+**Avance global: 27/49 tareas (55 %)**
 
 | Fase | Hechas | Total |
 |---|---|---|
@@ -11,7 +11,7 @@ Actualizado: 2026-11-27T04:00:41.578Z
 | F1 | 5 | 5 |
 | F2 | 5 | 5 |
 | F3 | 3 | 4 |
-| F4 | 0 | 7 |
+| F4 | 4 | 7 |
 | F5 | 0 | 7 |
 | F6 | 0 | 7 |
 | F7 | 0 | 4 |
@@ -64,13 +64,13 @@ Actualizado: 2026-11-27T04:00:41.578Z
 
 | | ID | Tarea | Estado | Commit | Evidencia | Fecha |
 |---|---|---|---|---|---|---|
-| · | T4.1 | Recortar el payload del catálogo (274 KB → ≤ 100 KB) | pending |  |  |  |
-| · | T4.2 | Imágenes con placeholder y dimensiones | pending |  |  |  |
-| · | T4.3 | Culling por frame, no por temporizador | pending |  |  |  |
-| · | T4.4 | Temporizadores y cachés sin límite (ideas del PR #24) | pending |  |  |  |
-| · | T4.5 | Sacar `portal.js` (507 KB) del camino crítico | pending |  |  |  |
-| · | T4.6 | Rangos sin acumular en memoria | pending |  |  |  |
-| · | T4.7 | Scroll sin escrituras redundantes | pending |  |  |  |
+| ✔ | T4.1 | Recortar el payload del catálogo (274 KB → ≤ 100 KB) | done | `274bf69` | movies 274.636 -> 129.972 B (-53%); 6 tests | 2026-11-27 |
+| ✔ | T4.2 | Imágenes con placeholder y dimensiones | done | `637c5eb` | placeholder 830 B; img-fallback 4/4; 4 sitios centralizados | 2026-11-27 |
+| — | T4.3 | Culling por frame, no por temporizador | dropped | `637c5eb` | medido: p95 15.4->14.7 dentro del ruido y long tasks iguales; no se acepta sin ganancia |  |
+| ✔ | T4.4 | Temporizadores y cachés sin límite (ideas del PR #24) | done | `6bc2e66` | reloj y caches ya acotados; guarda en telemetria; fuga -0.2 MB | 2026-11-27 |
+| — | T4.5 | Sacar `portal.js` (507 KB) del camino crítico | dropped | `a8463f7` | medido: dcl -2% y portada con 10 posters en vez de 110; revertido |  |
+| ✖ | T4.6 | Rangos sin acumular en memoria | blocked | `a8463f7` | proxy readRange es zona protegida: requiere 'modificar reproduccion' |  |
+| ✔ | T4.7 | Scroll sin escrituras redundantes | done | `a8463f7` | p95 15.4 -> 12.5 ms mediana; avg 8.71 -> 7.6; over33 0 | 2026-11-27 |
 
 ## F5
 

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-27T03:41:18.434Z",
+  "generatedAt": "2026-11-27T04:20:52.787Z",
   "target": {
     "url": "?screen=home&tab=1",
     "throttle": 4,
@@ -8,81 +8,89 @@
   "scenes": {
     "boot": {
       "nav": {
-        "dcl": 842,
-        "load": 983,
-        "fcp": 232,
+        "dcl": 1007,
+        "load": 1110,
+        "fcp": 292,
         "domNodes": 740,
         "imgs": 119,
-        "imgsLoaded": 9,
+        "imgsLoaded": 22,
         "heapMB": 4,
         "cssRules": 1539,
-        "scriptKB": 1025,
+        "scriptKB": 1027,
         "posters": 110,
         "rails": 10,
         "screen": "screen-home"
       },
-      "settleMs": 3053,
+      "settleMs": 1021,
       "longTasks": [
-        167,
-        456
+        217,
+        514
       ]
     },
     "focus": {
       "nav": {
-        "dcl": 871,
-        "load": 991,
-        "fcp": 276,
+        "dcl": 970,
+        "load": 1088,
+        "fcp": 292,
         "domNodes": 740,
         "imgs": 119,
-        "imgsLoaded": 9,
+        "imgsLoaded": 22,
         "heapMB": 3.8,
         "cssRules": 1539,
-        "scriptKB": 1025,
+        "scriptKB": 1027,
         "posters": 110,
         "rails": 10,
         "screen": "screen-home"
       },
-      "settleMs": 3074,
+      "settleMs": 1005,
       "focus": {
         "moves": 24,
-        "avgMs": 7.28,
-        "medianMs": 6.5,
-        "p95Ms": 11.2,
-        "maxMs": 17.6,
+        "avgMs": 8.55,
+        "medianMs": 7.5,
+        "p95Ms": 14.1,
+        "maxMs": 18.2,
         "over33": 0
       },
       "longTasks": [
-        75,
-        179,
-        428
+        74,
+        207,
+        489,
+        51,
+        51
       ]
     },
     "leak": {
       "nav": {
-        "dcl": 850,
-        "load": 970,
-        "fcp": 272,
+        "dcl": 961,
+        "load": 1133,
+        "fcp": 296,
         "domNodes": 740,
         "imgs": 119,
-        "imgsLoaded": 9,
+        "imgsLoaded": 22,
         "heapMB": 3.8,
         "cssRules": 1539,
-        "scriptKB": 1025,
+        "scriptKB": 1027,
         "posters": 110,
         "rails": 10,
         "screen": "screen-home"
       },
-      "settleMs": 3071,
+      "settleMs": 947,
       "leak": {
         "heapBeforeMB": 3.9,
         "heapAfterMB": 4.4,
         "growthMB": 0.6,
-        "domNodes": 740
+        "domNodes": 741
       },
       "longTasks": [
-        70,
-        175,
-        420
+        76,
+        204,
+        470,
+        50,
+        50,
+        50,
+        50,
+        57,
+        50
       ]
     }
   }

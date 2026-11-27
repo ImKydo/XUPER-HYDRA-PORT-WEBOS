@@ -1,6 +1,6 @@
 {
   "plan": ".hermes/plans/2026-11-26_224922-xupertv-v2-reconstruccion-verificada.md",
-  "updatedAt": "2026-11-27T04:00:41.578Z",
+  "updatedAt": "2026-11-27T04:21:28.814Z",
   "tasks": [
     {
       "id": "T0.1",
@@ -222,64 +222,64 @@
       "id": "T4.1",
       "phase": "F4",
       "title": "Recortar el payload del catálogo (274 KB → ≤ 100 KB)",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "274bf69",
+      "evidence": "movies 274.636 -> 129.972 B (-53%); 6 tests",
+      "date": "2026-11-27"
     },
     {
       "id": "T4.2",
       "phase": "F4",
       "title": "Imágenes con placeholder y dimensiones",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "637c5eb",
+      "evidence": "placeholder 830 B; img-fallback 4/4; 4 sitios centralizados",
+      "date": "2026-11-27"
     },
     {
       "id": "T4.3",
       "phase": "F4",
       "title": "Culling por frame, no por temporizador",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
+      "status": "dropped",
+      "commit": "637c5eb",
+      "evidence": "medido: p95 15.4->14.7 dentro del ruido y long tasks iguales; no se acepta sin ganancia",
       "date": null
     },
     {
       "id": "T4.4",
       "phase": "F4",
       "title": "Temporizadores y cachés sin límite (ideas del PR #24)",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "6bc2e66",
+      "evidence": "reloj y caches ya acotados; guarda en telemetria; fuga -0.2 MB",
+      "date": "2026-11-27"
     },
     {
       "id": "T4.5",
       "phase": "F4",
       "title": "Sacar `portal.js` (507 KB) del camino crítico",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
+      "status": "dropped",
+      "commit": "a8463f7",
+      "evidence": "medido: dcl -2% y portada con 10 posters en vez de 110; revertido",
       "date": null
     },
     {
       "id": "T4.6",
       "phase": "F4",
       "title": "Rangos sin acumular en memoria",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
+      "status": "blocked",
+      "commit": "a8463f7",
+      "evidence": "proxy readRange es zona protegida: requiere 'modificar reproduccion'",
       "date": null
     },
     {
       "id": "T4.7",
       "phase": "F4",
       "title": "Scroll sin escrituras redundantes",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "a8463f7",
+      "evidence": "p95 15.4 -> 12.5 ms mediana; avg 8.71 -> 7.6; over33 0",
+      "date": "2026-11-27"
     },
     {
       "id": "T5.1",
