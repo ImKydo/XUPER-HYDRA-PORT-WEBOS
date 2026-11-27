@@ -1,6 +1,6 @@
 !(function () {
   "use strict";
-  var APP_VERSION = "3.1.86";
+  var APP_VERSION = "3.2.0";
   window.APP_VERSION = APP_VERSION;
   /* Iconos vectoriales inline: las fuentes de las TV webOS no incluyen
      glifos ★ ☆ ▶ ⚙ ➕ ni emoji, por eso se dibujan en SVG. */
@@ -2514,7 +2514,7 @@
       var isChannelUp = (427 === t || 33 === t || "ChannelUp" === a || "PageUp" === a);
       var isChannelDown = (428 === t || 34 === t || "ChannelDown" === a || "PageDown" === a);
       if (isChannelUp || isChannelDown) {
-        var canSwitch = ("player" === X.screen && "live" === X.playerMode) || ("home" === X.screen && 0 === X.tab);
+        var canSwitch = ("player" === X.screen && "live" === X.playerMode) || ("home" === X.screen && isTvTab(X.tab));
         if (canSwitch) {
           stepLiveChannel(isChannelUp ? 1 : -1);
           return void (e.preventDefault && e.preventDefault());
@@ -3240,7 +3240,7 @@
                 if (X.tab !== e) {
                   selectHomeTab(e, !1);
                 }
-                if (0 === e) {
+                if (isTvTab(e)) {
                   var t = Fe.filter(function (e) {
                     return e._channel === X.channel;
                   })[0];
@@ -3276,7 +3276,7 @@
                   if (X.tab !== e) {
                     selectHomeTab(e, !1);
                   }
-                  if (0 === e) {
+                  if (isTvTab(e)) {
                     var a = Fe.filter(function (e) {
                       return e._channel === X.channel;
                     })[0];
@@ -3354,7 +3354,7 @@
                   return !0;
                 }
                 if ("down" === t) {
-                  if (0 === X.tab) {
+                  if (isTvTab(X.tab)) {
                     var fastSrch = document.querySelector(".live-fast .f-srch");
                     if (fastSrch) return (setFocus(fastSrch), !0);
                     var a = Fe.filter(function (e) {
@@ -3379,6 +3379,13 @@
   // muestra en su propia barra y aquí sólo añadían ruido.
   function yt() {}
   window.switchTab = selectHomeTab;
+  /* La pestaña de TV es la que apunta a la página 0 del catalogo. Antes se
+     comparaba el indice literal 0, que al reordenar la barra (Inicio primero)
+     pasó a ser Inicio: bajar desde Inicio intentaba enfocar un canal en vez de
+     la portada. */
+  function isTvTab(i) {
+    return !!(z[i] && 0 === z[i].page);
+  }
   function selectHomeTab(e, t) {
     if (X.channelsOpen || (Se && Se.classList.contains("is-active"))) {
       ro();
@@ -4064,7 +4071,7 @@
               e &&
               (e.channelCode || e.streamUrl) &&
               "home" === X.screen &&
-              0 === X.tab
+              isTvTab(X.tab)
             ) {
               var t = e.channelCode || e.streamUrl;
               if (
@@ -4084,7 +4091,7 @@
                       ? { streamUrl: e.streamUrl }
                       : { channelCode: e.channelCode },
                     function (e, t) {
-                      if (a === Nt && "home" === X.screen && 0 === X.tab) {
+                      if (a === Nt && "home" === X.screen && isTvTab(X.tab)) {
                         !e && t && rememberLastStream("live", t);
                         var i =
                           !e &&
@@ -4511,7 +4518,7 @@
   }
   function Kt(e, t) {
     (e < 0 && (e = 0), e > F.length - 1 && (e = F.length - 1), (X.channel = e));
-    "home" === X.screen && 0 === X.tab && renderLiveChannelRow(liveFavoritesOnly, e);
+    "home" === X.screen && isTvTab(X.tab) && renderLiveChannelRow(liveFavoritesOnly, e);
     for (var a = 0; a < Fe.length; a++)
       Fe[a].classList.toggle("is-current", Fe[a]._channel === e);
     (F[e] && ae && (ae.textContent = F[e].name),
@@ -5294,6 +5301,17 @@
     box.appendChild(createEl("div", "empty-desc", desc));
     pageEl.appendChild(box);
   }
+  /* Subir desde la primera fila vuelve a la portada. Se aplica al construir
+     cada tarjeta y no con un timeout: la fila "Seguir viendo" se crea en otro
+     momento y el parche llegaba tarde. */
+  function withHeroUp(pageEl, move) {
+    var play = pageEl && pageEl._heroPlay;
+    if (!play) return move;
+    return function (dir) {
+      if ("up" === dir) return (setFocus(play), !0);
+      return move(dir);
+    };
+  }
   function renderHero(pageEl, items, opts) {
     opts = opts || {};
     var pool = (opts.pool && opts.pool.length ? opts.pool : items) || [];
@@ -5359,7 +5377,11 @@
       if (item.duration && "\u2014" !== item.duration) bits.push(item.duration);
       meta.textContent = bits.join("  \u00B7  ");
       meta.style.display = bits.length ? "" : "none";
-      desc.textContent = clipSynopsis(item.synopsis || item.overview || item.description || "", 210);
+      var syn = clipSynopsis(item.synopsis || item.overview || item.description || "", 210);
+      /* El portal rellena con "Sin sinopsis disponible." cuando no hay texto;
+         en la portada eso solo ocupa sitio y se lee como un error. */
+      desc.textContent = /^sin sinopsis/i.test(syn) ? "" : syn;
+      desc.style.display = desc.textContent ? "" : "none";
       var fav = !!(X.favs && X.favs[String(item.id)]);
       info.textContent = fav ? "En mi lista" : "Mi lista";
       info.classList.toggle("is-on", fav);
@@ -5370,17 +5392,28 @@
          cuando uno carga. Si fallan los tres queda el degradado de fondo. */
       var candidates = [item.backdrop, item.landscape, item.poster],
         tryIndex = 0;
-      var tryNext = function () {
-        while (tryIndex < candidates.length && !candidates[tryIndex]) tryIndex++;
-        if (tryIndex >= candidates.length) return;
-        var url = candidates[tryIndex++];
+      /* En algunos televisores el CDN rechaza https y solo responde en http:
+         es el mismo reintento que hace attachPoster para los posters. Sin el,
+         la portada quedaba sin imagen aunque las tarjetas de abajo cargaran. */
+      var tryUrl = function (url, alreadyRetried) {
         var probe = new Image();
         probe.onload = function () {
           media.src = url;
           hero.classList.add("is-ready");
         };
-        probe.onerror = tryNext;
+        probe.onerror = function () {
+          if (!alreadyRetried && 0 === url.indexOf("https://")) {
+            tryUrl("http://" + url.slice(8), !0);
+            return;
+          }
+          tryNext();
+        };
         probe.src = url;
+      };
+      var tryNext = function () {
+        while (tryIndex < candidates.length && !candidates[tryIndex]) tryIndex++;
+        if (tryIndex >= candidates.length) return;
+        tryUrl(candidates[tryIndex++], !1);
       };
       tryNext();
       for (var k = 0; k < dotEls.length; k++)
@@ -5440,23 +5473,25 @@
       return !1;
     };
 
+    pageEl._heroPlay = play;
     show(0);
 
     /* La primera fila de rieles se construye justo después de la portada. Sin
        esto, subir desde la primera tarjeta se quedaba atrapado en la fila: en
        las referencias, arriba de la primera fila está la portada. */
     setTimeout(function () {
-      var row = pageEl.querySelector(".catalog-rail");
-      if (!row) return;
-      var cards = row.querySelectorAll(".focusable");
-      for (var i = 0; i < cards.length; i++)
-        (function (card) {
-          var prev = card._onMove;
-          card._onMove = function (dir) {
-            if ("up" === dir) return (setFocus(play), !0);
-            return prev ? prev.call(card, dir) : !1;
-          };
-        })(cards[i]);
+      var rows = pageEl.querySelectorAll(".catalog-rail, .history-rail");
+      for (var r = 0; r < rows.length; r++) {
+        var cards = rows[r].querySelectorAll(".focusable");
+        for (var i = 0; i < cards.length; i++)
+          (function (card) {
+            var prev = card._onMove;
+            card._onMove = function (dir) {
+              if ("up" === dir) return (setFocus(play), !0);
+              return prev ? prev.call(card, dir) : !1;
+            };
+          })(cards[i]);
+      }
     }, 0);
 
     /* Rotación sólo cuando nadie está usando la portada: si el foco está en el
@@ -5799,7 +5834,7 @@
     d = Math.min(a.length, MAX_RAIL);
     for (c = 0; c < d; c++) {
       var poster = xt(a[c], RAIL_STEP * c, 0, RAIL_W, RAIL_H, { gold: !0 });
-      poster._onMove = railMove(l, c);
+      poster._onMove = withHeroUp(t, railMove(l, c));
       poster._onFocus = (function (rail, card) {
         return function () {
           revealRailCard(rail, card);
@@ -5950,7 +5985,7 @@
         };
       })(itemData);
 
-      card._onMove = railMove(l, c);
+      card._onMove = withHeroUp(t, railMove(l, c));
       card._onFocus = (function (rail, cEl) {
         return function () {
           revealRailCard(rail, cEl);
@@ -5970,7 +6005,7 @@
         Ha();
         Ua(1, !0);
       };
-      moreCard._onMove = railMove(l, valid.length);
+      moreCard._onMove = withHeroUp(t, railMove(l, valid.length));
       moreCard._onFocus = function () {
         revealRailCard(l, moreCard);
       };

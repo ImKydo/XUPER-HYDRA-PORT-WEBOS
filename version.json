@@ -1,10 +1,10 @@
 {
-  "version": "3.1.86",
-  "name": "XuperTV",
+  "version": "3.2.0",
+  "name": "ZephyrTV",
   "minWebos": "1.0.0",
-  "ipkUrl": "https://github.com/cristianco7/XUPER-HYDRA-PORT-WEBOS/releases/download/v3.1.86/com.webosflux.xuptertv.fidelity_3.1.86_all.ipk",
-  "sha256": "0597ebc1ccba8ec72b8e70d3f2b7cb65187ca686ab1ab02bef6fed4786c69256",
-  "changelog": "v3.1.86: Actualización al protocolo actual del portal (WiwyXuper 49920): nueva clave 3DES, headers X-Request-Trace / X-Client-Meta / spkgVer / apkVer 49920, nuevos hosts edastu.udigkkrc.com y brkhzs.udigkkrc.com, fallback a cuenta compartida si se agotan las semillas en Argentina y corrección de tools/mint-seeds.js (portal200001 y searchItemList).",
-  "releaseDate": "2026-11-25",
-  "releasedAt": "2026-11-25T14:23:26Z"
+  "ipkUrl": "dist/com.webosflux.xuptertv.fidelity_3.2.0_all.ipk",
+  "sha256": "75aa6f228cea0d3620a87e59cab90cca0b961b7e7a65e8e171d1ee75569c0364",
+  "changelog": "v3.2.0: interfaz a 1080p nativa (adiós al difuminado), sistema visual nuevo con portada, navegación de cinco pestañas con Categorías, marca ZephyrTV, favoritos completos y fila Mi lista, carrusel de siete con asomo, truncado corregido y puertas de compatibilidad CSS a cero.",
+  "releaseDate": "2026-11-27",
+  "releasedAt": "2026-11-27T00:00:00Z"
 }
