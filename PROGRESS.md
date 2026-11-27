@@ -1,9 +1,9 @@
 # Progreso — XuperTV webOS
 
 Plan: `.hermes/plans/2026-11-26_224922-xupertv-v2-reconstruccion-verificada.md`
-Actualizado: 2026-11-27T04:21:28.814Z
+Actualizado: 2026-11-27T04:55:49.328Z
 
-**Avance global: 27/49 tareas (55 %)**
+**Avance global: 33/49 tareas (67 %)**
 
 | Fase | Hechas | Total |
 |---|---|---|
@@ -12,7 +12,7 @@ Actualizado: 2026-11-27T04:21:28.814Z
 | F2 | 5 | 5 |
 | F3 | 3 | 4 |
 | F4 | 4 | 7 |
-| F5 | 0 | 7 |
+| F5 | 6 | 7 |
 | F6 | 0 | 7 |
 | F7 | 0 | 4 |
 
@@ -76,13 +76,13 @@ Actualizado: 2026-11-27T04:21:28.814Z
 
 | | ID | Tarea | Estado | Commit | Evidencia | Fecha |
 |---|---|---|---|---|---|---|
-| · | T5.1 | Tokens | pending |  |  |  |
-| · | T5.2 | Consolidar 3 capas en `app.css` | pending |  |  |  |
-| · | T5.3 | Capa `.nogap` generada (patrón TiviBro) | pending |  |  |  |
-| · | T5.4 | `backdrop-filter` → fondo sólido | pending |  |  |  |
-| · | T5.5 | CSS muerto | pending |  |  |  |
-| · | T5.6 | `!important` a cero | pending |  |  |  |
-| · | T5.7 | Cerrar la puerta | pending |  |  |  |
+| ✔ | T5.1 | Tokens | done | `9c1a271` | tokens.json -> 74 lineas; sin var() (Chromium 38) | 2026-11-27 |
+| ✔ | T5.2 | Consolidar 3 capas en `app.css` | done | `9c1a271` | 3 capas -> legacy.css + app.css; diff pixel a pixel <=1.68% | 2026-11-27 |
+| ✔ | T5.3 | Capa `.nogap` generada (patrón TiviBro) | done | `9c1a271` | 14 reglas nogap; Chrome 53 activa, Chrome 158 no | 2026-11-27 |
+| ✔ | T5.4 | `backdrop-filter` → fondo sólido | done | `9c1a271` | 8 backdrop-filter fuera; css-compat 0 no soportadas | 2026-11-27 |
+| ✖ | T5.5 | CSS muerto | blocked | `9c1a271` | dead-css.mjs lista 185 clases sin uso; borrarlas exige migrar pantalla a pantalla |  |
+| ✔ | T5.6 | `!important` a cero | done | `9c1a271` | 3.609 -> 0 !important con diff visual <=1.68% | 2026-11-27 |
+| ✔ | T5.7 | Cerrar la puerta | done | `9c1a271` | css-compat --fail EXIT 0; continue-on-error fuera de CI | 2026-11-27 |
 
 ## F6
 

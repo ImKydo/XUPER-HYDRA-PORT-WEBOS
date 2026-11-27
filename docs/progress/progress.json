@@ -1,6 +1,6 @@
 {
   "plan": ".hermes/plans/2026-11-26_224922-xupertv-v2-reconstruccion-verificada.md",
-  "updatedAt": "2026-11-27T04:21:28.814Z",
+  "updatedAt": "2026-11-27T04:55:49.328Z",
   "tasks": [
     {
       "id": "T0.1",
@@ -285,64 +285,64 @@
       "id": "T5.1",
       "phase": "F5",
       "title": "Tokens",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "9c1a271",
+      "evidence": "tokens.json -> 74 lineas; sin var() (Chromium 38)",
+      "date": "2026-11-27"
     },
     {
       "id": "T5.2",
       "phase": "F5",
       "title": "Consolidar 3 capas en `app.css`",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "9c1a271",
+      "evidence": "3 capas -> legacy.css + app.css; diff pixel a pixel <=1.68%",
+      "date": "2026-11-27"
     },
     {
       "id": "T5.3",
       "phase": "F5",
       "title": "Capa `.nogap` generada (patrón TiviBro)",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "9c1a271",
+      "evidence": "14 reglas nogap; Chrome 53 activa, Chrome 158 no",
+      "date": "2026-11-27"
     },
     {
       "id": "T5.4",
       "phase": "F5",
       "title": "`backdrop-filter` → fondo sólido",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "9c1a271",
+      "evidence": "8 backdrop-filter fuera; css-compat 0 no soportadas",
+      "date": "2026-11-27"
     },
     {
       "id": "T5.5",
       "phase": "F5",
       "title": "CSS muerto",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
+      "status": "blocked",
+      "commit": "9c1a271",
+      "evidence": "dead-css.mjs lista 185 clases sin uso; borrarlas exige migrar pantalla a pantalla",
       "date": null
     },
     {
       "id": "T5.6",
       "phase": "F5",
       "title": "`!important` a cero",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "9c1a271",
+      "evidence": "3.609 -> 0 !important con diff visual <=1.68%",
+      "date": "2026-11-27"
     },
     {
       "id": "T5.7",
       "phase": "F5",
       "title": "Cerrar la puerta",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "9c1a271",
+      "evidence": "css-compat --fail EXIT 0; continue-on-error fuera de CI",
+      "date": "2026-11-27"
     },
     {
       "id": "T6.1",
