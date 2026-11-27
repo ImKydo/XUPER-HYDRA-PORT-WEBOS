@@ -1,15 +1,15 @@
 # Progreso — XuperTV webOS
 
 Plan: `.hermes/plans/2026-11-26_224922-xupertv-v2-reconstruccion-verificada.md`
-Actualizado: 2026-11-27T03:17:46.437Z
+Actualizado: 2026-11-27T03:42:10.995Z
 
-**Avance global: 15/49 tareas (31 %)**
+**Avance global: 20/49 tareas (41 %)**
 
 | Fase | Hechas | Total |
 |---|---|---|
 | F0 | 10 | 10 |
 | F1 | 5 | 5 |
-| F2 | 0 | 5 |
+| F2 | 5 | 5 |
 | F3 | 0 | 4 |
 | F4 | 0 | 7 |
 | F5 | 0 | 7 |
@@ -45,11 +45,11 @@ Actualizado: 2026-11-27T03:17:46.437Z
 
 | | ID | Tarea | Estado | Commit | Evidencia | Fecha |
 |---|---|---|---|---|---|---|
-| · | T2.1 | Inventario de las 313 funciones | pending |  |  |  |
-| · | T2.2 | Pruebas del renombrador (antes de usarlo) | pending |  |  |  |
-| · | T2.3 | Lote 1: el núcleo (≈20 funciones) | pending |  |  |  |
-| · | T2.4 | Lotes 2 a 6, por dominio | pending |  |  |  |
-| · | T2.5 | Cierre de la reconstrucción | pending |  |  |  |
+| ✔ | T2.1 | Inventario de las 313 funciones | done | `a260fbf` | 313 funciones; 34 de 1 letra, 172 de 2, 97 legibles | 2026-11-27 |
+| ✔ | T2.2 | Pruebas del renombrador (antes de usarlo) | done | `a95b3c8` | 9 tests; 3 verificaciones (ambito, canonica, declaracion) | 2026-11-27 |
+| ✔ | T2.3 | Lote 1: el núcleo (≈20 funciones) | done | `0644106` | 10 nombres, 405 apariciones; firstFocusable inexistente detectado y corregido | 2026-11-27 |
+| ✔ | T2.4 | Lotes 2 a 6, por dominio | done | `0117509` | 6 lotes, 74 nombres, 0 de una letra; smoke 6/6 | 2026-11-27 |
+| ✔ | T2.5 | Cierre de la reconstrucción | done | `459f8da` | legacy-map.md; 70% de lineas legibles; zona protegida documentada | 2026-11-27 |
 
 ## F3
 

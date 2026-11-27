@@ -1,6 +1,6 @@
 {
   "plan": ".hermes/plans/2026-11-26_224922-xupertv-v2-reconstruccion-verificada.md",
-  "updatedAt": "2026-11-27T03:17:46.437Z",
+  "updatedAt": "2026-11-27T03:42:10.995Z",
   "tasks": [
     {
       "id": "T0.1",
@@ -141,46 +141,46 @@
       "id": "T2.1",
       "phase": "F2",
       "title": "Inventario de las 313 funciones",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "a260fbf",
+      "evidence": "313 funciones; 34 de 1 letra, 172 de 2, 97 legibles",
+      "date": "2026-11-27"
     },
     {
       "id": "T2.2",
       "phase": "F2",
       "title": "Pruebas del renombrador (antes de usarlo)",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "a95b3c8",
+      "evidence": "9 tests; 3 verificaciones (ambito, canonica, declaracion)",
+      "date": "2026-11-27"
     },
     {
       "id": "T2.3",
       "phase": "F2",
       "title": "Lote 1: el núcleo (≈20 funciones)",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "0644106",
+      "evidence": "10 nombres, 405 apariciones; firstFocusable inexistente detectado y corregido",
+      "date": "2026-11-27"
     },
     {
       "id": "T2.4",
       "phase": "F2",
       "title": "Lotes 2 a 6, por dominio",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "0117509",
+      "evidence": "6 lotes, 74 nombres, 0 de una letra; smoke 6/6",
+      "date": "2026-11-27"
     },
     {
       "id": "T2.5",
       "phase": "F2",
       "title": "Cierre de la reconstrucción",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "459f8da",
+      "evidence": "legacy-map.md; 70% de lineas legibles; zona protegida documentada",
+      "date": "2026-11-27"
     },
     {
       "id": "T3.1",
