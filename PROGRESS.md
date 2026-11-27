@@ -1,9 +1,9 @@
 # Progreso — XuperTV webOS
 
 Plan: `.hermes/plans/2026-11-26_224922-xupertv-v2-reconstruccion-verificada.md`
-Actualizado: 2026-11-27T04:55:49.328Z
+Actualizado: 2026-11-27T06:23:37.588Z
 
-**Avance global: 39/55 tareas (71 %)**
+**Avance global: 42/55 tareas (76 %)**
 
 | Fase | Hechas | Total |
 |---|---|---|
@@ -13,7 +13,7 @@ Actualizado: 2026-11-27T04:55:49.328Z
 | F3 | 3 | 4 |
 | F4 | 4 | 7 |
 | F5 | 6 | 7 |
-| F6 | 6 | 13 |
+| F6 | 9 | 13 |
 | F7 | 0 | 4 |
 
 ## F0
@@ -88,11 +88,11 @@ Actualizado: 2026-11-27T04:55:49.328Z
 
 | | ID | Tarea | Estado | Commit | Evidencia | Fecha |
 |---|---|---|---|---|---|---|
-| · | T6.1 | Tipografía y truncado | pending |  |  |  |
-| · | T6.2 | Un solo lenguaje de foco | pending |  |  |  |
+| ✔ | T6.1 | Tipografía y truncado | done | `f724c09` | auditoria de desbordes: 4 defectos corregidos; segunda pasada 0 | 2026-11-27 |
+| ✔ | T6.2 | Un solo lenguaje de foco | done | `ab01bb3` | hover=foco unificado; anchos 107,74,155,118,172 identicos en 5 estados | 2026-11-27 |
 | · | T6.3 | Safe area (overscan 5 %) | pending |  |  |  |
 | · | T6.4 | Estados de carga, error y vacío | pending |  |  |  |
-| · | T6.5 | Carrusel de 7 + asomo | pending |  |  |  |
+| ✔ | T6.5 | Carrusel de 7 + asomo | done | `f724c09` | paso 254, tarjeta 234x346: 7 completas + 46 px de asomo | 2026-11-27 |
 | · | T6.6 | Issue #83: retomar, favoritos y Back | pending |  |  |  |
 | · | T6.7 | Regresión visual | pending |  |  |  |
 | ✔ | T6.8 | Navegación de cinco pestañas con Categorías | done | `1e0ab60` | 8 pestañas -> 5; Kids/Anime/Novelas dentro de Categorías; panel abre con Kids/Anime/Novelas + géneros | 2026-11-27 |

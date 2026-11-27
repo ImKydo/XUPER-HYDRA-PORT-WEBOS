@@ -1,6 +1,6 @@
 {
   "plan": ".hermes/plans/2026-11-26_224922-xupertv-v2-reconstruccion-verificada.md",
-  "updatedAt": "2026-11-27T04:55:49.328Z",
+  "updatedAt": "2026-11-27T06:23:37.588Z",
   "tasks": [
     {
       "id": "T0.1",
@@ -348,19 +348,19 @@
       "id": "T6.1",
       "phase": "F6",
       "title": "Tipografía y truncado",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "f724c09",
+      "evidence": "auditoria de desbordes: 4 defectos corregidos; segunda pasada 0",
+      "date": "2026-11-27"
     },
     {
       "id": "T6.2",
       "phase": "F6",
       "title": "Un solo lenguaje de foco",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "ab01bb3",
+      "evidence": "hover=foco unificado; anchos 107,74,155,118,172 identicos en 5 estados",
+      "date": "2026-11-27"
     },
     {
       "id": "T6.3",
@@ -384,10 +384,10 @@
       "id": "T6.5",
       "phase": "F6",
       "title": "Carrusel de 7 + asomo",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "f724c09",
+      "evidence": "paso 254, tarjeta 234x346: 7 completas + 46 px de asomo",
+      "date": "2026-11-27"
     },
     {
       "id": "T6.6",
