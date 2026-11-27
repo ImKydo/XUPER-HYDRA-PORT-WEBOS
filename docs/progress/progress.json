@@ -408,6 +408,51 @@
       "date": null
     },
     {
+      "id": "T6.8",
+      "phase": "F6",
+      "title": "Navegación de cinco pestañas con Categorías",
+      "status": "done",
+      "commit": "1e0ab60",
+      "evidence": "8 pestañas -> 5; Kids/Anime/Novelas dentro de Categorías; panel abre con Kids/Anime/Novelas + géneros",
+      "date": "2026-11-27"
+    },
+    {
+      "id": "T6.9",
+      "phase": "F6",
+      "title": "Seguir viendo e Historial en Ajustes",
+      "status": "done",
+      "commit": "1e0ab60",
+      "evidence": "riel 'Seguir viendo' primero en Inicio sólo con progreso; Historial fuera de la barra, en Ajustes -> Mi lista",
+      "date": "2026-11-27"
+    },
+    {
+      "id": "T6.10",
+      "phase": "F6",
+      "title": "Cabecera sin reloj ni wifi y buscar accesible",
+      "status": "done",
+      "commit": "1e0ab60",
+      "evidence": "reloj y wifi fuera; acciones de cabecera reducidas a buscar y cuenta; sin icono de filtro duplicado",
+      "date": "2026-11-27"
+    },
+    {
+      "id": "T6.11",
+      "phase": "F6",
+      "title": "Marca ZephyrTV",
+      "status": "done",
+      "commit": "1e0ab60",
+      "evidence": "icono 256/512 + marca 144; nombre en appinfo/index/arranque/barra; textos y errores sin XuperTV; créditos al código base",
+      "date": "2026-11-27"
+    },
+    {
+      "id": "T6.12",
+      "phase": "F6",
+      "title": "Documentar la nueva navegación",
+      "status": "done",
+      "commit": "1e0ab60",
+      "evidence": "docs/engineering/navegacion.md con estructura, marca y por qué se retiraron las pestañas",
+      "date": "2026-11-27"
+    },
+    {
       "id": "T7.1",
       "phase": "F7",
       "title": "Geometría pura + pruebas",

@@ -3,7 +3,7 @@
 Plan: `.hermes/plans/2026-11-26_224922-xupertv-v2-reconstruccion-verificada.md`
 Actualizado: 2026-11-27T04:55:49.328Z
 
-**Avance global: 33/49 tareas (67 %)**
+**Avance global: 38/54 tareas (70 %)**
 
 | Fase | Hechas | Total |
 |---|---|---|
@@ -13,7 +13,7 @@ Actualizado: 2026-11-27T04:55:49.328Z
 | F3 | 3 | 4 |
 | F4 | 4 | 7 |
 | F5 | 6 | 7 |
-| F6 | 0 | 7 |
+| F6 | 5 | 12 |
 | F7 | 0 | 4 |
 
 ## F0
@@ -95,6 +95,11 @@ Actualizado: 2026-11-27T04:55:49.328Z
 | · | T6.5 | Carrusel de 7 + asomo | pending |  |  |  |
 | · | T6.6 | Issue #83: retomar, favoritos y Back | pending |  |  |  |
 | · | T6.7 | Regresión visual | pending |  |  |  |
+| ✔ | T6.8 | Navegación de cinco pestañas con Categorías | done | `1e0ab60` | 8 pestañas -> 5; Kids/Anime/Novelas dentro de Categorías; panel abre con Kids/Anime/Novelas + géneros | 2026-11-27 |
+| ✔ | T6.9 | Seguir viendo e Historial en Ajustes | done | `1e0ab60` | riel 'Seguir viendo' primero en Inicio sólo con progreso; Historial fuera de la barra, en Ajustes -> Mi lista | 2026-11-27 |
+| ✔ | T6.10 | Cabecera sin reloj ni wifi y buscar accesible | done | `1e0ab60` | reloj y wifi fuera; acciones de cabecera reducidas a buscar y cuenta; sin icono de filtro duplicado | 2026-11-27 |
+| ✔ | T6.11 | Marca ZephyrTV | done | `1e0ab60` | icono 256/512 + marca 144; nombre en appinfo/index/arranque/barra; textos y errores sin XuperTV; créditos al código base | 2026-11-27 |
+| ✔ | T6.12 | Documentar la nueva navegación | done | `1e0ab60` | docs/engineering/navegacion.md con estructura, marca y por qué se retiraron las pestañas | 2026-11-27 |
 
 ## F7
 
