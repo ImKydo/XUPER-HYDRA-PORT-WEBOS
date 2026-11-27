@@ -939,6 +939,8 @@ body {
 
 /* Los titulos de seccion traian un acento vertical rojo+amarillo de la capa
    heredada. En el lenguaje nuevo el titulo se basta solo. */
+.kids-subtitle::before,
+.kids-subtitle::after,
 .catalog-rail-title::before,
 .home-section-title::before,
 .section-title::before,
@@ -1402,4 +1404,11 @@ body {
   font-size: 22px;
   line-height: 1.5;
   color: #98a0ae;
+}
+
+/* El titulo de fila llevaba una barra roja de 6 px como border-left; el acento
+   ya lo da la tipografia y en el lenguaje nuevo sobraba. */
+.kids-subtitle {
+  border-left: 0;
+  padding-left: 0;
 }
