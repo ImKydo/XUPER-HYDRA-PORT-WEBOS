@@ -109,6 +109,21 @@ suficiente en el inventario para nombrarlas sin inventar. Se pueden abordar por
 demanda: cuando haya que tocar una, se añade a un `batch-7.json` y se aplica el
 mismo ciclo.
 
+### Deuda conocida dentro de la zona protegida
+
+Detectada al revisar temporizadores (F4). No se toca sin la frase
+**"modificar reproducción"**:
+
+- `lr()` monta un `setInterval(..., 2000)` que vigila el arranque del
+  reproductor. No se guarda en ninguna variable ni se limpia: cada entrada al
+  reproductor dejaba uno vivo. Con una reproducción por sesión no se nota;
+  tras cambiar de título veinte veces, sí.
+- `xe.onplay` reasigna `ni = setInterval(...)` sin limpiar el anterior, mismo
+  patrón para el avance del VOD.
+
+Ambos son acumulativos, no bloqueantes: el sistema sigue funcionando, pero la
+memoria y el número de callbacks por segundo crecen con el uso.
+
 ## Regenerar el inventario
 
 ```bash

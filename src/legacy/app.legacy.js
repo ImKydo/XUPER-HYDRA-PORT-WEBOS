@@ -5833,6 +5833,8 @@
     telemetryHudEl = createEl("div", "telemetry-hud");
     playerScreen.appendChild(telemetryHudEl);
     updateTelemetryHudData();
+    // Abrir el HUD dos veces sin cerrarlo dejaba dos intervalos vivos.
+    if (telemetryHudTimer) clearInterval(telemetryHudTimer);
     telemetryHudTimer = setInterval(updateTelemetryHudData, 800);
   }
   var sectionCatalogCache = {},
