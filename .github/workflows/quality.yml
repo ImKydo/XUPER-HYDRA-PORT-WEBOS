@@ -45,5 +45,8 @@ jobs:
       - name: Pruebas unitarias
         run: npm test
 
+      - name: Regresion de maquetacion
+        run: node tools/check/visual-layout.mjs
+
       - name: Compatibilidad CSS del televisor
         run: node tools/check/css-compat.mjs --fail

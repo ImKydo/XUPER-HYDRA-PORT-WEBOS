@@ -19,7 +19,9 @@
     "perf": "node tools/perf/measure.mjs --throttle=4 --out=docs/perf/latest.json",
     "budget": "node tools/perf/budget.mjs docs/perf/latest.json",
     "progress": "node tools/progress.mjs",
-    "progress:check": "node tools/progress.mjs --check"
+    "progress:check": "node tools/progress.mjs --check",
+    "layout": "node tools/check/visual-layout.mjs",
+    "safe-area": "node tools/check/safe-area.mjs"
   },
   "devDependencies": {
     "acorn": "^8.19.0",

@@ -1385,3 +1385,21 @@ body {
   -webkit-line-clamp: 2;
   overflow: hidden;
 }
+
+/* Estado vacio del catalogo */
+.empty-state {
+  text-align: center;
+}
+
+.empty-title {
+  font-size: 34px;
+  font-weight: 700;
+  color: #f4f5f8;
+}
+
+.empty-desc {
+  margin-top: 16px;
+  font-size: 22px;
+  line-height: 1.5;
+  color: #98a0ae;
+}

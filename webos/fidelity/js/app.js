@@ -1270,12 +1270,51 @@
     if (!e || !e.id) return !1;
     var t = String(e.id),
       a = !X.favs[t];
-    return (
-      a ? (X.favs[t] = !0) : delete X.favs[t],
-      (Q.favs = X.favs),
-      writeJsonStorage($, Q),
-      a
-    );
+    /* La lista de favoritos se armaba recorriendo el catalogo cargado, asi que
+       un titulo marcado en una categoria que ya no estaba en memoria no
+       aparecia nunca (issue #83). Se guarda la ficha junto al id. */
+    if (a) {
+      X.favs[t] = !0;
+      Q.favMeta = Q.favMeta || {};
+      Q.favMeta[t] = {
+        id: e.id,
+        title: e.title || "",
+        poster: e.poster || e.landscape || e.backdrop || "",
+        series: !isMovieItem(e),
+      };
+    } else {
+      delete X.favs[t];
+      if (Q.favMeta) delete Q.favMeta[t];
+    }
+    (Q.favs = X.favs), writeJsonStorage($, Q);
+    return a;
+  }
+
+  /* Favoritos completos: primero la ficha guardada, y solo si falta se busca
+     en el catalogo cargado. */
+  function favoriteItems() {
+    var out = [],
+      meta = Q.favMeta || {},
+      key,
+      i;
+    for (key in X.favs) {
+      if (!Object.prototype.hasOwnProperty.call(X.favs, key)) continue;
+      if (meta[key]) {
+        out.push(meta[key]);
+        continue;
+      }
+      for (i = 0; i < l.length; i++)
+        if (String(l[i].id) === key) {
+          out.push({
+            id: l[i].id,
+            title: l[i].title,
+            poster: l[i].poster || l[i].landscape || "",
+            series: !isMovieItem(l[i]),
+          });
+          break;
+        }
+    }
+    return out;
   }
   function liveChannelKey(e) {
     return e
@@ -5246,10 +5285,26 @@
       space = cut.lastIndexOf(" ");
     return (space > 40 ? cut.slice(0, space) : cut).replace(/[\s,;:.\-]+$/, "") + "\u2026";
   }
+  /* Estado vacio de la portada: sin catalogo la pantalla quedaba en negro y no
+     se distinguia "cargando" de "no hay nada". */
+  function renderEmptyState(pageEl, title, desc) {
+    var box = createEl("div", "empty-state");
+    placeAbsolute(box, 360, 320, 1200, 220);
+    box.appendChild(createEl("div", "empty-title", title));
+    box.appendChild(createEl("div", "empty-desc", desc));
+    pageEl.appendChild(box);
+  }
   function renderHero(pageEl, items, opts) {
     opts = opts || {};
     var pool = (opts.pool && opts.pool.length ? opts.pool : items) || [];
-    if (!pool.length) return;
+    if (!pool.length) {
+      renderEmptyState(
+        pageEl,
+        "No se pudo cargar el catálogo",
+        "La app reintenta sola cada 20 segundos. Si sigue así, revisa la conexión del televisor en Ajustes → Diagnóstico."
+      );
+      return;
+    }
     var total = Math.min(opts.dots || 5, pool.length),
       index = 0,
       timer = null;
@@ -5773,7 +5828,7 @@
         }),
         l.appendChild(moreCard));
     }
-    return o + 360 + 35;
+    return o + RAIL_H + 35;
   }
 
   /* Carril de Continuar viendo (Watch History): muestra los contenidos en curso
@@ -6598,6 +6653,13 @@
 
     if (i && i.sectionTitle === "Destacados" && Q && Q.history && Q.history.length) {
       u = renderHistoryRail(e, Q.history, u);
+    }
+
+    if (i && i.sectionTitle === "Destacados") {
+      var favRail = favoriteItems();
+      if (favRail.length) {
+        u = buildCatalogRail(e, favRail, u, "Mi lista", null, null, "Mi lista");
+      }
     }
 
     if (popItems.length) {
@@ -9232,17 +9294,13 @@
     (t.appendChild(a), t.appendChild(createEl("div", "history-rule")));
     var r = [];
     if ("history" === We) r = Q.history || [];
-    else if ("favs" === We)
-      for (var o = 0; o < l.length; o++)
-        X.favs &&
-          X.favs[l[o].id] &&
-          r.push({
-            id: l[o].id,
-            title: l[o].title,
-            poster: l[o].poster || l[o].cover,
-            series: isMovieItem(l[o]),
-            position: 0,
-          });
+    else if ("favs" === We) {
+      var favList = favoriteItems();
+      for (var o = 0; o < favList.length; o++) {
+        favList[o].position = 0;
+        r.push(favList[o]);
+      }
+    }
     var s = createEl("div", "history-total", "Total ");
     (s.appendChild(createEl("span", null, String(r.length))), t.appendChild(s));
     var d = createEl("div", "history-grid");
@@ -9256,11 +9314,16 @@
             (i.src =
               t.poster || "assets/original/common/bg_placehoder_vertical.png"),
             a.appendChild(i));
-          var n = t.series
-            ? "Ya miró hasta " +
-            (t.episodeNumber ? "epis. " + t.episodeNumber : "un episodio") +
-            (t.position ? " · " + ai(t.position) : "")
-            : "Ya miró hasta " + ai(t.position || 0);
+          /* En favoritos no hay progreso que mostrar: antes decia "Ya miró
+             hasta 00:00" en cada tarjeta. */
+          var n =
+            "favs" === We
+              ? "En mi lista"
+              : t.series
+                ? "Ya miró hasta " +
+                  (t.episodeNumber ? "epis. " + t.episodeNumber : "un episodio") +
+                  (t.position ? " · " + ai(t.position) : "")
+                : "Ya miró hasta " + ai(t.position || 0);
           (a.appendChild(createEl("div", "history-progress", n)),
             a.appendChild(
               createEl("div", "history-card-title", t.title || "Contenido")

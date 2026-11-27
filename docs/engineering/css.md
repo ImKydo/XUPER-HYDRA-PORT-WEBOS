@@ -93,3 +93,36 @@ declara 1920x1080 y la escala es 1:1.
 
 Consecuencia: el modo "Compatibilidad HD" (que reducía la interfaz a 2/3) ya no
 se aplica en paneles de 1080p o más; sólo sigue activo entre 1280 y 1920.
+
+## Safe area (overscan)
+
+`node tools/check/safe-area.mjs` mide qué elementos caen dentro del 5 % del
+borde que algunos televisores recortan. Medición actual: 47 elementos con texto
+en esa banda, casi todos a 32-80 px del borde izquierdo.
+
+**Decisión:** no se mueve el layout. Las posiciones son absolutas y están
+calculadas en JavaScript para nueve pantallas; desplazarlas a ciegas rompe la
+composición en las que ya están bien, y el recorte solo ocurre si el televisor
+tiene overscan activo. La app usa márgenes del 2,5 % (48 px) desde el origen.
+
+Qué hacer si en un televisor concreto aparece contenido cortado:
+
+1. Ajustes de imagen del televisor → relación de aspecto → **16:9 / Solo
+   escaneo** (desactiva el overscan).
+2. Si aun así se corta, `node tools/check/safe-area.mjs --strict` lista los
+   elementos con texto dentro de la banda para decidir cuáles mover.
+
+## Regresión de maquetación
+
+`node tools/check/visual-layout.mjs` guarda las cajas de 30 elementos estables
+en `docs/perf/layout-baseline.json` y falla si alguna se mueve más de 8 px.
+
+Se compara geometría y no píxeles a propósito: las carátulas llegan de una CDN
+y en un entorno sin red la mitad no carga, así que un diff de imagen daría
+falsos positivos constantes. Después de un cambio visual deliberado:
+
+```bash
+node tools/check/visual-layout.mjs --update   # nueva línea base
+```
+
+La comprobación corre en CI después de los chequeos de CSS.
