@@ -83,19 +83,115 @@ if (problems.length) {
   process.exit(1);
 }
 
-/* ---------- aplicar el renombrado sólo a Identifier ---------- */
+/* ---------- ámbitos: sólo se renombra el binding de nivel superior ---------- */
+// Los nombres de una letra son parámetros locales en cientos de funciones.
+// Renombrar `e` sin mirar el ámbito convierte también esos parámetros y deja
+// `function createEl(createEl, createEl)`: equivalente, pero ilegible.
 const ast = acorn.parse(src, { ecmaVersion: 5 });
+const scopeOfNode = new Map();
+const makeScope = (parent, node) => ({ parent, node, names: new Set() });
+
+function collectScopes(node, scope) {
+  if (!node || typeof node.type !== "string") return;
+
+  if (node.type === "FunctionDeclaration") {
+    // En ES5 la declaración se eleva al ámbito de la función contenedora.
+    if (node.id) scope.names.add(node.id.name);
+    const inner = makeScope(scope, node);
+    scopeOfNode.set(node, inner);
+    for (const p of node.params) if (p.type === "Identifier") inner.names.add(p.name);
+    for (const s of node.body.body) collectScopes(s, inner);
+    return;
+  }
+  if (node.type === "FunctionExpression") {
+    const inner = makeScope(scope, node);
+    scopeOfNode.set(node, inner);
+    // El nombre de una función con nombre sólo existe dentro de ella.
+    if (node.id) inner.names.add(node.id.name);
+    for (const p of node.params) if (p.type === "Identifier") inner.names.add(p.name);
+    for (const s of node.body.body) collectScopes(s, inner);
+    return;
+  }
+  if (node.type === "VariableDeclarator") {
+    if (node.id && node.id.type === "Identifier") scope.names.add(node.id.name);
+    collectScopes(node.init, scope);
+    return;
+  }
+  if (node.type === "CatchClause") {
+    const inner = makeScope(scope, node);
+    scopeOfNode.set(node, inner);
+    if (node.param && node.param.type === "Identifier") inner.names.add(node.param.name);
+    collectScopes(node.body, inner);
+    return;
+  }
+
+  for (const k of Object.keys(node)) {
+    if (k === "loc" || k === "range" || k === "start" || k === "end") continue;
+    const v = node[k];
+    if (Array.isArray(v)) for (const c of v) collectScopes(c, scope);
+    else if (v && typeof v.type === "string") collectScopes(v, scope);
+  }
+}
+
+const rootScope = makeScope(null, ast);
+for (const s of ast.body) collectScopes(s, rootScope);
+
+// El "nivel superior" es el cuerpo del IIFE que envuelve el bundle.
+let topScope = rootScope;
+for (const s of scopeOfNode.values()) {
+  if (s.parent === rootScope && s.names.size > topScope.names.size) topScope = s;
+}
+
+const resolveScope = (scope, name) => {
+  for (let s = scope; s; s = s.parent) if (s.names.has(name)) return s;
+  return null;
+};
+
+/* ---------- aplicar el renombrado sólo a Identifier del nivel superior ---------- */
 const edits = [];
 let renamed = 0;
-walk(ast, (node, parent, key) => {
-  if (node.type !== "Identifier") return;
-  if (!(node.name in mapping)) return;
-  // No tocar claves de objeto ni propiedades de acceso (cambiarían el nombre real).
-  if (parent && parent.type === "MemberExpression" && key === "property" && !parent.computed) return;
-  if (parent && parent.type === "Property" && key === "key" && !parent.computed) return;
-  edits.push([node.start, node.end, mapping[node.name]]);
-  renamed++;
-});
+
+function renameWalk(node, scope, parent, key) {
+  if (!node || typeof node.type !== "string") return;
+
+  // En una función, el `id` pertenece al ámbito EXTERIOR (ahí se declara el
+  // nombre); parámetros y cuerpo al interior. Sin esta distinción, un parámetro
+  // con el mismo nombre que la función tapa la declaración y el bundle queda
+  // con llamadas renombradas y declaración sin renombrar.
+  if (node.type === "FunctionDeclaration" || node.type === "FunctionExpression") {
+    const inner = scopeOfNode.get(node) || scope;
+    if (node.id) renameWalk(node.id, scope, node, "id");
+    for (const p of node.params) renameWalk(p, inner, node, "params");
+    renameWalk(node.body, inner, node, "body");
+    return;
+  }
+  if (node.type === "CatchClause") {
+    const inner = scopeOfNode.get(node) || scope;
+    if (node.param) renameWalk(node.param, inner, node, "param");
+    renameWalk(node.body, inner, node, "body");
+    return;
+  }
+
+  if (node.type === "Identifier" && node.name in mapping) {
+    const isProperty =
+      parent &&
+      ((parent.type === "MemberExpression" && key === "property" && !parent.computed) ||
+        (parent.type === "Property" && key === "key" && !parent.computed));
+    // Sólo si el identificador resuelve al binding de nivel superior.
+    if (!isProperty && resolveScope(scope, node.name) === topScope) {
+      edits.push([node.start, node.end, mapping[node.name]]);
+      renamed++;
+    }
+  }
+
+  for (const k of Object.keys(node)) {
+    if (k === "loc" || k === "range" || k === "start" || k === "end") continue;
+    const v = node[k];
+    if (Array.isArray(v)) for (const c of v) renameWalk(c, scope, node, k);
+    else if (v && typeof v.type === "string") renameWalk(v, scope, node, k);
+  }
+}
+for (const s of ast.body) renameWalk(s, rootScope, null, null);
 
 if (!renamed) {
   console.error("no se encontró ninguna aparición que renombrar");
@@ -139,6 +235,24 @@ const reverse = {};
 for (const [oldName, newName] of Object.entries(mapping)) reverse[newName] = oldName;
 if (canonical(src) !== canonical(out, reverse)) {
   console.error("La forma canónica cambió: el renombrado NO es equivalente.");
+  process.exit(1);
+}
+
+/* ---------- verificación 3: cada nombre nuevo queda declarado ---------- */
+// La verificación 2 no basta: si las llamadas se renombran y la declaración no,
+// el mapeo inverso hace que la forma canónica coincida igual y la app se rompe
+// en ejecución con "x is not defined". Pasó de verdad con `function e(e, t)`.
+const outAst = acorn.parse(out, { ecmaVersion: 5 });
+const declaredNames = new Set();
+walk(outAst, (n) => {
+  if (n.type === "FunctionDeclaration" && n.id) declaredNames.add(n.id.name);
+  if (n.type === "VariableDeclarator" && n.id && n.id.type === "Identifier") declaredNames.add(n.id.name);
+});
+const undeclared = Object.values(mapping).filter((n) => !declaredNames.has(n));
+if (undeclared.length) {
+  console.error(
+    `Renombrado inconsistente: ${undeclared.join(", ")} se usa pero no se declara. No se escribe nada.`
+  );
   process.exit(1);
 }
 

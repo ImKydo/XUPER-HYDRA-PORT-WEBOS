@@ -38,20 +38,20 @@
   function clockSvg() {
     return '<svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><circle cx="16" cy="16" r="12" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M16 9v7l5 3" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
   }
-  function e(e, t, a) {
+  function createEl(e, t, a) {
     var i = document.createElement(e);
     return (t && (i.className = t), null != a && (i.textContent = a), i);
   }
-  function t(e) {
+  function byId(e) {
     return document.getElementById(e);
   }
-  function a(e) {
+  function removeAllChildren(e) {
     if (e) for (; e.firstChild;) e.removeChild(e.firstChild);
   }
   function clearChildren(e) {
     if (e) for (; e.firstChild;) e.removeChild(e.firstChild);
   }
-  function i(e, t, a, i, n) {
+  function placeAbsolute(e, t, a, i, n) {
     return (
       (e.style.position = "absolute"),
       (e.style.left = t + "px"),
@@ -61,7 +61,7 @@
       e
     );
   }
-  function n(e, t) {
+  function closestMatch(e, t) {
     for (; e && e !== document;) {
       if (1 === e.nodeType) {
         var m = e.matches || e.webkitMatchesSelector || e.mozMatchesSelector || e.msMatchesSelector;
@@ -90,10 +90,10 @@
     }
     return null;
   }
-  function r(e) {
+  function pad2(e) {
     return e < 10 ? "0" + e : "" + e;
   }
-  function o(e) {
+  function normalizeText(e) {
     return (
       (e = String(e).toLowerCase()).normalize &&
       (e = e.normalize("NFD").replace(/[\u0300-\u036f]/g, "")),
@@ -126,20 +126,20 @@
         o = s[(a + i + 3) % s.length];
       l.push({
         id: l.length + 1,
-        title: e + " demo " + r(i),
+        title: e + " demo " + pad2(i),
         category: d[e] || "",
         score: (7.9 + ((a + i) % 16) / 10).toFixed(1),
         year: 2018 + ((a + i) % 7),
         duration:
           1 + ((a + i) % 2) + " h " + (10 + ((7 * a + 5 * i) % 45)) + " min",
         genres: n === o ? [n] : [n, o],
-        director: "Director demo " + r(i),
-        actors: "Actor demo " + r(i) + ", Actriz demo " + r(i + 1),
+        director: "Director demo " + pad2(i),
+        actors: "Actor demo " + pad2(i) + ", Actriz demo " + pad2(i + 1),
         synopsis:
           "Sinopsis de demostración para " +
           e.toLowerCase() +
           " demo " +
-          r(i) +
+          pad2(i) +
           '. Este texto sólo existe para comprobar el recorte a dos líneas, el interlineado y la sangría de la etiqueta "Sinopsis :" definidos en activity_voddetails.',
         kind: e.toLowerCase(),
       });
@@ -158,7 +158,7 @@
   var v = { loading: !1, source: "demo", error: null },
     f = { refreshing: !1, lastSync: 0, roots: 0, error: null },
     h = ["featured", "movies", "series", "anime", "kids", "free"];
-  function m(e) {
+  function toArray(e) {
     if ("[object Array]" === Object.prototype.toString.call(e)) return e;
     if (!e) return [];
     for (
@@ -179,20 +179,20 @@
       if ("[object Array]" === Object.prototype.toString.call(e[t[a]]))
         return e[t[a]];
       if (e[t[a]] && "object" == typeof e[t[a]]) {
-        var i = m(e[t[a]]);
+        var i = toArray(e[t[a]]);
         if (i.length) return i;
       }
     }
     return [];
   }
-  function g(e) {
+  function configUrl(e) {
     var t = p[e + "Url"];
     if (t) return String(t);
     var a = String(p.baseUrl || "").replace(/\/$/, ""),
       i = String(p[e + "Path"] || "");
     return a && i ? a + ("/" === i.charAt(0) ? i : "/" + i) : "";
   }
-  function y() {
+  function readSession() {
     var e = p.session || {};
     return {
       userId: String(e.userId || ""),
@@ -202,12 +202,12 @@
       version: String(e.version || "4.34.4"),
     };
   }
-  function b() {
-    var e = y();
+  function hasSession() {
+    var e = readSession();
     return !!(e.userId && e.userToken && e.portalCode);
   }
-  function C(e, t) {
-    var a = y();
+  function authParams(e, t) {
+    var a = readSession();
     return "catalog" === e
       ? {
         userId: a.userId,
@@ -235,7 +235,7 @@
           programId: t,
         };
   }
-  function w(e) {
+  function isRemoteUrl(e) {
     return e
       ? ((e = String(e)),
         /^https?:\/\//i.test(e) || 0 === e.indexOf("data:")
@@ -247,10 +247,10 @@
             : e)
       : "";
   }
-  function S(e, t) {
+  function orDefault(e, t) {
     return null == e || "" === e ? t : String(e);
   }
-  function x(e) {
+  function isMovieItem(e) {
     if (!e) return !1;
     /* Si el backend o catálogo indica explícitamente película, no es serie salvo que tenga más de 1 episodio real o múltiples temporadas */
     var isMovieExplicit = "movie" === e.type || "película" === e.kind || "pelicula" === e.category;
@@ -278,22 +278,22 @@
     var r = e.duration || e.runtime || e.runtimeMinutes || "";
     "number" == typeof r &&
       (r = Math.floor(r / 60) + " h " + (r % 60) + " min");
-    var s = S(e.type || e.programType, ""),
+    var s = orDefault(e.type || e.programType, ""),
       l =
         "teleplay" === s ||
         "series" === s ||
-        "serie" === o(S(e.kind || "", "")) ||
-        -1 !== o(S(e.category || "", "")).indexOf("serie") ||
+        "serie" === normalizeText(orDefault(e.kind || "", "")) ||
+        -1 !== normalizeText(orDefault(e.category || "", "")).indexOf("serie") ||
         (e.episodes && e.episodes.length > 0) ||
         (e.seasons && e.seasons.length > 0) ||
         (e.volumeCount && parseInt(e.volumeCount, 10) > 1) ||
         (e.volumnCount && parseInt(e.volumnCount, 10) > 1);
     return {
-      id: S(
+      id: orDefault(
         e.id || e.vodId || e.programId || e.program_id || e.tmdb_id,
         "api-" + t
       ),
-      title: S(
+      title: orDefault(
         e.title ||
         e.name ||
         e.programName ||
@@ -301,30 +301,30 @@
         e.original_title,
         "Sin título"
       ),
-      category: o(
-        S(e.category || e.section || e.collection || e.homeSection, "")
+      category: normalizeText(
+        orDefault(e.category || e.section || e.collection || e.homeSection, "")
       ),
-      score: S(
+      score: orDefault(
         e.score || e.vote_average || e.rating || e.movieRate || e.programScore,
         "—"
       ),
-      year: S(
+      year: orDefault(
         e.year ||
         e.release_year ||
         e.programYear ||
         (e.releaseDate || e.releaseTime || e.release_date || "").slice(0, 4),
         "—"
       ),
-      duration: S(r, "—"),
+      duration: orDefault(r, "—"),
       genres: i.length ? i : ["Sin clasificar"],
-      director: S(e.director, "—"),
-      actors: S(e.actors || e.actorDisplay || e.cast, "—"),
-      synopsis: S(
+      director: orDefault(e.director, "—"),
+      actors: orDefault(e.actors || e.actorDisplay || e.cast, "—"),
+      synopsis: orDefault(
         e.synopsis || e.overview || e.description || e.programUpdateContent,
         "Sin sinopsis disponible."
       ),
-      kind: l ? "serie" : S(e.kind || e.media_type, "película"),
-      poster: w(
+      kind: l ? "serie" : orDefault(e.kind || e.media_type, "película"),
+      poster: isRemoteUrl(
         e.posterUrl ||
         e.poster_url ||
         e.poster ||
@@ -336,23 +336,23 @@
         e.programPoster ||
         e.programImage
       ),
-      landscape: w(
+      landscape: isRemoteUrl(
         e.landscapeUrl ||
         e.landscape_url ||
         e.landscape ||
         e.wideImage ||
         e.bannerImage
       ),
-      backdrop: w(
+      backdrop: isRemoteUrl(
         e.backdropUrl || e.backdrop_url || e.backdrop || e.backdrop_path
       ),
       streamUrl: e.streamUrl || e.stream_url || "",
       type: s || (l ? "teleplay" : "movie"),
-      row: S(e.row, ""),
-      alias: S(e.alias, ""),
-      country: S(e.country || e.originalCountry, ""),
-      releaseDate: S(e.releaseDate || e.releaseTime, ""),
-      tagline: S(e.tagline || e.viewPoint, ""),
+      row: orDefault(e.row, ""),
+      alias: orDefault(e.alias, ""),
+      country: orDefault(e.country || e.originalCountry, ""),
+      releaseDate: orDefault(e.releaseDate || e.releaseTime, ""),
+      tagline: orDefault(e.tagline || e.viewPoint, ""),
       volumeCount: parseInt(e.volumeCount || e.volumnCount, 10) || 0,
       updateCount: parseInt(e.updateCount, 10) || 0,
       episodes: e.episodes || [],
@@ -408,7 +408,7 @@
      Se conserva una sola ficha: la variante en portugués se descarta cuando
      existe la versión en español o multilenguaje de la misma temporada. */
   function catalogKeyText(value) {
-    return o(String(value || ""))
+    return normalizeText(String(value || ""))
       .replace(/[^a-z0-9]+/g, " ")
       .replace(/\s+/g, " ")
       .trim();
@@ -500,7 +500,7 @@
     return out;
   }
   function k(e) {
-    if (!e || !x(e)) return null;
+    if (!e || !isMovieItem(e)) return null;
     var t = String(e.title || e.alias || "")
       .replace(/\s+/g, " ")
       .replace(/^\s+|\s+$/g, ""),
@@ -531,7 +531,7 @@
       var f = (function (e) {
         for (var t = {}, a = [], i = 0; i < e.length; i++) {
           var n = k(e[i]); n
-            ? (t[(r = o(n.title))] || (t[r] = { title: n.title, items: [] }),
+            ? (t[(r = normalizeText(n.title))] || (t[r] = { title: n.title, items: [] }),
               t[r].items.push({ item: e[i], number: n.number }))
             : a.push(e[i]);
         }
@@ -586,21 +586,21 @@
       (v.error = null),
       (function () {
         if (Ve) {
-          var e = t("home-tabs"),
+          var e = byId("home-tabs"),
             a = !(
               !e ||
               !e.classList.contains("is-expanded") ||
               e.classList.contains("is-collapsed")
             ),
             i = !(!X.focus || void 0 === X.focus._tab),
-            r = !(!X.focus || !n(X.focus, "#home-notify")),
-            o = !(!X.focus || !n(X.focus, ".home-page"));
+            r = !(!X.focus || !closestMatch(X.focus, "#home-notify")),
+            o = !(!X.focus || !closestMatch(X.focus, ".home-page"));
           if (
             ((He = []), (Ue = []), renderHomeScreen(), bt(X.tab, !1), "home" === X.screen)
           ) {
             if (i && Ue[X.tab]) setFocus(Ue[X.tab], !0);
             else if (r) {
-              var s = findFirstFocusable(t("home-notify"));
+              var s = findFirstFocusable(byId("home-notify"));
               s && setFocus(s, !0);
             } else if (o) {
               var l = He[z[X.tab].page],
@@ -624,7 +624,7 @@
   }
   function M() {
     var e = window.XUPERTV_CATALOG;
-    return e ? m(e) : [];
+    return e ? toArray(e) : [];
   }
   function I() {
     return (
@@ -860,7 +860,7 @@
       var e = {},
         t = 0,
         a = !1;
-      !(function i() {
+      !(function placeAbsolute() {
         if (t >= h.length)
           return (
             (f.refreshing = !1),
@@ -900,7 +900,7 @@
   }
   function N() {
     var e,
-      t = (e = window.XUPERTV_PORTAL) ? m(e) : [];
+      t = (e = window.XUPERTV_PORTAL) ? toArray(e) : [];
     (t.length && L(t, "portal-snapshot", !0),
       !1 !== p.refresh
         ? q()
@@ -915,8 +915,8 @@
     if (p.enabled)
       if ("portal" !== p.mode)
         if ("static" !== p.mode) {
-          var e = g("catalog");
-          "xuper" !== p.mode || b()
+          var e = configUrl("catalog");
+          "xuper" !== p.mode || hasSession()
             ? e
               ? ((v.loading = !0),
                 _(
@@ -932,13 +932,13 @@
                         (a ? String(a) : "La API rechazó la petición")
                         : "";
                     })(t);
-                    if (e || a || !L(m(t), "api")) {
+                    if (e || a || !L(toArray(t), "api")) {
                       var i = e || a || "La API no devolvió películas";
                       R("bundled-fallback", i) || (v.error = i);
                     }
                   },
                   "xuper" === p.mode
-                    ? { method: "POST", body: C("catalog") }
+                    ? { method: "POST", body: authParams("catalog") }
                     : null
                 ))
               : p.useBundledCatalog
@@ -995,7 +995,7 @@
                     (parseInt(t.number, 10) || 0)
                   );
                 }),
-                (!e.seasons || !e.seasons.length) && x(e))
+                (!e.seasons || !e.seasons.length) && isMovieItem(e))
             ) {
               var i = 1,
                 n =
@@ -1032,14 +1032,14 @@
               l || (xe && xe.src && !xe.paused) || Jr(e, X.detailEpisode));
         })
       );
-    var a = g("detail");
-    return p.enabled && a && ("xuper" !== p.mode || b())
+    var a = configUrl("detail");
+    return p.enabled && a && ("xuper" !== p.mode || hasSession())
       ? ((e._detailLoading = !0),
         void _(
           a.replace("{id}", encodeURIComponent(e.id)),
           function (a, i) {
             if (((e._detailLoading = !1), !a)) {
-              var n = m(i),
+              var n = toArray(i),
                 r = n.length ? n[0] : i && (i.item || i.movie || i);
               r &&
                 "object" == typeof r &&
@@ -1054,7 +1054,7 @@
             t(e);
           },
           "xuper" === p.mode
-            ? { method: "POST", body: C("detail", e.id) }
+            ? { method: "POST", body: authParams("detail", e.id) }
             : null
         ))
       : t(e);
@@ -1271,7 +1271,7 @@
       e &&
       (X.adultEnabled || !isAdultLiveChannel(e)) &&
       (!liveFavoritesOnly || !!X.liveFavorites[liveChannelKey(e)]) &&
-      (!t || o((e.name || "") + " " + (e.category || "")).indexOf(o(t)) >= 0)
+      (!t || normalizeText((e.name || "") + " " + (e.category || "")).indexOf(normalizeText(t)) >= 0)
     );
   }
   function toggleLiveFavorite(e) {
@@ -1407,26 +1407,26 @@
         return !1;
       }
     }
-    if (Ht) return !!n(e, "#dialog-addons");
-    if (X.episodeBrowserOpen) return !!n(e, "#player-episodes");
-    if (X.categoryPickerOpen) return !!n(e, "#player-categories");
-    if (catalogFilterDialog) return !!n(e, ".catalog-filter-dialog");
-    if (liveFavoritePrompt) return !!n(e, ".pc-favorite-confirm");
-    if (ji) return !!n(e, "#dialog-playsettings");
-    if (Ut) return !!n(e, "#dialog-update");
-    if (zi) return !!n(e, "#player-playsetting-view");
-    if (xa) return !!n(e, ".season-popup");
-    var a = n(e, ".home-page");
+    if (Ht) return !!closestMatch(e, "#dialog-addons");
+    if (X.episodeBrowserOpen) return !!closestMatch(e, "#player-episodes");
+    if (X.categoryPickerOpen) return !!closestMatch(e, "#player-categories");
+    if (catalogFilterDialog) return !!closestMatch(e, ".catalog-filter-dialog");
+    if (liveFavoritePrompt) return !!closestMatch(e, ".pc-favorite-confirm");
+    if (ji) return !!closestMatch(e, "#dialog-playsettings");
+    if (Ut) return !!closestMatch(e, "#dialog-update");
+    if (zi) return !!closestMatch(e, "#player-playsetting-view");
+    if (xa) return !!closestMatch(e, ".season-popup");
+    var a = closestMatch(e, ".home-page");
     if (a && !a.classList.contains("is-current")) return !1;
-    var i = n(e, ".settings-panel");
+    var i = closestMatch(e, ".settings-panel");
     if (i && !i.classList.contains("is-active")) return !1;
-    var r = n(e, ".search-hot");
+    var r = closestMatch(e, ".search-hot");
     if (r && r.classList.contains("is-hidden")) return !1;
-    var o = n(e, ".search-results");
+    var o = closestMatch(e, ".search-results");
     if (o && !o.classList.contains("is-active")) return !1;
-    var s = n(e, ".player-channels");
+    var s = closestMatch(e, ".player-channels");
     if (s && !s.classList.contains("is-active")) return !1;
-    var l = n(e, ".player-infobar");
+    var l = closestMatch(e, ".player-infobar");
     return !(l && !l.classList.contains("is-active"));
   }
   function it() {
@@ -1436,21 +1436,21 @@
       if (act && act.el) root = act.el;
     }
     if (!root) {
-      if (Ht) root = t("dialog-addons");
+      if (Ht) root = byId("dialog-addons");
       else if (catalogFilterDialog) root = catalogFilterDialog;
       else if (liveFavoritePrompt) root = liveFavoritePrompt;
-      else if (ji) root = t("dialog-playsettings");
-      else if (Ut) root = t("dialog-update");
-      else if (zi) root = t("player-playsetting-view");
+      else if (ji) root = byId("dialog-playsettings");
+      else if (Ut) root = byId("dialog-update");
+      else if (zi) root = byId("player-playsetting-view");
       else if (xa) root = xa;
-      else if (X.episodeBrowserOpen) root = t("player-episodes");
-      else if (X.categoryPickerOpen) root = t("player-categories");
+      else if (X.episodeBrowserOpen) root = byId("player-episodes");
+      else if (X.categoryPickerOpen) root = byId("player-categories");
     }
-    if ("detail" === X.screen && !root) root = t("screen-detail");
-    else if ("search" === X.screen && !root) root = t("screen-search");
-    else if ("section" === X.screen && !root) root = t("screen-section");
-    else if ("settings" === X.screen && !root) root = t("screen-settings");
-    else if ("player" === X.screen && !root) root = t("screen-player");
+    if ("detail" === X.screen && !root) root = byId("screen-detail");
+    else if ("search" === X.screen && !root) root = byId("screen-search");
+    else if ("section" === X.screen && !root) root = byId("screen-section");
+    else if ("settings" === X.screen && !root) root = byId("screen-settings");
+    else if ("player" === X.screen && !root) root = byId("screen-player");
     else if ("home" === X.screen && !root) {
       var curPage = document.querySelector(".home-page.is-current");
       var tList = [];
@@ -1572,16 +1572,16 @@
           e.classList.add("is-focused"),
           e._onFocus && e._onFocus(),
           Nn());
-        var i = t("home-tabs");
+        var i = byId("home-tabs");
         if (i && "home" === X.screen) {
-          var r = n(e, ".home-tabs");
+          var r = closestMatch(e, ".home-tabs");
           (i.classList.toggle("is-expanded", !!r),
             i.classList.toggle("is-collapsed", !r));
           var o = document.querySelector(".home-sidebar-bg");
           o &&
             (o.classList.toggle("is-on", !!r),
               o.classList.toggle("is-collapsed", !r));
-          var s = t("screen-home");
+          var s = byId("screen-home");
           s && s.classList.toggle("is-rail-open", !!r);
         }
         (a || nt(e), "player" !== X.screen && schedulePosterLoad());
@@ -1680,7 +1680,7 @@
         }
       }
       var screenId = X && X.screen ? "screen-" + X.screen : "";
-      var screenElem = screenId ? (t(screenId) || document.getElementById(screenId)) : null;
+      var screenElem = screenId ? (byId(screenId) || document.getElementById(screenId)) : null;
       if (typeof findFirstFocusable === "function" && screenElem) {
         var f = findFirstFocusable(screenElem);
         if (f) return f;
@@ -1899,8 +1899,8 @@
       }
       if (!X.focus._onMove || !X.focus._onMove(e)) {
         for (
-          var isHomePage = "home" === X.screen && n(X.focus, ".home-page"),
-          a = "home" === X.screen && n(X.focus, ".home-tabs"),
+          var isHomePage = "home" === X.screen && closestMatch(X.focus, ".home-page"),
+          a = "home" === X.screen && closestMatch(X.focus, ".home-tabs"),
           i = it(),
           r = X.focus.getBoundingClientRect(),
           o = r.left + r.width / 2,
@@ -1914,8 +1914,8 @@
           var p = i[c];
           if (
             p !== X.focus &&
-            (!isHomePage || !n(p, ".home-tabs")) &&
-            (!a || n(p, ".home-tabs"))
+            (!isHomePage || !closestMatch(p, ".home-tabs")) &&
+            (!a || closestMatch(p, ".home-tabs"))
           ) {
             var u,
               v,
@@ -1948,7 +1948,7 @@
             y < d && ((d = y), (l = p));
           }
         }
-        l ? setFocus(l) : ("left" === e || "up" === e) && t && Ue[X.tab] && setFocus(Ue[X.tab]);
+        l ? setFocus(l) : ("left" === e || "up" === e) && byId && Ue[X.tab] && setFocus(Ue[X.tab]);
       }
     } else {
       var b = it();
@@ -1961,7 +1961,7 @@
     }
     for (var a = document.querySelectorAll(".screen"), i = 0; i < a.length; i++)
       a[i].classList.remove("is-active");
-    var n = t("screen-" + e);
+    var n = byId("screen-" + e);
     if (
       (n && n.classList.add("is-active"),
         (X.screen = e),
@@ -1969,13 +1969,13 @@
         "player" !== e && X.categoryPickerOpen && ur(!0),
         "player" !== e && "detail" !== e)
     ) {
-      var detScreen = t("screen-detail");
+      var detScreen = byId("screen-detail");
       if (detScreen) {
         detScreen.style.backgroundImage = "none";
         detScreen.classList.remove("is-synopsis-open");
       }
       (ji && tr(), zi && On());
-      var r = t("screen-player");
+      var r = byId("screen-player");
       (r && (r.classList.remove("is-mini"), r.classList.remove("is-active")),
         zr(),
         Yi++,
@@ -2016,8 +2016,8 @@
                               (ui(), fi(), closeTelemetryHud());
                               var e = X.playerReturn;
                               if (e && "detail" === e.screen) {
-                                var a = t("screen-player"),
-                                  i = t("screen-detail");
+                                var a = byId("screen-player"),
+                                  i = byId("screen-detail");
                                 (a &&
                                   (a.classList.add("is-mini"),
                                     a.classList.add("is-active")),
@@ -2048,7 +2048,7 @@
                                   }
                               } else {
                                 zr();
-                                var s = t("screen-player");
+                                var s = byId("screen-player");
                                 (s &&
                                   (s.classList.remove("is-mini"),
                                     s.classList.remove("is-active")),
@@ -2072,13 +2072,13 @@
               if (sRet && "section" === sRet.screen) {
                 lt("section");
                 if (sRet.focus && at(sRet.focus)) setFocus(sRet.focus);
-                else if (t("screen-section")) setFocus(t("screen-section").querySelector(".focusable") || t("screen-section"));
+                else if (byId("screen-section")) setFocus(byId("screen-section").querySelector(".focusable") || byId("screen-section"));
                 return;
               }
               lt("home");
               var destTab = (typeof X.tab === "number" && X.tab >= 0) ? X.tab : 0;
               bt(destTab, !1);
-              var homeTarget = (Ue && Ue[destTab]) || (Ue && Ue[0]) || findFirstFocusable(t("screen-home"));
+              var homeTarget = (Ue && Ue[destTab]) || (Ue && Ue[0]) || findFirstFocusable(byId("screen-home"));
               if (homeTarget) setFocus(homeTarget);
               return;
             }
@@ -2093,7 +2093,7 @@
               if (inRight) {
                 var menuTarget = document.querySelector(".settings-item.is-selected") ||
                   (je && je[0]) ||
-                  (t("settings-menu") && t("settings-menu").querySelector(".focusable")) ||
+                  (byId("settings-menu") && byId("settings-menu").querySelector(".focusable")) ||
                   null;
                 if (menuTarget) {
                   setFocus(menuTarget);
@@ -2124,10 +2124,10 @@
               var a = de ? de.querySelector(".detail-season") : null;
               return void (a && setFocus(a));
             }
-            var i = t("screen-detail");
+            var i = byId("screen-detail");
             if (i && i.classList.contains("is-synopsis-open"))
               return void (function () {
-                var e = t("screen-detail");
+                var e = byId("screen-detail");
                 if (!e) return;
                 var a = !e.classList.contains("is-synopsis-open");
                 e.classList.toggle("is-synopsis-open", a);
@@ -2139,7 +2139,7 @@
               i.classList.remove("is-synopsis-open");
             }
             zr();
-            var n = t("screen-player");
+            var n = byId("screen-player");
             n &&
               (n.classList.remove("is-mini"), n.classList.remove("is-active"));
             var r = X.detailReturn;
@@ -2148,7 +2148,7 @@
               if (r.focus && at(r.focus)) {
                 setFocus(r.focus);
               } else {
-                var searchTarget = findFirstFocusable(he) || (t("search-suggestions") && findFirstFocusable(t("search-suggestions"))) || (Be && Be[0]) || me;
+                var searchTarget = findFirstFocusable(he) || (byId("search-suggestions") && findFirstFocusable(byId("search-suggestions"))) || (Be && Be[0]) || me;
                 if (searchTarget) setFocus(searchTarget);
               }
             } else if (r && "section" === r.screen) {
@@ -2520,7 +2520,7 @@
           if (38 === t)
             return (Fr(), void (e.preventDefault && e.preventDefault()));
         } else {
-          var m = X.focus && n(X.focus, ".player-channels");
+          var m = X.focus && closestMatch(X.focus, ".player-channels");
           if (X.channelsOpen || m) {
             var liveToolbar =
               X.focus &&
@@ -2638,7 +2638,7 @@
                 X.streamError &&
                 xe &&
                 xe.src &&
-                !n(X.focus, ".player-channels")
+                !closestMatch(X.focus, ".player-channels")
                 ? (Mr(), (X.streamError = ""), jr(""))
                 : "player" === X.screen && "vod" === X.playerMode
                   ? di()
@@ -2650,8 +2650,8 @@
   function vt() {
     (tt && (clearTimeout(tt), (tt = null)),
       et && (clearInterval(et), (et = null)));
-    var e = t("screen-welcome"),
-      a = t("screen-home");
+    var e = byId("screen-welcome"),
+      a = byId("screen-home");
     try {
       Ve || renderHomeScreen();
     } catch (e) {
@@ -2681,11 +2681,11 @@
       console.error("setFocus error:", e);
     }
     try {
-      var i = t("home-tabs");
+      var i = byId("home-tabs");
       i && (i.classList.add("is-expanded"), i.classList.remove("is-collapsed"));
       var n = document.querySelector(".home-sidebar-bg");
       n && (n.classList.add("is-on"), n.classList.remove("is-collapsed"));
-      var r = t("screen-home");
+      var r = byId("screen-home");
       r && r.classList.add("is-rail-open");
     } catch (e) { }
   }
@@ -2790,7 +2790,7 @@
   }
   var ft = [
     function (t) {
-      ((ie = e("div", "live-main")),
+      ((ie = createEl("div", "live-main")),
         ((Ot = document.createElement("video")).className =
           "live-preview-video"),
         (Ot.preload = "auto"),
@@ -2801,15 +2801,15 @@
         Ot.setAttribute("playsinline", ""),
         Ot.setAttribute("webkit-playsinline", ""),
         ie.appendChild(Ot),
-        ie.appendChild(e("div", "live-frame")),
-        ie.appendChild(e("div", "live-logo")),
-        (qt = e("div", "live-preview-status")),
+        ie.appendChild(createEl("div", "live-frame")),
+        ie.appendChild(createEl("div", "live-logo")),
+        (qt = createEl("div", "live-preview-status")),
         ie.appendChild(qt),
         t.appendChild(ie));
-      var a = e("div", "live-info");
-      (((ae = e("div", "live-channel")).style.right = "112.5px"),
+      var a = createEl("div", "live-info");
+      (((ae = createEl("div", "live-channel")).style.right = "112.5px"),
         a.appendChild(ae));
-      var i = e("div", "live-fullscreen focusable");
+      var i = createEl("div", "live-fullscreen focusable");
       ((i._activate = function () {
         Yr("live");
         ro();
@@ -2831,16 +2831,16 @@
         bindMagicActivate(i),
         a.appendChild(i),
         ie.appendChild(a));
-      var n = e("div", "live-arrow-up"),
-        r = e("div", "live-arrow-down");
+      var n = createEl("div", "live-arrow-up"),
+        r = createEl("div", "live-arrow-down");
       (t.appendChild(n),
         t.appendChild(r),
         (function () {
-          var a = e("div", "live-fast"),
-            i = e("button", "fast-btn f-srch focusable"),
-            r = e("button", "fast-btn f-fav focusable"),
-            o = e("button", "fast-btn f-all focusable"),
-            c = e("button", "fast-btn f-cat focusable");
+          var a = createEl("div", "live-fast"),
+            i = createEl("button", "fast-btn f-srch focusable"),
+            r = createEl("button", "fast-btn f-fav focusable"),
+            o = createEl("button", "fast-btn f-all focusable"),
+            c = createEl("button", "fast-btn f-cat focusable");
           (i.setAttribute("aria-label", "Buscar canal"),
             r.setAttribute("aria-label", "Canales favoritos"),
             o.setAttribute("aria-label", "Todos los canales"),
@@ -2945,11 +2945,11 @@
             a.appendChild(c),
             t.appendChild(a));
         })(),
-        (re = e("div", "live-list scrollable")),
+        (re = createEl("div", "live-list scrollable")),
         t.appendChild(re),
         renderLiveChannelRow(!1),
         loadLiveCategory(),
-        ((ne = e("div", "live-focus focusable"))._onMove = function (e) {
+        ((ne = createEl("div", "live-focus focusable"))._onMove = function (e) {
           if ("up" === e) {
             var a = document.querySelector(".live-fast .f-srch");
             return (a ? setFocus(a) : !0, !0);
@@ -3083,12 +3083,12 @@
             fallbackRow: "Más telenovelas y dramas",
           });
       } else {
-        var s = e(
+        var s = createEl(
           "div",
           "catalog-empty",
           "No se encontraron novelas en el catálogo actual."
         );
-        (i(s, 192, 170, 1500, 80), t.appendChild(s));
+        (placeAbsolute(s, 192, 170, 1500, 80), t.appendChild(s));
       }
     },
   ],
@@ -3114,44 +3114,44 @@
   }
   function renderHomeScreen() {
     ((Ve = !0),
-      (ee = t("home-pages")),
-      (te = t("home-notify")),
-      a(ee),
+      (ee = byId("home-pages")),
+      (te = byId("home-notify")),
+      removeAllChildren(ee),
       (He = []),
       (ht = {}));
     for (var i = 0; i < ft.length; i++) {
-      var n = e("div", "home-page scrollable");
+      var n = createEl("div", "home-page scrollable");
       (0 === i && n.classList.add("is-current"), ee.appendChild(n), He.push(n));
     }
     (mt(z[X.tab] && z[X.tab].page >= 0 ? z[X.tab].page : 0),
       (function () {
-        var i = t("home-tabs");
-        (a(i),
+        var i = byId("home-tabs");
+        (removeAllChildren(i),
           i.classList.add("scrollable"),
           i.classList.add("is-expanded"),
           (Ue = []));
-        var railBrand = e("div", "tabs-brand"),
-          railMark = e("div", "tabs-mark"),
-          markImg = e("img", "tabs-mark-img"),
-          railText = e("div", "tabs-brand-text");
+        var railBrand = createEl("div", "tabs-brand"),
+          railMark = createEl("div", "tabs-mark"),
+          markImg = createEl("img", "tabs-mark-img"),
+          railText = createEl("div", "tabs-brand-text");
         markImg.src = "images/logo-mark.png";
         markImg.alt = "Xuper";
         railMark.appendChild(markImg);
-        (railText.appendChild(e("div", "tabs-word", "XUPER PORT WEBOS")),
-          railText.appendChild(e("div", "tabs-tag", "Por CristiancoDEV")),
+        (railText.appendChild(createEl("div", "tabs-word", "XUPER PORT WEBOS")),
+          railText.appendChild(createEl("div", "tabs-tag", "Por CristiancoDEV")),
           railBrand.appendChild(railMark),
           railBrand.appendChild(railText),
           i.appendChild(railBrand));
         for (var n = 0; n < z.length; n++) {
-          (0 === n && i.appendChild(e("div", "tabs-group", "En vivo")),
-            1 === n && i.appendChild(e("div", "tabs-group", "Explorar")),
+          (0 === n && i.appendChild(createEl("div", "tabs-group", "En vivo")),
+            1 === n && i.appendChild(createEl("div", "tabs-group", "Explorar")),
             "history" === z[n].action &&
-            i.appendChild(e("div", "tabs-group", "Tu biblioteca")));
-          var r = e("div", "tab-item focusable");
-          r.appendChild(e("div", "tab-pill"));
-          var o = e("div", "tab-icon");
+            i.appendChild(createEl("div", "tabs-group", "Tu biblioteca")));
+          var r = createEl("div", "tab-item focusable");
+          r.appendChild(createEl("div", "tab-pill"));
+          var o = createEl("div", "tab-icon");
           ((o.innerHTML = B[z[n].icon] || ""), r.appendChild(o));
-          var s = e("div", "tab-title", z[n].label);
+          var s = createEl("div", "tab-title", z[n].label);
           (r.appendChild(s),
             (r._tab = n),
             (r._activate = (function (e) {
@@ -3218,7 +3218,7 @@
         }
       })(),
       (function () {
-        a(te);
+        removeAllChildren(te);
         for (
           var t = [
             {
@@ -3245,11 +3245,11 @@
           i++
         ) {
           var n = t[i],
-            r = e(
+            r = createEl(
               "div",
               "notify-item focusable " + n.cls + (n.small ? " is-small" : "")
             ),
-            o = e("div", "n-normal");
+            o = createEl("div", "n-normal");
           ((o.innerHTML = n.svg || ""),
             n.label && r.setAttribute("aria-label", n.label),
             r.appendChild(o),
@@ -3300,13 +3300,13 @@
             })(i)),
             te.appendChild(r));
         }
-        var s = e("div", "notify-divider");
+        var s = createEl("div", "notify-divider");
         te.appendChild(s);
-        var l = e("div", "notify-wifi");
+        var l = createEl("div", "notify-wifi");
         ((l.innerHTML =
           '<svg viewBox="0 0 30 22"><path d="M15 19.5a2.1 2.1 0 1 1 0-4.2 2.1 2.1 0 0 1 0 4.2z" fill="currentColor"/><path d="M8.4 12.2a9.6 9.6 0 0 1 13.2 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M4.2 7.6a15.6 15.6 0 0 1 21.6 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>'),
           te.appendChild(l));
-        var d = e("div", "notify-time");
+        var d = createEl("div", "notify-time");
         d.id = "notify-time";
         te.appendChild(d);
         yt();
@@ -3315,14 +3315,14 @@
       })());
   }
   function yt() {
-    var e = t("notify-time");
+    var e = byId("notify-time");
     if (e) {
       var a = new Date(),
         i = a.getHours(),
         n = i >= 12 ? "PM" : "AM";
       0 === (i %= 12) && (i = 12);
       var o = a.getMinutes();
-      e.textContent = i + ":" + r(o) + " " + n;
+      e.textContent = i + ":" + pad2(o) + " " + n;
     }
   }
   window.switchTab = bt;
@@ -3390,11 +3390,11 @@
         if ("home" === X.screen) {
           root = document.querySelector(".home-page.is-current");
         } else if ("detail" === X.screen) {
-          root = t("screen-detail");
+          root = byId("screen-detail");
         } else if ("search" === X.screen) {
-          root = t("screen-search");
+          root = byId("screen-search");
         } else if ("section" === X.screen) {
-          root = t("screen-section");
+          root = byId("screen-section");
         } else {
           root = document.querySelector(".screen.is-active") || document;
         }
@@ -3465,7 +3465,7 @@
         var e = root.querySelectorAll("img[data-poster-src]");
         for (var i = 0; i < e.length; i++) {
           var r = e[i];
-          var o = n(r, ".poster, .bento");
+          var o = closestMatch(r, ".poster, .bento");
           var isBento = o && o.classList.contains("bento");
           var s =
             o && o.getBoundingClientRect
@@ -3492,32 +3492,32 @@
   }
   function St(e) {
     if ("home" === X.screen) {
-      var t = n(e, ".home-page");
+      var t = closestMatch(e, ".home-page");
       return !(!t || !t.classList.contains("is-current"));
     }
     if ("search" === X.screen) {
-      var a = n(e, ".search-results"),
-        i = n(e, ".search-hot");
+      var a = closestMatch(e, ".search-results"),
+        i = closestMatch(e, ".search-hot");
       return !!(
         (a && a.classList.contains("is-active")) ||
         (i && !i.classList.contains("is-hidden"))
       );
     }
     if ("detail" === X.screen) {
-      var r = n(e, "#screen-detail");
+      var r = closestMatch(e, "#screen-detail");
       return !(!r || !r.classList.contains("is-active"));
     }
     return !1;
   }
   function xt(t, a, n, r, o, s) {
-    var l = e(
+    var l = createEl(
       "div",
       "poster focusable" +
       ((s = s || {}).gold ? " gold" : "") +
       (s.type3 ? " type3" : "")
     );
-    if ((i(l, a, n, r, o), t.poster)) {
-      var d = e("img", "p-img");
+    if ((placeAbsolute(l, a, n, r, o), t.poster)) {
+      var d = createEl("img", "p-img");
       (d.setAttribute("data-poster-src", t.poster),
         (d.onerror = function () {
           if (
@@ -3536,8 +3536,8 @@
     }
     return (
       s.gold ||
-      (l.appendChild(e("div", "p-shade")),
-        l.appendChild(e("div", "p-title", t.title))),
+      (l.appendChild(createEl("div", "p-shade")),
+        l.appendChild(createEl("div", "p-title", t.title))),
       (l._item = t),
       (l._activate = function () {
         ba(t);
@@ -4295,7 +4295,7 @@
         previousFocus.classList &&
         previousFocus.classList.contains("channel-star");
     if (re)
-      if ((a(re), (Fe = []), (homeRows = {}), F.length)) {
+      if ((removeAllChildren(re), (Fe = []), (homeRows = {}), F.length)) {
         var visible = visibleLiveIndexes();
         if (t)
           visible = visible.filter(function (e) {
@@ -4305,18 +4305,18 @@
           rows = liveRowsWindow(visible, null == currentChannel ? X.channel : currentChannel);
         for (var rowIndex = 0; rowIndex < rows.length; rowIndex++) {
           var i = rows[rowIndex];
-          var n = e("div", "live-row focusable");
+          var n = createEl("div", "live-row focusable");
           n._channel = i;
-          var r = e("div", "row-icon");
+          var r = createEl("div", "row-icon");
           F[i].logo &&
             ((r.style.backgroundImage = "url(" + F[i].logo + ")"),
               (r.style.backgroundSize = "contain"),
               (r.style.backgroundRepeat = "no-repeat"),
               (r.style.backgroundPosition = "center"));
-          var o = e("div", "row-play"),
-            s = e("div", "row-name", F[i].name),
+          var o = createEl("div", "row-play"),
+            s = createEl("div", "row-name", F[i].name),
             isFav = !!(X.liveFavorites[liveChannelKey(F[i])] || F[i].fav),
-            star = e(
+            star = createEl(
               "button",
               "channel-star focusable" + (isFav ? " is-favorite" : "")
             );
@@ -4428,7 +4428,7 @@
         }
       } else
         re.appendChild(
-          e(
+          createEl(
             "div",
             "live-list-status",
             Et ? "No se encontraron canales" : "Cargando canales…"
@@ -4491,10 +4491,10 @@
     }
   }
   function Yt(a) {
-    var i = t("app-toast");
+    var i = byId("app-toast");
     i ||
-      (((i = e("div", "app-toast")).id = "app-toast"),
-        (t("app") || document.body).appendChild(i));
+      (((i = createEl("div", "app-toast")).id = "app-toast"),
+        (byId("app") || document.body).appendChild(i));
     ((i.textContent = a),
       (i.style.display = "block"),
       (i.style.opacity = "1"),
@@ -4508,28 +4508,28 @@
   }
   function openUpdateDialog(i) {
     ((Ft = i || {}), (Ut = !0));
-    var n = t("dialog-update");
+    var n = byId("dialog-update");
     if (n) {
       n.classList.add("is-active");
-      var r = t("du-title");
+      var r = byId("du-title");
       r && (r.textContent = "Nueva versión disponible");
-      var o = t("du-version-subtitle");
+      var o = byId("du-version-subtitle");
       o &&
         (o.textContent =
           "Versión " +
           (i.latestVersion || "") +
           (i.releaseDate ? " (" + i.releaseDate + ")" : ""));
-      var s = t("du-changelog");
+      var s = byId("du-changelog");
       s &&
         (s.textContent =
           i.changelog ||
           "Mejoras de estabilidad, rendimiento y optimizaciones de catálogo.");
-      var l = t("du-status-container");
+      var l = byId("du-status-container");
       l && (l.style.display = "none");
-      var d = t("du-footer-actions");
+      var d = byId("du-footer-actions");
       if (d) {
-        a(d);
-        var c = e(
+        removeAllChildren(d);
+        var c = createEl(
           "button",
           "du-btn du-btn-primary focusable",
           "Actualizar ahora"
@@ -4539,13 +4539,13 @@
             !(function () {
               if (!Ft || !Ft.ipkUrl) return;
               zt = !0;
-              var i = t("du-status-container");
+              var i = byId("du-status-container");
               i && (i.style.display = "block");
-              var n = t("du-progress-bar"),
-                r = t("du-status-text"),
-                o = t("du-status-subtext"),
-                s = t("du-footer-actions");
-              s && a(s);
+              var n = byId("du-progress-bar"),
+                r = byId("du-status-text"),
+                o = byId("du-status-subtext"),
+                s = byId("du-footer-actions");
+              s && removeAllChildren(s);
               n && (n.style.width = "4%");
               r && (r.textContent = "Iniciando descarga...");
               o &&
@@ -4598,8 +4598,8 @@
                             "Comprueba tu red o intenta más tarde."),
                           s)
                       ) {
-                        a(s);
-                        var l = e(
+                        removeAllChildren(s);
+                        var l = createEl(
                           "button",
                           "du-btn du-btn-secondary focusable",
                           "Cerrar"
@@ -4623,7 +4623,7 @@
                   (zt = !1),
                   s)
               ) {
-                var d = e(
+                var d = createEl(
                   "button",
                   "du-btn du-btn-secondary focusable",
                   "Cerrar"
@@ -4636,7 +4636,7 @@
               }
             })();
           }));
-        var u = e("button", "du-btn du-btn-secondary focusable", "Más tarde");
+        var u = createEl("button", "du-btn du-btn-secondary focusable", "Más tarde");
         ((u.id = "du-btn-later"),
           (u._activate = function () {
             ((Bt = !0), ea());
@@ -4679,7 +4679,7 @@
       return;
     }
     Ut = !1;
-    var e = t("dialog-update");
+    var e = byId("dialog-update");
     if (e) e.classList.remove("is-active");
     if (!skipFocus) {
       if ("home" === X.screen) {
@@ -4817,12 +4817,12 @@
   }
   function sa(returnFocus) {
     Ht = !0;
-    var e = t("dialog-addons");
+    var e = byId("dialog-addons");
     if (e) {
       var ret = returnFocus || X.focus;
       e.classList.add("is-active");
       renderAddonPresets();
-      var a = t("da-btn-write-url") || t("da-custom-url") || e.querySelector(".focusable");
+      var a = byId("da-btn-write-url") || byId("da-custom-url") || e.querySelector(".focusable");
       if (window.DialogManager) {
         window.DialogManager.open("addons", e, {
           returnFocus: ret,
@@ -4851,7 +4851,7 @@
       return;
     }
     Ht = !1;
-    var e = t("dialog-addons");
+    var e = byId("dialog-addons");
     if (e && (e.classList.remove("is-active"), X.channelsOpen)) {
       var a = Se ? Se.querySelector("#pc-btn-addons") : null;
       setFocus(a || Ce);
@@ -4864,12 +4864,12 @@
   var urlKbDialogEl = null;
 
   function updateUrlKbDisplay() {
-    var inp = t("url-kb-input");
+    var inp = byId("url-kb-input");
     if (inp) inp.value = urlKbCurrentText;
   }
 
   function initUrlKeyboard() {
-    var grid = t("url-kb-grid");
+    var grid = byId("url-kb-grid");
     if (!grid || grid.children.length > 0) return;
 
     var rows = [
@@ -4890,7 +4890,7 @@
     ];
 
     for (var r = 0; r < rows.length; r++) {
-      var rowEl = e("div", "url-kb-row");
+      var rowEl = createEl("div", "url-kb-row");
       for (var c = 0; c < rows[r].length; c++) {
         var item = rows[r][c];
         var isObj = typeof item === "object";
@@ -4898,7 +4898,7 @@
         var val = isObj ? item.val : item;
         var act = isObj ? item.action : null;
         var extraCls = isObj && item.cls ? (" " + item.cls) : "";
-        var keyBtn = e("button", "url-kb-key focusable" + extraCls, label);
+        var keyBtn = createEl("button", "url-kb-key focusable" + extraCls, label);
 
         (function (keyVal, keyAction) {
           keyBtn._activate = function () {
@@ -4922,7 +4922,7 @@
       grid.appendChild(rowEl);
     }
 
-    var btnBack = t("url-kb-btn-backspace");
+    var btnBack = byId("url-kb-btn-backspace");
     if (btnBack) {
       btnBack._activate = function () {
         if (urlKbCurrentText.length > 0) {
@@ -4932,7 +4932,7 @@
       };
       bindMagicActivate(btnBack);
     }
-    var btnClear = t("url-kb-btn-clear");
+    var btnClear = byId("url-kb-btn-clear");
     if (btnClear) {
       btnClear._activate = function () {
         urlKbCurrentText = "";
@@ -4940,14 +4940,14 @@
       };
       bindMagicActivate(btnClear);
     }
-    var btnSave = t("url-kb-btn-save");
+    var btnSave = byId("url-kb-btn-save");
     if (btnSave) {
       btnSave._activate = function () {
         closeUrlKeyboard(!0);
       };
       bindMagicActivate(btnSave);
     }
-    var btnCancel = t("url-kb-btn-cancel");
+    var btnCancel = byId("url-kb-btn-cancel");
     if (btnCancel) {
       btnCancel._activate = function () {
         closeUrlKeyboard(!1);
@@ -4959,7 +4959,7 @@
   function openUrlKeyboard(initialValue, onSaveCallback) {
     urlKbCurrentText = initialValue || "";
     urlKbCallback = onSaveCallback;
-    urlKbDialogEl = t("dialog-url-kb");
+    urlKbDialogEl = byId("dialog-url-kb");
     initUrlKeyboard();
     updateUrlKbDisplay();
     if (urlKbDialogEl) {
@@ -4987,7 +4987,7 @@
       window.DialogManager.close("urlKeyboard");
     } else if (urlKbDialogEl) {
       urlKbDialogEl.classList.remove("is-active");
-      var daInp = t("da-custom-url");
+      var daInp = byId("da-custom-url");
       if (daInp) setFocus(daInp);
     }
   }
@@ -4996,8 +4996,8 @@
 
   function renderAddonPresets() {
     for (
-      var i = t("da-presets-list"),
-      n = t("da-installed-list"),
+      var i = byId("da-presets-list"),
+      n = byId("da-installed-list"),
       r = _t(),
       o = {},
       s = 0;
@@ -5006,16 +5006,16 @@
     )
       o[r[s].id || r[s].url] = !0;
     if (i) {
-      a(i);
+      removeAllChildren(i);
       for (var l = 0; l < Tt.length; l++)
         (function (t) {
-          var a = e("div", "da-preset-item"),
-            n = e("div", "da-preset-info");
-          (n.appendChild(e("div", "da-preset-name", t.name)),
-            n.appendChild(e("div", "da-preset-desc", t.desc)),
+          var a = createEl("div", "da-preset-item"),
+            n = createEl("div", "da-preset-info");
+          (n.appendChild(createEl("div", "da-preset-name", t.name)),
+            n.appendChild(createEl("div", "da-preset-desc", t.desc)),
             a.appendChild(n));
           var r = !!o[t.id || t.url],
-            s = e(
+            s = createEl(
               "button",
               "da-preset-btn focusable" + (r ? " is-installed" : ""),
               r ? "Instalado" : "+ Instalar"
@@ -5038,20 +5038,20 @@
         })(Tt[l]);
     }
     if (n)
-      if ((a(n), r.length))
+      if ((removeAllChildren(n), r.length))
         for (var d = 0; d < r.length; d++)
           (function (t, a) {
-            var i = e("div", "da-installed-item"),
-              o = e("div", "da-installed-info"),
-              s = e("div", "da-preset-name", t.name),
-              l = e(
+            var i = createEl("div", "da-installed-item"),
+              o = createEl("div", "da-installed-info"),
+              s = createEl("div", "da-preset-name", t.name),
+              l = createEl(
                 "div",
                 "da-preset-desc",
                 (t.count ? t.count + " canales • " : "") +
                 (t.url || "lista curada")
               );
             (o.appendChild(s), o.appendChild(l), i.appendChild(o));
-            var d = e("button", "da-del-btn focusable", "Eliminar");
+            var d = createEl("button", "da-del-btn focusable", "Eliminar");
             ((d._activate = function () {
               (r.splice(a, 1), kt(r), renderAddonPresets(), Mt && Mt.isAddon && $t());
             }),
@@ -5061,18 +5061,18 @@
           })(r[d], d);
       else
         n.appendChild(
-          e(
+          createEl(
             "div",
             "da-installed-empty",
             "No hay addons personalizados instalados aún. Instala una lista recomendada arriba o escribe una URL."
           )
         );
-    var inpUrl = t("da-custom-url");
-    var btnWrite = t("da-btn-write-url");
+    var inpUrl = byId("da-custom-url");
+    var btnWrite = byId("da-btn-write-url");
     var handleOpenKb = function () {
       openUrlKeyboard(inpUrl ? (inpUrl.value || "") : "", function (newUrl) {
         if (inpUrl) inpUrl.value = newUrl;
-        var btnAdd = t("da-btn-add-custom");
+        var btnAdd = byId("da-btn-add-custom");
         if (btnAdd) setFocus(btnAdd);
       });
     };
@@ -5084,10 +5084,10 @@
       btnWrite._activate = handleOpenKb;
       bindMagicActivate(btnWrite);
     }
-    var c = t("da-btn-add-custom");
+    var c = byId("da-btn-add-custom");
     if (c) {
       c._activate = function () {
-        var e = t("da-custom-url"),
+        var e = byId("da-custom-url"),
           a = e ? (e.value || "").trim() : "";
         a && /^https?:\/\//i.test(a)
           ? ((c.textContent = "Descargando…"),
@@ -5108,7 +5108,7 @@
       };
       bindMagicActivate(c);
     }
-    var p = t("da-btn-exit");
+    var p = byId("da-btn-exit");
     if (p) {
       p._activate = function () {
         la();
@@ -5185,11 +5185,11 @@
   };
   function ua(t, a, n, r, o, s) {
     s = s || {};
-    var l = e("div", "bento focusable");
-    i(l, a, n, r, o);
+    var l = createEl("div", "bento focusable");
+    placeAbsolute(l, a, n, r, o);
     var d = t ? t.landscape || t.poster : "";
     if (d) {
-      var c = e("img", "bento-img");
+      var c = createEl("img", "bento-img");
       (c.setAttribute("data-poster-src", d),
         (c.onerror = function () {
           if (
@@ -5207,9 +5207,9 @@
         l.appendChild(c));
     }
     return (
-      s.shade && l.appendChild(e("div", "bento-shade")),
-      s.title && t && l.appendChild(e("div", "bento-title", t.title)),
-      s.badge && l.appendChild(e("div", "bento-badge", s.badge)),
+      s.shade && l.appendChild(createEl("div", "bento-shade")),
+      s.title && t && l.appendChild(createEl("div", "bento-title", t.title)),
+      s.badge && l.appendChild(createEl("div", "bento-badge", s.badge)),
       (l._item = t),
       t &&
       (l._activate = function () {
@@ -5220,10 +5220,10 @@
     );
   }
   function va(t, a, n, r) {
-    var o = e("div", "bento-dots");
-    i(o, t, a, 21 + 40 * Math.max(0, n - 1), 11);
+    var o = createEl("div", "bento-dots");
+    placeAbsolute(o, t, a, 21 + 40 * Math.max(0, n - 1), 11);
     for (var s = 0; s < n; s++)
-      o.appendChild(e("span", "bento-dot" + (s === r ? " is-active" : "")));
+      o.appendChild(createEl("span", "bento-dot" + (s === r ? " is-active" : "")));
     return o;
   }
   function fa(e, t, a) {
@@ -5291,9 +5291,9 @@
   }
   function isNovelaItem(item) {
     if (!item) return false;
-    var row = o(item.row || "");
-    var title = o(item.title || item.alias || "");
-    var g = o((item.genres || []).join(" "));
+    var row = normalizeText(item.row || "");
+    var title = normalizeText(item.title || item.alias || "");
+    var g = normalizeText((item.genres || []).join(" "));
     return (
       row.indexOf("novela") !== -1 ||
       row.indexOf("telenovela") !== -1 ||
@@ -5316,16 +5316,16 @@
   var ANIME_TITLE_REGEX = /naruto|boruto|shippuden|dragon ball|one piece|bleach|shingeki|titan|kimetsu|demon slayer|jujutsu|kaisen|hero academia|boku no hero|death note|hunter x hunter|chainsaw|evangelion|evangerion|spy x family|solo leveling|frieren|dan da dan|dandadan|kaiju|pokemon|digimon|sailor moon|inuyasha|haikyuu|sword art|slime|doraemon|saint seiya|seinto seiya|caballeros del zodiaco|yu-gi-oh|fullmetal|kaguya|fairy tail|black clover|tokyo ghoul|tokyo revengers|re:zero|dr. stone|vinland|helluva|hasbin|gurren|kusuriya|kuroshitsuji|ao no hako|tensei|sasaki|hyouken|hotel inhumans|tsuihou|link click|overgeared|youjo senk|smiling friends|dinosaucers|jayce|centurions|gen: lock|shin seiki/i;
   function isAnimeItem(item) {
     if (!item) return false;
-    var title = o(item.title || item.alias || "");
+    var title = normalizeText(item.title || item.alias || "");
     if (
       title.indexOf("sirenita") !== -1 ||
       title.indexOf("spider-man") !== -1 ||
       title.indexOf("tadeo") !== -1
     )
       return false;
-    var cat = o(item.category || "");
-    var row = o(item.row || "");
-    var g = o((item.genres || []).join(" "));
+    var cat = normalizeText(item.category || "");
+    var row = normalizeText(item.row || "");
+    var g = normalizeText((item.genres || []).join(" "));
     if (
       cat.indexOf("anime") !== -1 ||
       row.indexOf("anime") !== -1 ||
@@ -5340,10 +5340,10 @@
   function isKidsItem(item) {
     if (!item) return false;
     if (isAnimeItem(item)) return false;
-    var cat = o(item.category || "");
-    var row = o(item.row || "");
-    var g = o((item.genres || []).join(" "));
-    var title = o(item.title || item.alias || "");
+    var cat = normalizeText(item.category || "");
+    var row = normalizeText(item.row || "");
+    var g = normalizeText((item.genres || []).join(" "));
+    var title = normalizeText(item.title || item.alias || "");
     if (
       cat.indexOf("infantil") !== -1 ||
       row.indexOf("kids") !== -1 ||
@@ -5362,11 +5362,11 @@
   }
   function isPureSeriesItem(item) {
     if (!item) return false;
-    var cat = o(item.category || "");
-    var kind = o(item.kind || "");
-    var type = o(item.type || "");
-    var row = o(item.row || "");
-    var title = o(item.title || item.alias || "");
+    var cat = normalizeText(item.category || "");
+    var kind = normalizeText(item.kind || "");
+    var type = normalizeText(item.type || "");
+    var row = normalizeText(item.row || "");
+    var title = normalizeText(item.title || item.alias || "");
     var isEpisodic =
       cat.indexOf("serie") !== -1 ||
       kind === "serie" ||
@@ -5384,7 +5384,7 @@
       row.indexOf("paramount") !== -1;
     if (!isPlatformSeries) {
       if (isKidsItem(item)) return false;
-      var g = o((item.genres || []).join(" "));
+      var g = normalizeText((item.genres || []).join(" "));
       if (g.indexOf("animation") !== -1 || g.indexOf("cartoon") !== -1) return false;
     } else {
       if (/bebefinn|cocomelon|dbillions|cancion|nursery/i.test(title)) return false;
@@ -5396,7 +5396,7 @@
       a = [],
       seen = {};
     if (!e) return l;
-    var target = o(e);
+    var target = normalizeText(e);
     if ("serie" === target || "series" === target) {
       for (t = 0; t < l.length; t++) {
         if (l[t] && l[t].id && !seen[l[t].id] && isPureSeriesItem(l[t])) {
@@ -5436,9 +5436,9 @@
     if ("pelicula" === target || "peliculas" === target || "movie" === target) {
       for (t = 0; t < l.length; t++) {
         if (l[t] && l[t].id && !seen[l[t].id]) {
-          var c = o(l[t].category || "");
-          var k = o(l[t].kind || "");
-          var typ = o(l[t].type || "");
+          var c = normalizeText(l[t].category || "");
+          var k = normalizeText(l[t].kind || "");
+          var typ = normalizeText(l[t].type || "");
           if (
             (c.indexOf("pelicula") !== -1 || k === "pelicula" || typ === "movie") &&
             !isNovelaItem(l[t])
@@ -5455,8 +5455,8 @@
         l[t] &&
         l[t].id &&
         !seen[l[t].id] &&
-        (-1 !== o(l[t].category || "").split(",").indexOf(target) ||
-          (l[t].kind && -1 !== o(l[t].kind).indexOf(target)))
+        (-1 !== normalizeText(l[t].category || "").split(",").indexOf(target) ||
+          (l[t].kind && -1 !== normalizeText(l[t].kind).indexOf(target)))
       ) {
         seen[l[t].id] = !0;
         a.push(l[t]);
@@ -5473,12 +5473,12 @@
   function buildCatalogRail(t, a, n, r, sectionInfo, sectionContext, categoryKey) {
     if (!a || !a.length) return n;
     var o = n || 772,
-      s = e("div", "kids-subtitle", r || "Catálogo");
-    (i(s, 48, o, 1824, 40), t.appendChild(s), (o += 54));
-    var l = e("div", "catalog-rail scrollable"),
+      s = createEl("div", "kids-subtitle", r || "Catálogo");
+    (placeAbsolute(s, 48, o, 1824, 40), t.appendChild(s), (o += 54));
+    var l = createEl("div", "catalog-rail scrollable"),
       d,
       c;
-    i(l, 48, o, 1824, 380);
+    placeAbsolute(l, 48, o, 1824, 380);
     t.appendChild(l);
     l.style.width = "1824px";
     l.style.height = "380px";
@@ -5555,12 +5555,12 @@
       l.appendChild(poster);
     }
     if (hasMore) {
-      var moreCard = e("div", "poster gold focusable see-more");
-      (i(moreCard, 264 * d, 0, 244, 360),
-        moreCard.appendChild(e("div", "see-more-dots", "···")),
-        moreCard.appendChild(e("div", "see-more-label", "Ver más")),
+      var moreCard = createEl("div", "poster gold focusable see-more");
+      (placeAbsolute(moreCard, 264 * d, 0, 244, 360),
+        moreCard.appendChild(createEl("div", "see-more-dots", "···")),
+        moreCard.appendChild(createEl("div", "see-more-label", "Ver más")),
         moreCard.appendChild(
-          e(
+          createEl(
             "div",
             "see-more-count",
             sectionInfo && sectionInfo.query ? "Explorar catálogo" : a.length + " títulos"
@@ -5592,13 +5592,13 @@
     }
     if (!valid.length) return startY;
     var o = startY || 772,
-      s = e("div", "kids-subtitle", "Continuar viendo");
-    i(s, 48, o, 1824, 40);
+      s = createEl("div", "kids-subtitle", "Continuar viendo");
+    placeAbsolute(s, 48, o, 1824, 40);
     t.appendChild(s);
     o += 54;
 
-    var l = e("div", "catalog-rail scrollable");
-    i(l, 48, o, 1824, 380);
+    var l = createEl("div", "catalog-rail scrollable");
+    placeAbsolute(l, 48, o, 1824, 380);
     t.appendChild(l);
     l.style.width = "1824px";
     l.style.height = "380px";
@@ -5661,10 +5661,10 @@
 
     for (var c = 0; c < valid.length; c++) {
       var itemData = valid[c];
-      var card = e("div", "poster gold focusable history-rail-card");
-      i(card, 264 * c, 0, 244, 360);
+      var card = createEl("div", "poster gold focusable history-rail-card");
+      placeAbsolute(card, 264 * c, 0, 244, 360);
       if (itemData.poster) {
-        var img = e("img", "p-img");
+        var img = createEl("img", "p-img");
         img.setAttribute("data-poster-src", itemData.poster);
         img.onerror = function () {
           if (this.src && 0 === this.src.indexOf("https://") && !this._httpFallback) {
@@ -5676,9 +5676,9 @@
         };
         card.appendChild(img);
       }
-      card.appendChild(e("div", "p-shade"));
+      card.appendChild(createEl("div", "p-shade"));
       var titleText = itemData.title || "Contenido";
-      card.appendChild(e("div", "p-title", titleText));
+      card.appendChild(createEl("div", "p-title", titleText));
 
       var pct = 0;
       if (itemData.duration > 0 && itemData.position > 0) {
@@ -5686,8 +5686,8 @@
       } else if (itemData.position > 0) {
         pct = 25;
       }
-      var progWrap = e("div", "history-rail-bar");
-      var progFill = e("div", "history-rail-fill");
+      var progWrap = createEl("div", "history-rail-bar");
+      var progFill = createEl("div", "history-rail-fill");
       progFill.style.width = (pct || 10) + "%";
       progWrap.appendChild(progFill);
       card.appendChild(progWrap);
@@ -5696,7 +5696,7 @@
         ? (itemData.episodeNumber ? "Ep. " + itemData.episodeNumber : "Episodio") + (itemData.position ? " · " + ai(itemData.position) : "")
         : (itemData.position ? ai(itemData.position) : "");
       if (labelText) {
-        card.appendChild(e("div", "history-rail-badge", labelText));
+        card.appendChild(createEl("div", "history-rail-badge", labelText));
       }
 
       (function (savedItem) {
@@ -5715,11 +5715,11 @@
     }
 
     if (hasMore) {
-      var moreCard = e("div", "poster gold focusable see-more");
-      i(moreCard, 264 * valid.length, 0, 244, 360);
-      moreCard.appendChild(e("div", "see-more-dots", "···"));
-      moreCard.appendChild(e("div", "see-more-label", "Ver historial"));
-      moreCard.appendChild(e("div", "see-more-count", historyList.length + " títulos"));
+      var moreCard = createEl("div", "poster gold focusable see-more");
+      placeAbsolute(moreCard, 264 * valid.length, 0, 244, 360);
+      moreCard.appendChild(createEl("div", "see-more-dots", "···"));
+      moreCard.appendChild(createEl("div", "see-more-label", "Ver historial"));
+      moreCard.appendChild(createEl("div", "see-more-count", historyList.length + " títulos"));
       moreCard._activate = function () {
         We = "history";
         Ha();
@@ -5819,9 +5819,9 @@
       closeTelemetryHud();
       return;
     }
-    var playerScreen = t("screen-player");
+    var playerScreen = byId("screen-player");
     if (!playerScreen) return;
-    telemetryHudEl = e("div", "telemetry-hud");
+    telemetryHudEl = createEl("div", "telemetry-hud");
     playerScreen.appendChild(telemetryHudEl);
     updateTelemetryHudData();
     telemetryHudTimer = setInterval(updateTelemetryHudData, 800);
@@ -5830,7 +5830,7 @@
     sectionCatalogLoading = {},
     sectionRequestId = 0;
   function sectionInfoFor(title, source) {
-    var text = o(String(source || "") + " " + String(title || "")),
+    var text = normalizeText(String(source || "") + " " + String(title || "")),
       hit = /disney|netflix|hbo|prime|apple|paramount|hulu/.exec(text),
       year = /\b20[0-9][0-9]\b/.exec(text),
       scope = /serie|series/.test(text)
@@ -5851,8 +5851,8 @@
         for (var i = 0; list && i < list.length; i++) {
           var item = list[i];
           if (!item || !item.id || seen[item.id]) continue;
-          if ("series" === scope && !x(item)) continue;
-          if ("movies" === scope && x(item)) continue;
+          if ("series" === scope && !isMovieItem(item)) continue;
+          if ("movies" === scope && isMovieItem(item)) continue;
           seen[item.id] = !0;
           out.push(item);
         }
@@ -5896,7 +5896,7 @@
     currentSectionPage = 0;
 
   function openCatalogSection(title, items, info, context, categoryKey) {
-    var scr = t("screen-section");
+    var scr = byId("screen-section");
     if (!scr) return;
     X.sectionReturn = X.focus;
     if (!context || !context.categories || !context.categories.length) {
@@ -5937,7 +5937,7 @@
   }
 
   function renderCatalogExplorer() {
-    var scr = t("screen-section");
+    var scr = byId("screen-section");
     if (!scr) return;
     var ctx = currentSectionContext;
     if (!ctx) return;
@@ -5958,24 +5958,24 @@
     scr.innerHTML = "";
 
     // 1. Cabecera superior: Migas de pan estilo APK
-    var breadcrumb = e("div", "section-breadcrumb", secTitle + " › " + activeTitle);
-    i(breadcrumb, 410, 30, 680, 54);
+    var breadcrumb = createEl("div", "section-breadcrumb", secTitle + " › " + activeTitle);
+    placeAbsolute(breadcrumb, 410, 30, 680, 54);
     scr.appendChild(breadcrumb);
 
     // Contador de páginas y títulos
-    var pageInfo = e(
+    var pageInfo = createEl(
       "div",
       "section-page-info",
       (page + 1) + "/" + totalPages + " · " + allItems.length + " títulos"
     );
-    i(pageInfo, 1100, 34, 250, 48);
+    placeAbsolute(pageInfo, 1100, 34, 250, 48);
     scr.appendChild(pageInfo);
 
     // Botones de paginación si hay más de 10 títulos (amplios y claros para control remoto)
     var prevBtn = null, nextBtn = null;
     if (page > 0) {
-      prevBtn = e("div", "section-page-btn focusable", "‹ Anterior");
-      i(prevBtn, 1365, 30, 165, 54);
+      prevBtn = createEl("div", "section-page-btn focusable", "‹ Anterior");
+      placeAbsolute(prevBtn, 1365, 30, 165, 54);
       prevBtn._activate = function () {
         currentSectionPage--;
         renderCatalogExplorer();
@@ -5983,8 +5983,8 @@
       scr.appendChild(prevBtn);
     }
     if (page < totalPages - 1) {
-      nextBtn = e("div", "section-page-btn focusable", "Siguiente ›");
-      i(nextBtn, 1545, 30, 175, 54);
+      nextBtn = createEl("div", "section-page-btn focusable", "Siguiente ›");
+      placeAbsolute(nextBtn, 1545, 30, 175, 54);
       nextBtn._activate = function () {
         currentSectionPage++;
         renderCatalogExplorer();
@@ -5993,17 +5993,17 @@
     }
 
     // Botón Volver
-    var backBtn = e("div", "section-back focusable", "‹ Volver");
-    i(backBtn, 1735, 30, 145, 54);
+    var backBtn = createEl("div", "section-back focusable", "‹ Volver");
+    placeAbsolute(backBtn, 1735, 30, 145, 54);
     backBtn._activate = closeSection;
     scr.appendChild(backBtn);
 
     // 2. Sidebar lateral izquierdo (más ancho y con tipografía grande y legible para TV)
-    var sidebar = e("div", "section-sidebar");
-    i(sidebar, 40, 32, 340, 1010);
+    var sidebar = createEl("div", "section-sidebar");
+    placeAbsolute(sidebar, 40, 32, 340, 1010);
     scr.appendChild(sidebar);
 
-    var searchBtn = e("div", "section-sidebar-btn focusable");
+    var searchBtn = createEl("div", "section-sidebar-btn focusable");
     searchBtn.innerHTML = searchSvg() + "<span>Busca</span>";
     searchBtn._activate = function () {
       X.searchReturn = { screen: "section", focus: searchBtn };
@@ -6011,17 +6011,17 @@
     };
     sidebar.appendChild(searchBtn);
 
-    var filterBtn = e("div", "section-sidebar-btn focusable");
+    var filterBtn = createEl("div", "section-sidebar-btn focusable");
     filterBtn.innerHTML = filterSvg() + "<span>Filtrar</span>";
     filterBtn._activate = function () {
       openCatalogFilter(filterBtn);
     };
     sidebar.appendChild(filterBtn);
 
-    var divider = e("div", "section-sidebar-divider");
+    var divider = createEl("div", "section-sidebar-divider");
     sidebar.appendChild(divider);
 
-    var catList = e("div", "section-cat-list");
+    var catList = createEl("div", "section-cat-list");
     catList.style.height = "860px";
     sidebar.appendChild(catList);
 
@@ -6045,7 +6045,7 @@
       var catLabel = (ctx.categoryTitles && ctx.categoryTitles[catKey]) || catKey;
       var isSel = (catKey === activeCat);
       if (isSel) activeCatIndex = c;
-      var catItem = e("div", "section-cat-item focusable" + (isSel ? " is-selected" : ""), catLabel);
+      var catItem = createEl("div", "section-cat-item focusable" + (isSel ? " is-selected" : ""), catLabel);
       catItem._catKey = catKey;
       catItem._catIdx = c;
       catElements.push(catItem);
@@ -6053,14 +6053,14 @@
     }
 
     // 3. Grid derecho: 5 columnas x 2 filas
-    var grid = e("div", "section-grid");
-    i(grid, 410, 95, 1470, 950);
+    var grid = createEl("div", "section-grid");
+    placeAbsolute(grid, 410, 95, 1470, 950);
     scr.appendChild(grid);
 
     var cardElements = [];
     if (!pageItems.length) {
-      var emptyMsg = e("div", "catalog-empty", "No hay títulos disponibles en esta categoría.");
-      i(emptyMsg, 0, 100, 1400, 60);
+      var emptyMsg = createEl("div", "catalog-empty", "No hay títulos disponibles en esta categoría.");
+      placeAbsolute(emptyMsg, 0, 100, 1400, 60);
       grid.appendChild(emptyMsg);
     } else {
       for (var k = 0; k < pageItems.length; k++) {
@@ -6070,15 +6070,15 @@
         var cardX = col * 300;
         var cardY = row * 455;
 
-        var card = e("div", "section-explorer-card poster gold focusable");
-        i(card, cardX, cardY, 270, 420);
+        var card = createEl("div", "section-explorer-card poster gold focusable");
+        placeAbsolute(card, cardX, cardY, 270, 420);
         card._item = it;
         card._index = k;
         card._col = col;
         card._row = row;
 
         if (it.poster) {
-          var pImg = e("img", "p-img");
+          var pImg = createEl("img", "p-img");
           pImg.setAttribute("data-poster-src", it.poster);
           pImg.onerror = function () {
             if (this.src && 0 === this.src.indexOf("https://") && !this._httpFallback) {
@@ -6091,16 +6091,16 @@
           card.appendChild(pImg);
         }
 
-        card.appendChild(e("div", "p-shade"));
+        card.appendChild(createEl("div", "p-shade"));
 
         if (it.score && parseFloat(it.score) > 0) {
           var scoreVal = parseFloat(it.score).toFixed(1);
-          card.appendChild(e("div", "section-badge-score", scoreVal));
+          card.appendChild(createEl("div", "section-badge-score", scoreVal));
         }
 
-        card.appendChild(e("div", "section-badge-cc", "CC"));
+        card.appendChild(createEl("div", "section-badge-cc", "CC"));
 
-        var titleEl = e("div", "section-card-title", it.title || it.name || "Sin título");
+        var titleEl = createEl("div", "section-card-title", it.title || it.name || "Sin título");
         card.appendChild(titleEl);
 
         card._activate = (function (itemToOpen) {
@@ -6477,7 +6477,7 @@
       lt("detail"),
       Ce || lr());
     zr();
-    var screenPlayer = t("screen-player");
+    var screenPlayer = byId("screen-player");
     screenPlayer && (screenPlayer.classList.remove("is-mini"), screenPlayer.classList.remove("is-active"));
     var n = le ? le.querySelector(".focusable") : null;
     if (!n && de) n = de.querySelector(".focusable");
@@ -6512,7 +6512,7 @@
     var isAnime = targetCat.indexOf("anime") >= 0 ||
       targetGenres.indexOf("anime") >= 0 ||
       /jap[oó]n|japan|tokyo/i.test(targetCountry);
-    var isTargetSeries = x(target);
+    var isTargetSeries = isMovieItem(target);
 
     var scored = [];
     for (var j = 0; j < catalog.length; j++) {
@@ -6530,7 +6530,7 @@
         }
       }
       var itemCountry = String(item.country || "").toLowerCase().trim();
-      var isItemSeries = x(item);
+      var isItemSeries = isMovieItem(item);
       var isItemAnime = cat.indexOf("anime") >= 0 ||
         itemGenres.indexOf("anime") >= 0 ||
         /jap[oó]n|japan|tokyo/i.test(itemCountry);
@@ -6591,7 +6591,7 @@
   }
   function hasDetailCredit(value) {
     var text = String(value || "").replace(/^\s+|\s+$/g, ""),
-      normalized = o(text);
+      normalized = normalizeText(text);
     return !!(
       text &&
       "—" !== text &&
@@ -6602,7 +6602,7 @@
   }
   function restoreDetailFocus() {
     if ("detail" !== X.screen) return;
-    var screen = t("screen-detail");
+    var screen = byId("screen-detail");
     if (X.focus && screen && screen.contains(X.focus)) return;
     /* Ca() reconstruye los botones del detalle; el foco anterior queda
        desconectado y el control remoto parecía no responder al entrar por
@@ -6615,17 +6615,17 @@
     if (X.channelsOpen || (Se && Se.classList.contains("is-active"))) {
       ro();
     }
-    ((oe = t("detail-left")),
-      (se = t("detail-player")),
-      (le = t("detail-buttons")),
-      (de = t("detail-bottom")),
-      a(oe),
-      a(le),
-      a(de),
-      a(se));
+    ((oe = byId("detail-left")),
+      (se = byId("detail-player")),
+      (le = byId("detail-buttons")),
+      (de = byId("detail-bottom")),
+      removeAllChildren(oe),
+      removeAllChildren(le),
+      removeAllChildren(de),
+      removeAllChildren(se));
 
     var playerBackdropUrl = n.landscape || n.poster || "";
-    var detScreen = t("screen-detail");
+    var detScreen = byId("screen-detail");
     if (detScreen) {
       if (playerBackdropUrl) {
         detScreen.style.backgroundImage =
@@ -6643,37 +6643,37 @@
     var r,
       hasDirector = hasDetailCredit(n.director),
       hasActors = hasDetailCredit(n.actors),
-      o = e("div", "detail-titlewrap");
-    o.appendChild(e("div", "detail-title", n.title));
+      o = createEl("div", "detail-titlewrap");
+    o.appendChild(createEl("div", "detail-title", n.title));
     if (n.score) {
-      var sc = e("div", "detail-score");
+      var sc = createEl("div", "detail-score");
       sc.innerHTML = '<span class="detail-score-star">' + starSvg(true) + '</span> ' + n.score;
       o.appendChild(sc);
     }
     oe.appendChild(o);
 
-    var metaWrap = e("div", "detail-meta");
+    var metaWrap = createEl("div", "detail-meta");
     var metaYear = (n.year && "—" !== n.year) ? n.year : (n.releaseDate ? String(n.releaseDate).substring(0, 4) : "");
     if (metaYear) {
-      metaWrap.appendChild(e("span", "detail-badge detail-badge-year", metaYear));
+      metaWrap.appendChild(createEl("span", "detail-badge detail-badge-year", metaYear));
     }
     var metaDur = (n.duration && "—" !== n.duration) ? n.duration : "";
     if (metaDur) {
-      var dBadge = e("span", "detail-badge detail-badge-duration");
+      var dBadge = createEl("span", "detail-badge detail-badge-duration");
       dBadge.innerHTML = '<span class="detail-badge-icon">' + clockSvg() + '</span> ' + metaDur;
       metaWrap.appendChild(dBadge);
     }
-    var qBadge = e("span", "detail-badge detail-badge-quality", "4K UHD");
+    var qBadge = createEl("span", "detail-badge detail-badge-quality", "4K UHD");
     metaWrap.appendChild(qBadge);
     if (n.country && "—" !== n.country) {
-      metaWrap.appendChild(e("span", "detail-badge detail-badge-country", n.country));
+      metaWrap.appendChild(createEl("span", "detail-badge detail-badge-country", n.country));
     }
     oe.appendChild(metaWrap);
     if (n.tagline && "—" !== n.tagline && n.tagline !== n.title) {
-      oe.appendChild(e("div", "detail-tagline", n.tagline));
+      oe.appendChild(createEl("div", "detail-tagline", n.tagline));
     }
 
-    if (x(n)) {
+    if (isMovieItem(n)) {
       var c = 0,
         p = /S(\d+)/i.exec(n.alias || "") || /T(\d+)/i.exec(n.title || "");
       if (
@@ -6686,23 +6686,23 @@
       c || (c = 1);
       var v =
         n.updateCount || n.volumeCount || (n.episodes ? n.episodes.length : 0);
-      v && oe.appendChild(e("div", "detail-update", "Temporada " + c + "  ·  " + v + " Episodios"));
+      v && oe.appendChild(createEl("div", "detail-update", "Temporada " + c + "  ·  " + v + " Episodios"));
     }
 
-    var f = e("div", "detail-genres");
+    var f = createEl("div", "detail-genres");
     for (var h = 0; h < (n.genres || []).length; h++) {
-      var m = e("div", "chip", n.genres[h]);
+      var m = createEl("div", "chip", n.genres[h]);
       f.appendChild(m);
     }
     oe.appendChild(f);
 
-    var w = e("div", "detail-synopsis"),
-      synText = e("div", "text", n.synopsis || "Sin sinopsis disponible.");
+    var w = createEl("div", "detail-synopsis"),
+      synText = createEl("div", "text", n.synopsis || "Sin sinopsis disponible.");
     w.appendChild(synText);
     if (n.synopsis && n.synopsis.length > 120) {
-      var moreBtn = e("span", "detail-more focusable", "Más");
+      var moreBtn = createEl("span", "detail-more focusable", "Más");
       moreBtn._activate = function () {
-        var det = t("screen-detail");
+        var det = byId("screen-detail");
         if (!det) return;
         var isOpen = !det.classList.contains("is-synopsis-open");
         det.classList.toggle("is-synopsis-open", isOpen);
@@ -6713,17 +6713,17 @@
     oe.appendChild(w);
 
     if (hasDirector || hasActors) {
-      var cred = e("div", "detail-credits-block");
+      var cred = createEl("div", "detail-credits-block");
       if (hasDirector) {
-        var g = e("div", "detail-row");
-        g.appendChild(e("span", "label", "Director : "));
-        g.appendChild(e("span", "val", n.director));
+        var g = createEl("div", "detail-row");
+        g.appendChild(createEl("span", "label", "Director : "));
+        g.appendChild(createEl("span", "val", n.director));
         cred.appendChild(g);
       }
       if (hasActors) {
-        var b = e("div", "detail-row");
-        b.appendChild(e("span", "label", "Reparto : "));
-        b.appendChild(e("span", "val", n.actors));
+        var b = createEl("div", "detail-row");
+        b.appendChild(createEl("span", "label", "Reparto : "));
+        b.appendChild(createEl("span", "val", n.actors));
         cred.appendChild(b);
       }
       oe.appendChild(cred);
@@ -6731,17 +6731,17 @@
 
     /* Mini reproductor en pausa con imagen de la peli/serie y botón central para salir en grande */
     if (se) {
-      a(se);
+      removeAllChildren(se);
       se.style.display = "";
       se.className = "detail-player focusable";
       var imgUrl = playerBackdropUrl || n.poster || "";
       if (imgUrl) {
-        var posterImg = e("img", "detail-player-poster");
+        var posterImg = createEl("img", "detail-player-poster");
         posterImg.src = imgUrl;
         posterImg.alt = n.title || "";
         se.appendChild(posterImg);
       }
-      var playBtn = e("div", "detail-player-center-btn");
+      var playBtn = createEl("div", "detail-player-center-btn");
       playBtn.innerHTML = '<span class="detail-player-icon">' + playSvg() + '</span><span class="detail-player-label">Ver en grande</span>';
       se.appendChild(playBtn);
 
@@ -6774,7 +6774,7 @@
       },
       { glyph: "star", label: "Favorito", kind: "favorite" },
     ];
-    x(n) &&
+    isMovieItem(n) &&
       T.push({
         glyph: "bell",
         label: "Avisos",
@@ -6792,11 +6792,11 @@
               : gaugeSvg();
     };
     for (var _ = 0; _ < T.length; _++) {
-      var k = e("div", "detail-btn focusable"),
-        iconWrap = e("span", "detail-btn-icon");
+      var k = createEl("div", "detail-btn focusable"),
+        iconWrap = createEl("span", "detail-btn-icon");
       iconWrap.innerHTML = detailGlyph(T[_].glyph);
       k.appendChild(iconWrap);
-      k.appendChild(e("span", "detail-btn-label", T[_].label));
+      k.appendChild(createEl("span", "detail-btn-label", T[_].label));
       k._kind = T[_].kind;
       "favorite" === T[_].kind &&
         X.favs[String(n.id)] &&
@@ -6848,11 +6848,11 @@
         }),
         le.appendChild(k));
     }
-    var M = e("div", "detail-btn detail-smooth-toggle focusable"),
-      smoothIcon = e("span", "detail-btn-icon");
+    var M = createEl("div", "detail-btn detail-smooth-toggle focusable"),
+      smoothIcon = createEl("span", "detail-btn-icon");
     smoothIcon.innerHTML = gaugeSvg();
     M.appendChild(smoothIcon);
-    var E = e(
+    var E = createEl(
       "span",
       "detail-btn-label",
       "smooth" === X.streamMode ? "Fluido: Sí" : "Fluido: No"
@@ -6884,7 +6884,7 @@
       (function (t) {
         var hasSeasonsList = (t.seasons && t.seasons.length > 1) || (t._catalogSeasons && t._catalogSeasons.length > 1);
         var isMovie = !hasSeasonsList && ((1 === X.tab) || ("movie" === t.type) || ("película" === t.kind) || ("pelicula" === t.category));
-        var isSeries = hasSeasonsList || (!isMovie && x(t) && ((t.episodes && t.episodes.length > 1) || (t.seasons && t.seasons.length > 1)));
+        var isSeries = hasSeasonsList || (!isMovie && isMovieItem(t) && ((t.episodes && t.episodes.length > 1) || (t.seasons && t.seasons.length > 1)));
         var a = isSeries && t.episodes ? t.episodes : [],
           n = isSeries && a.length > 1,
           r = wa(a.length);
@@ -6897,11 +6897,11 @@
           if (!t.seasons || t.seasons.length < 2) {
             t.seasons = t._catalogSeasons || t.seasons;
           }
-          seasonsRail = e("div", "detail-seasons-rail scrollable");
+          seasonsRail = createEl("div", "detail-seasons-rail scrollable");
           for (var sIdx = 0; sIdx < t.seasons.length; sIdx++) {
             (function (sNum) {
               var sItem = t.seasons[sNum];
-              var sBtn = e(
+              var sBtn = createEl(
                 "div",
                 "detail-season-btn focusable" +
                 (sNum === X.detailSeason ? " is-selected" : ""),
@@ -6981,10 +6981,10 @@
           de.appendChild(seasonsRail);
         }
         if (showRanges) {
-          rangesCont = e("div", "detail-ranges scrollable");
+          rangesCont = createEl("div", "detail-ranges scrollable");
           for (var c = 0; c < r.length; c++)
             (function (rangeIdx) {
-              var rangeBtn = e(
+              var rangeBtn = createEl(
                 "div",
                 "detail-range focusable" +
                 (rangeIdx === X.detailRange ? " is-selected" : ""),
@@ -7038,11 +7038,11 @@
         }
         if (n) {
           var p = showRanges ? (r[X.detailRange] || { start: 0, end: a.length }) : { start: 0, end: a.length };
-          var u = e("div", "detail-episodes scrollable");
+          var u = createEl("div", "detail-episodes scrollable");
           for (var v = p.start; v < p.end; v++)
             (function (epData, epRelIdx, epAbsIdx) {
               var isPlaying = X.detailEpisode && (X.detailEpisode.id === epData.id || X.detailEpisode === epData);
-              var epTile = e(
+              var epTile = createEl(
                 "div",
                 "detail-episode focusable" + (isPlaying ? " is-playing" : "")
               );
@@ -7050,7 +7050,7 @@
                 void 0 !== epData.number && null !== epData.number
                   ? String(epData.number)
                   : String(epAbsIdx + 1);
-              epTile.appendChild(e("span", "ep-num", epNum));
+              epTile.appendChild(createEl("span", "ep-num", epNum));
               epTile._ep = epData;
               epTile._activate = function () {
                 Kr(t, epData);
@@ -7131,13 +7131,13 @@
           relHeight = 36,
           relFont = 30,
           gridTop = relTop + 42;
-        var m = e("div", "detail-related", "Quizás te guste");
+        var m = createEl("div", "detail-related", "Quizás te guste");
         m.style.top = relTop + "px";
         m.style.fontSize = relFont + "px";
         m.style.height = relHeight + "px";
         de.appendChild(m);
 
-        var g = e("div", "detail-grid scrollable");
+        var g = createEl("div", "detail-grid scrollable");
         g.style.top = gridTop + "px";
         g.style.height = (cellH + 20) + "px";
 
@@ -7146,7 +7146,7 @@
           var S = relList[w];
           if (S) {
             (function (relItem, relIdx) {
-              var T = e("div", "cell");
+              var T = createEl("div", "cell");
               T.style.width = pWidth + "px";
               T.style.height = cellH + "px";
               var cardPoster = xt(relItem, 0, 0, pWidth, pHeight, { gold: !0 });
@@ -7194,7 +7194,7 @@
                 return !1;
               };
               T.appendChild(cardPoster);
-              var dName = e("div", "d-name", relItem.title);
+              var dName = createEl("div", "d-name", relItem.title);
               dName.style.top = (pHeight + 6) + "px";
               dName.style.height = compactCards ? "50px" : "64px";
               dName.style.fontSize = compactCards ? "22px" : "23px";
@@ -7244,7 +7244,7 @@
     var arrow = anchorBtn ? anchorBtn.querySelector(".season-arrow") : null;
     if (arrow) arrow.classList.add("is-open");
 
-    xa = e("div", "season-popup");
+    xa = createEl("div", "season-popup");
     var popupHeight = Math.min(330, item.seasons.length * 54);
     xa.style.position = "absolute";
     xa.style.left = "80px";
@@ -7260,14 +7260,14 @@
       (function (sIndex) {
         var sData = item.seasons[sIndex];
         var isSelected = sIndex === selectedSeasonIdx;
-        var pItem = e(
+        var pItem = createEl(
           "div",
           "season-popup-item focusable" + (isSelected ? " is-selected" : "")
         );
         var sText = "Temporada " + (sData.number || sIndex + 1);
-        pItem.appendChild(e("span", "season-item-text", sText));
+        pItem.appendChild(createEl("span", "season-item-text", sText));
 
-        var check = e("img", "season-item-check");
+        var check = createEl("img", "season-item-check");
         check.src = "assets/original/vod/icon_nation_selected.png";
         check.alt = "";
         pItem.appendChild(check);
@@ -7349,18 +7349,18 @@
   }
   window.toggleSeasonPopup = toggleSeasonPopup;
   function _a() {
-    ((ce = t("search-keyboard")),
-      (pe = t("search-hot")),
-      (ue = t("search-results")),
-      (ve = t("search-empty")),
-      (fe = t("search-hot-grid")),
-      (he = t("search-result-grid")),
-      (ge = t("search-nav")),
-      a(ce),
-      a(fe),
-      a(he),
+    ((ce = byId("search-keyboard")),
+      (pe = byId("search-hot")),
+      (ue = byId("search-results")),
+      (ve = byId("search-empty")),
+      (fe = byId("search-hot-grid")),
+      (he = byId("search-result-grid")),
+      (ge = byId("search-nav")),
+      removeAllChildren(ce),
+      removeAllChildren(fe),
+      removeAllChildren(he),
       ue && ue.classList.add("scrollable"));
-    me = e("input", "kb-edit focusable");
+    me = createEl("input", "kb-edit focusable");
     me.type = "text";
     me.id = "kb-edit-input";
     me.placeholder = "Buscar películas, series, actores…";
@@ -7379,7 +7379,7 @@
       if (13 === k) {
         try { me.blur(); } catch (err) { }
         Pa();
-        var res = findFirstFocusable(he) || (t("search-suggestions") && findFirstFocusable(t("search-suggestions")));
+        var res = findFirstFocusable(he) || (byId("search-suggestions") && findFirstFocusable(byId("search-suggestions")));
         if (res) setFocus(res);
         e.preventDefault && e.preventDefault();
       }
@@ -7388,7 +7388,7 @@
       setFocus(me);
       if (X.searchQuery && X.searchQuery.trim().length > 0) {
         Pa();
-        var res = findFirstFocusable(he) || (t("search-suggestions") && findFirstFocusable(t("search-suggestions")));
+        var res = findFirstFocusable(he) || (byId("search-suggestions") && findFirstFocusable(byId("search-suggestions")));
         if (res) setFocus(res);
       } else {
         var firstKey = (Be && Be[0]) || (ce && ce.querySelector(".kb-action.focusable"));
@@ -7419,7 +7419,7 @@
     };
     ce.appendChild(me);
     for (
-      var i = e("div", "kb-actions"),
+      var i = createEl("div", "kb-actions"),
       n = [
         { cls: "switch", w: 100.5 },
         { cls: "clear", w: 100.5 },
@@ -7430,11 +7430,11 @@
       r < n.length;
       r++
     ) {
-      var o = e("div", "kb-action focusable " + n[r].cls);
+      var o = createEl("div", "kb-action focusable " + n[r].cls);
       if ("go" === n[r].cls) {
         o.textContent = "Busca";
       } else {
-        var ico = e("div", "ico");
+        var ico = createEl("div", "ico");
         if ("switch" === n[r].cls) {
           ico.className = "ico ico-switch";
           ico.textContent = "123";
@@ -7475,10 +7475,10 @@
       l < s.length;
       l++
     ) {
-      var d = e("div", "kb-row");
+      var d = createEl("div", "kb-row");
       d.style.top = 264 + 88.5 * l + "px";
       for (var c = 0; c < s[l].length; c++) {
-        var p = e(
+        var p = createEl(
           "div",
           "kb-key focusable" + (" " === s[l][c] ? " space" : ""),
           " " === s[l][c] ? "" : s[l][c]
@@ -7495,7 +7495,7 @@
       }
       ce.appendChild(d);
     }
-    var u = e("div", "kb-feedback focusable", "Feedback");
+    var u = createEl("div", "kb-feedback focusable", "Feedback");
     ((u._activate = function () { }),
       bindMagicActivate(u),
       ce.appendChild(u));
@@ -7515,11 +7515,11 @@
       Ea());
   }
   function ka(t, a) {
-    var n = e("div", "search-cell");
+    var n = createEl("div", "search-cell");
     return (
-      i(n, (a % 5) * 246, 437 * Math.floor(a / 5), 246, 437),
+      placeAbsolute(n, (a % 5) * 246, 437 * Math.floor(a / 5), 246, 437),
       n.appendChild(xt(t, 0, 0, 222, 329, { gold: !0 })),
-      n.appendChild(e("div", "s-name", t.title)),
+      n.appendChild(createEl("div", "s-name", t.title)),
       n
     );
   }
@@ -7539,7 +7539,7 @@
       } else if (ret) {
         setFocus(ret);
       } else if ("section" === X.screen) {
-        var scr = t("screen-section");
+        var scr = byId("screen-section");
         if (scr) setFocus(scr.querySelector(".section-sidebar-btn") || scr);
       }
     }
@@ -7558,7 +7558,7 @@
         var itemGenres = n.genres || [],
           matchesGenre = !1;
         for (var g = 0; g < itemGenres.length; g++) {
-          if (o(String(itemGenres[g] || "").trim()) === o(genre)) {
+          if (normalizeText(String(itemGenres[g] || "").trim()) === normalizeText(genre)) {
             matchesGenre = !0;
             break;
           }
@@ -7566,8 +7566,8 @@
         matchesGenre && t.push(n);
         continue;
       }
-      var r = o((n.kind || "") + " " + (n.category || "") + " " + (n.genres || []).join(" ")),
-        s = x(n);
+      var r = normalizeText((n.kind || "") + " " + (n.category || "") + " " + (n.genres || []).join(" ")),
+        s = isMovieItem(n);
       ("movies" === filter
         ? !s
         : "series" === filter
@@ -7608,14 +7608,14 @@
   }
   function openCatalogFilter(returnFocus) {
     if (catalogFilterDialog) return void closeCatalogFilter();
-    var a = e("div", "catalog-filter-dialog"),
-      i = e("div", "catalog-filter-card"),
-      n = e("div", "catalog-filter-title", "Filtrar catálogo"),
-      r = e("div", "catalog-filter-sub", "Elige un tipo o un género"),
-      typeLabel = e("div", "catalog-filter-section-label", "Tipo"),
-      typeRow = e("div", "catalog-filter-options"),
-      genreLabel = e("div", "catalog-filter-section-label", "Géneros"),
-      genreRow = e("div", "catalog-filter-genres"),
+    var a = createEl("div", "catalog-filter-dialog"),
+      i = createEl("div", "catalog-filter-card"),
+      n = createEl("div", "catalog-filter-title", "Filtrar catálogo"),
+      r = createEl("div", "catalog-filter-sub", "Elige un tipo o un género"),
+      typeLabel = createEl("div", "catalog-filter-section-label", "Tipo"),
+      typeRow = createEl("div", "catalog-filter-options"),
+      genreLabel = createEl("div", "catalog-filter-section-label", "Géneros"),
+      genreRow = createEl("div", "catalog-filter-genres"),
       typeBtns = [],
       genreBtns = [],
       typeDefs = [
@@ -7641,7 +7641,7 @@
       var itemGenres = item.genres || [];
       for (var h = 0; h < itemGenres.length; h++) {
         var label = String(itemGenres[h] || "").trim(),
-          key = o(label);
+          key = normalizeText(label);
         if (!label || "sin clasificar" === key || genreMap[key]) continue;
         /* El portal mete años y otros tags sueltos en "tags"; no son géneros
            y ocupaban dos botones enteros del panel. */
@@ -7656,7 +7656,7 @@
 
     for (var ti = 0; ti < typeDefs.length; ti++)
       (function (def, idx) {
-        var btn = e("button", "catalog-filter-option focusable", def.label);
+        var btn = createEl("button", "catalog-filter-option focusable", def.label);
         btn._activate = function () {
           applyCatalogFilter(def.id);
         };
@@ -7691,7 +7691,7 @@
     };
     for (var t2 = 0; t2 < genreList.length; t2++)
       (function (value, idx) {
-        var btn = e("button", "catalog-filter-option catalog-filter-genre focusable", value);
+        var btn = createEl("button", "catalog-filter-option catalog-filter-genre focusable", value);
         btn._activate = function () {
           applyCatalogFilter("genre:" + value);
         };
@@ -7716,17 +7716,17 @@
       })(genreList[t2], t2);
 
     if (!genreList.length)
-      genreRow.appendChild(e("div", "catalog-filter-empty", "El catálogo aún no informa géneros."));
+      genreRow.appendChild(createEl("div", "catalog-filter-empty", "El catálogo aún no informa géneros."));
 
     catalogFilterDialog = a;
-    (t("app") || document.body).appendChild(a);
+    (byId("app") || document.body).appendChild(a);
     if (window.DialogManager) {
       window.DialogManager.open("catalogFilter", a, {
         returnFocus: catalogFilterReturn,
         initialFocus: typeBtns[0],
         fallbackFocus: function () {
           if ("section" === X.screen) {
-            var scr = t("screen-section");
+            var scr = byId("screen-section");
             if (scr) return scr.querySelector(".section-sidebar-btn") || scr;
           }
           return null;
@@ -7748,20 +7748,20 @@
     (ce || _a(), lt("search"), X.searchQuery || Ia(), setFocus(me));
   }
   function updateSearchSuggestions(query) {
-    var sugContainer = t("search-suggestions");
+    var sugContainer = byId("search-suggestions");
     if (!sugContainer) return;
-    a(sugContainer);
+    removeAllChildren(sugContainer);
     if (!query || query.length < 2) {
       sugContainer.classList.remove("is-active");
       return;
     }
-    var cleanQ = o(query.trim());
+    var cleanQ = normalizeText(query.trim());
     var matches = [];
     var seenTitles = {};
     for (var i = 0; i < l.length; i++) {
       var itm = l[i];
       if (!itm || !itm.title) continue;
-      var cleanTitle = o(itm.title);
+      var cleanTitle = normalizeText(itm.title);
       var idx = cleanTitle.indexOf(cleanQ);
       if (-1 !== idx) {
         var baseKey = cleanTitle.replace(/[^a-z0-9]/g, "");
@@ -7781,11 +7781,11 @@
       return;
     }
     sugContainer.classList.add("is-active");
-    var lbl = e("span", "search-sug-label", "Sugerencias:");
+    var lbl = createEl("span", "search-sug-label", "Sugerencias:");
     sugContainer.appendChild(lbl);
     for (var s = 0; s < topSuggestions.length; s++) {
       (function (sugTitle) {
-        var chip = e("button", "search-sug-chip focusable", sugTitle);
+        var chip = createEl("button", "search-sug-chip focusable", sugTitle);
         chip._activate = function () {
           Aa(sugTitle);
         };
@@ -7830,7 +7830,7 @@
   }
   function Ia() {
     if (fe && !X.searchQuery) {
-      a(fe);
+      removeAllChildren(fe);
       for (var e = Ma(), t = 0; t < e.length; t++) fe.appendChild(ka(e[t], t));
       schedulePosterLoad();
     }
@@ -7860,7 +7860,7 @@
       (X.searchQuery = ""),
       Ea(),
       updateSearchSuggestions(""),
-      he && a(he),
+      he && removeAllChildren(he),
       (X.searchMatches = []),
       (X.searchPage = 0),
       ge && (ge.textContent = ""),
@@ -7870,7 +7870,7 @@
   }
   function Pa() {
     var e = X.searchQuery || "",
-      t = o(e.trim());
+      t = normalizeText(e.trim());
     if (t) {
       updateSearchSuggestions(e.trim());
       var scoredMatches = [];
@@ -7878,8 +7878,8 @@
       for (var i = 0; i < l.length; i++) {
         var itm = l[i];
         if (!itm || !itm.id || seenIds[itm.id]) continue;
-        var title = o(itm.title || ""),
-          alias = itm.alias ? o(itm.alias) : "";
+        var title = normalizeText(itm.title || ""),
+          alias = itm.alias ? normalizeText(itm.alias) : "";
         var matchScore = 0;
         if (title === t) {
           matchScore += 2000;
@@ -7955,7 +7955,7 @@
     if (
       (pe.classList.add("is-hidden"),
         ue.classList.add("is-active"),
-        a(he),
+        removeAllChildren(he),
         0 === i.length)
     )
       return (
@@ -7996,7 +7996,7 @@
       (v || (v = findFirstFocusable(he)), v && setFocus(v));
     } else if (
       "search" === X.screen &&
-      (n(X.focus, ".search-hot") || n(X.focus, ".search-results"))
+      (closestMatch(X.focus, ".search-hot") || closestMatch(X.focus, ".search-results"))
     ) {
       var f = findFirstFocusable(he);
       f && setFocus(f);
@@ -8021,10 +8021,10 @@
           r < n.length;
           r++
         ) {
-          var o = e("div", "kb-row kb-row-num");
+          var o = createEl("div", "kb-row kb-row-num");
           o.style.top = 264 + 88.5 * r + "px";
           for (var s = 0; s < n[r].length; s++) {
-            var l = e(
+            var l = createEl(
               "div",
               "kb-key focusable" + (" " === n[r][s] ? " space" : ""),
               " " === n[r][s] ? "" : n[r][s]
@@ -8050,23 +8050,23 @@
     }
   }
   function renderSettingsScreen() {
-    ((ye = t("settings-menu")),
-      (be = t("settings-right")),
-      a(ye),
-      a(be),
+    ((ye = byId("settings-menu")),
+      (be = byId("settings-right")),
+      removeAllChildren(ye),
+      removeAllChildren(be),
       (je = []));
     for (var n = null, r = 0; r < j.length; r++) {
       var o = j[r];
       if (o.group && o.group !== n) {
-        var s = e("div", "settings-group", (n = o.group));
+        var s = createEl("div", "settings-group", (n = o.group));
         ye.appendChild(s);
       }
-      var l = e("div", "settings-item focusable"),
-        d = e("div", "settings-icon");
+      var l = createEl("div", "settings-item focusable"),
+        d = createEl("div", "settings-icon");
       ((d.innerHTML = W[o.id] || ""), l.appendChild(d));
-      var c = e("div", "settings-text");
-      (c.appendChild(e("div", "settings-label", o.label)),
-        o.desc && c.appendChild(e("div", "settings-desc", o.desc)),
+      var c = createEl("div", "settings-text");
+      (c.appendChild(createEl("div", "settings-label", o.label)),
+        o.desc && c.appendChild(createEl("div", "settings-desc", o.desc)),
         l.appendChild(c),
         (l._index = r),
         (l._activate = (function (e) {
@@ -8088,61 +8088,61 @@
       (ze.history = ja()),
       (ze.addons = Wa()),
       (ze.share = (function () {
-        var t = e("div", "settings-panel share-panel");
-        (t.appendChild(e("div", "share-head", "Compartir XuperTV")),
+        var t = createEl("div", "settings-panel share-panel");
+        (t.appendChild(createEl("div", "share-head", "Compartir XuperTV")),
           t.appendChild(
-            e(
+            createEl(
               "div",
               "share-sub",
               "Instala XuperTV en cualquier otro televisor LG webOS de tu hogar o de tus amigos directamente desde el instalador IPK."
             )
           ));
-        var a = e("div", "share-free");
-        (a.appendChild(e("div", "share-free-badge", "100% GRATIS")),
+        var a = createEl("div", "share-free");
+        (a.appendChild(createEl("div", "share-free-badge", "100% GRATIS")),
           a.appendChild(
-            e(
+            createEl(
               "div",
               "share-free-text",
               "Esta aplicación es y siempre será gratuita y sin fines de lucro. No compres suscripciones ni pagues a intermediarios."
             )
           ),
           t.appendChild(a));
-        var i = e("div", "share-warning");
+        var i = createEl("div", "share-warning");
         (i.appendChild(
-          e(
+          createEl(
             "div",
             "share-warning-title",
             "Protege a tu comunidad contra revendedores"
           )
         ),
           i.appendChild(
-            e(
+            createEl(
               "div",
               "share-warning-text",
               "Si alguien intentó cobrarte por esta app, repórtalo en nuestra comunidad. El código y las descargas son abiertas."
             )
           ),
           t.appendChild(i));
-        var n = e("div", "share-qr-box"),
-          r = e("img", "share-qr");
+        var n = createEl("div", "share-qr-box"),
+          r = createEl("img", "share-qr");
         ((r.src = "assets/original/settings/qr_telegram.png"),
           (r.alt = "Telegram QR"),
           n.appendChild(r));
-        var o = e("div", "share-qr-text");
+        var o = createEl("div", "share-qr-text");
         return (
           o.appendChild(
-            e("div", "share-qr-title", "Canal oficial de novedades y soporte")
+            createEl("div", "share-qr-title", "Canal oficial de novedades y soporte")
           ),
           o.appendChild(
-            e(
+            createEl(
               "div",
               "share-qr-line",
               "Únete a nuestro canal para descargar las versiones más recientes, reportar incidencias y conocer nuevas funciones."
             )
           ),
-          o.appendChild(e("div", "share-qr-handle", "@CristiancoDEV")),
+          o.appendChild(createEl("div", "share-qr-handle", "@CristiancoDEV")),
           o.appendChild(
-            e(
+            createEl(
               "div",
               "share-qr-url",
               "https://github.com/cristianco7/XUPER-HYDRA-PORT-WEBOS"
@@ -8156,13 +8156,13 @@
       (ze.playback = (function () {
         var t = Fa("Configuración global de reproducción");
         (t.appendChild(
-          e(
+          createEl(
             "div",
             "sp-global-note",
             "Estas preferencias se aplican automáticamente a todas las películas y series nuevas."
           )
         ),
-          t.appendChild(i(e("div", "sp-hr"), 0, 168, 1478, 1)),
+          t.appendChild(placeAbsolute(createEl("div", "sp-hr"), 0, 168, 1478, 1)),
           Ba(
             t,
             188,
@@ -8195,9 +8195,9 @@
             "audio",
             X.playback.audio
           ),
-          t.appendChild(i(e("div", "sp-hr"), 0, 524, 1478, 1)),
-          t.appendChild(e("div", "sp-subtitle-h", "Subtítulos")));
-        var a = e(
+          t.appendChild(placeAbsolute(createEl("div", "sp-hr"), 0, 524, 1478, 1)),
+          t.appendChild(createEl("div", "sp-subtitle-h", "Subtítulos")));
+        var a = createEl(
           "div",
           "sp-switch focusable " + (X.playback.subtitle ? "on" : "off")
         );
@@ -8227,20 +8227,20 @@
             X.playback.size
           ),
           (function (t, a) {
-            var i = e("div", "pb-row");
+            var i = createEl("div", "pb-row");
             ((i.style.top = a + "px"),
-              i.appendChild(e("div", "pb-label", "Estilo")));
+              i.appendChild(createEl("div", "pb-label", "Estilo")));
             var curStyleIdx = ["white", "yellow", "cyan"].indexOf(X.playback.style);
             if (curStyleIdx < 0) curStyleIdx = 0;
             for (var n = ["#ffffff", "#f6e33f", "#ffffff"], r = 0; r < 3; r++) {
-              var o = e(
+              var o = createEl(
                 "div",
                 "pb-opt focusable" +
                 (r === curStyleIdx ? " is-checked" : "")
               );
               ((o.style.marginLeft = (0 === r ? 0 : 28) + "px"),
-                o.appendChild(e("div", "radio")));
-              var s = e("span", null, "Aa");
+                o.appendChild(createEl("div", "radio")));
+              var s = createEl("span", null, "Aa");
               ((s.style.color = n[r]),
                 2 === r &&
                 ((s.style.background = "#000000"),
@@ -8278,40 +8278,40 @@
       (ze.netdiag = (function () {
         var t = Fa("Diagnóstico de red");
         (t.appendChild(
-          e(
+          createEl(
             "div",
             "dg-note",
             "Comprueba si tu operador de internet está bloqueando los servidores de XuperTV. La app ya usa un DNS seguro (DNS-over-HTTPS) para evitarlo; esta prueba solo lo muestra."
           )
         ),
-          t.appendChild(i(e("div", "sp-hr"), 0, 168, 1478, 1)));
-        var n = e("div", "dg-btn focusable", "Analizar red");
-        i(n, 52, 188, 280, 60);
-        var r = e("div", "dg-btn dg-report-btn focusable", "Generar reporte");
-        i(r, 346, 188, 320, 60);
-        var q = e("div", "dg-btn dg-report-btn focusable", "Ver TV en vivo");
-        i(q, 680, 188, 300, 60);
-        var btnReset = e("div", "dg-btn dg-report-btn focusable", "Nueva Identidad");
-        i(btnReset, 994, 188, 300, 60);
-        var o = e("div", "dg-summary", 'Pulsa "Analizar red" para empezar.');
-        i(o, 52, 262, 1380, 64);
-        var s = e("div", "dg-head");
-        (i(s, 52, 340, 1380, 44),
-          s.appendChild(e("span", "dg-host", "Dominio")),
-          s.appendChild(e("span", "dg-local", "DNS del televisor")),
-          s.appendChild(e("span", "dg-state", "Estado")),
-          s.appendChild(e("span", "dg-ip", "Dirección real (DNS seguro)")));
-        var l = e("div", "dg-list");
-        i(l, 52, 388, 1380, 420);
-        var d = e("div", "dg-env", "");
-        (i(d, 52, 816, 1380, 30), ($a = d));
-        var c = e(
+          t.appendChild(placeAbsolute(createEl("div", "sp-hr"), 0, 168, 1478, 1)));
+        var n = createEl("div", "dg-btn focusable", "Analizar red");
+        placeAbsolute(n, 52, 188, 280, 60);
+        var r = createEl("div", "dg-btn dg-report-btn focusable", "Generar reporte");
+        placeAbsolute(r, 346, 188, 320, 60);
+        var q = createEl("div", "dg-btn dg-report-btn focusable", "Ver TV en vivo");
+        placeAbsolute(q, 680, 188, 300, 60);
+        var btnReset = createEl("div", "dg-btn dg-report-btn focusable", "Nueva Identidad");
+        placeAbsolute(btnReset, 994, 188, 300, 60);
+        var o = createEl("div", "dg-summary", 'Pulsa "Analizar red" para empezar.');
+        placeAbsolute(o, 52, 262, 1380, 64);
+        var s = createEl("div", "dg-head");
+        (placeAbsolute(s, 52, 340, 1380, 44),
+          s.appendChild(createEl("span", "dg-host", "Dominio")),
+          s.appendChild(createEl("span", "dg-local", "DNS del televisor")),
+          s.appendChild(createEl("span", "dg-state", "Estado")),
+          s.appendChild(createEl("span", "dg-ip", "Dirección real (DNS seguro)")));
+        var l = createEl("div", "dg-list");
+        placeAbsolute(l, 52, 388, 1380, 420);
+        var d = createEl("div", "dg-env", "");
+        (placeAbsolute(d, 52, 816, 1380, 30), ($a = d));
+        var c = createEl(
           "div",
           "dg-foot",
           'Si el estado dice "Bloqueado", tu operador está interceptando el nombre del servidor, pero la app ya conecta por la dirección real. El reproductor Normal y el Modo Fluido usan este mismo DNS seguro. Si el vídeo sigue sin abrir con la conexión en verde, el bloqueo es por dirección: hace falta un túnel (VPN local).'
         );
         return (
-          i(c, 52, 852, 1380, 110),
+          placeAbsolute(c, 52, 852, 1380, 110),
           (n._activate = function () {
             runDiagnostics(n, o, l);
           }),
@@ -8422,7 +8422,7 @@
                 lines.push(
                   "Foto de esta pantalla = lo que necesito para ver el corte."
                 );
-                var box = e("div", "dg-report", lines.join("\n"));
+                var box = createEl("div", "dg-report", lines.join("\n"));
                 while (l.firstChild) l.removeChild(l.firstChild);
                 (l.appendChild(box),
                   (o.className = "dg-summary ok"),
@@ -8478,8 +8478,8 @@
                   hosts: [],
                 };
               }
-              a(i);
-              var r = e(
+              removeAllChildren(i);
+              var r = createEl(
                 "div",
                 "dg-report",
                 (function (e) {
@@ -8691,23 +8691,23 @@
         );
       })()),
       (ze.parent = (function () {
-        var t = e("div", "settings-panel");
+        var t = createEl("div", "settings-panel");
         (t.appendChild(
-          e("div", "pl-title", "Contenido para adultos (+18)")
+          createEl("div", "pl-title", "Contenido para adultos (+18)")
         ),
           t.appendChild(
-            e(
+            createEl(
               "div",
               "pl-tip",
               "Elige si deseas mostrar contenido y canales clasificados para mayores de edad en este televisor."
             )
           ),
-          t.appendChild(e("div", "pl-label", "Contenido +18")));
-        var a = e(
+          t.appendChild(createEl("div", "pl-label", "Contenido +18")));
+        var a = createEl(
           "div",
           "sp-switch focusable " + (X.adultEnabled ? "on" : "off")
         ),
-          i = e(
+          i = createEl(
             "div",
             "pl-note",
             X.adultEnabled
@@ -8736,19 +8736,19 @@
       })()),
       (ze.display = (function () {
         var t = Fa("Pantalla y compatibilidad"),
-          a = e(
+          a = createEl(
             "div",
             "sp-global-note",
             "La compatibilidad 720p se aplica al instalar esta versión. Este ajuste no reduce ni modifica la superficie de vídeo."
           ),
-          i = e("div", "pb-row"),
+          i = createEl("div", "pb-row"),
           n = [
             { id: "auto", label: "Automático" },
             { id: "hd", label: "Compatibilidad HD" },
           ];
         (t.appendChild(a),
           (i.style.top = "210px"));
-        var uiLabel = e("div", "pb-label", "Tamaño de interfaz");
+        var uiLabel = createEl("div", "pb-label", "Tamaño de interfaz");
         /* "Tamaño de interfaz" no cabe en los 212 px del TextView original y se
            partía en dos líneas montándose sobre el primer botón. */
         ((uiLabel.style.width = "400px"),
@@ -8757,14 +8757,14 @@
         i.appendChild(uiLabel);
         for (var r = 0; r < n.length; r++)
           (function (a) {
-            var r = e(
+            var r = createEl(
               "div",
               "pb-opt focusable" +
               (Q.uiScaleMode === a.id ? " is-checked" : "")
             );
             ((r.style.marginLeft = 0 === a.index ? 0 : 28 + "px"),
-              r.appendChild(e("div", "radio")),
-              r.appendChild(e("span", null, a.label)),
+              r.appendChild(createEl("div", "radio")),
+              r.appendChild(createEl("span", null, a.label)),
               (r._activate = function () {
                 ((Q.uiScaleMode = a.id),
                   K($, Q),
@@ -8783,74 +8783,74 @@
         return (t.appendChild(i), t);
       })()),
       (ze.feedback = (function () {
-        var t = e("div", "settings-panel");
-        (t.appendChild(e("div", "fb-title", "Ayuda y Feedback")),
-          t.appendChild(e("div", "fb-hr")),
+        var t = createEl("div", "settings-panel");
+        (t.appendChild(createEl("div", "fb-title", "Ayuda y Feedback")),
+          t.appendChild(createEl("div", "fb-hr")),
           t.appendChild(
-            e(
+            createEl(
               "div",
               "fb-contact",
               "Si tiene alguna duda, puede ponerse en contacto con nosotros a través de los siguientes medios:"
             )
           ),
           t.appendChild(
-            e(
+            createEl(
               "div",
               "fb-qr-note",
               "Escanee el código QR para enviar sugerencias o comentarios."
             )
           ));
-        var a = e("div", "fb-qr");
-        var img = e("img", "fb-qr-img");
+        var a = createEl("div", "fb-qr");
+        var img = createEl("img", "fb-qr-img");
         ((img.src = "assets/original/settings/qr_telegram.png"),
           (img.alt = "WebOs PortXuper Chat"),
           a.appendChild(img),
           t.appendChild(a));
-        var i = e("div", "fb-help focusable", "Ayuda");
+        var i = createEl("div", "fb-help focusable", "Ayuda");
         return ((i._activate = function () { }), t.appendChild(i), t);
       })()),
       (ze.about = (function () {
-        var t = e("div", "settings-panel");
-        (t.appendChild(e("div", "sp-title plain", "Sobre nosotros")),
-          t.appendChild(i(e("div", "sp-hr soft"), 0, 165, 1498, 1)),
+        var t = createEl("div", "settings-panel");
+        (t.appendChild(createEl("div", "sp-title plain", "Sobre nosotros")),
+          t.appendChild(placeAbsolute(createEl("div", "sp-hr soft"), 0, 165, 1498, 1)),
           t.appendChild(
-            e(
+            createEl(
               "div",
               "sp-about-body",
               "Xuper TV se dedica a ofrecer a los usuarios una amplia variedad de recursos de alta calidad. Aquí encontrarás miles de películas, series, animes y canales en vivo, todo reunido en un solo lugar. Brindamos una experiencia estable, diversa y siempre actualizada, además de contenidos gratuitos para disfrutar."
             )
           ));
-        var a = e(
+        var a = createEl(
           "div",
           "sp-about-port",
           "Port para LG webOS realizado por CristiancoDEV"
         );
         ((a.style.top = "380px"), t.appendChild(a));
-        var n = e("div", "sp-about-mail"),
-          r = e("img");
+        var n = createEl("div", "sp-about-mail"),
+          r = createEl("img");
         ((r.src = "assets/original/settings/vod_email_icon.png"),
           (r.alt = ""),
           n.appendChild(r),
-          n.appendChild(e("span", null, "escuchamos-tv@outlook.com")),
+          n.appendChild(createEl("span", null, "escuchamos-tv@outlook.com")),
           t.appendChild(n));
-        var o = e("div", "sp-about-update-box");
+        var o = createEl("div", "sp-about-update-box");
         (o.appendChild(
-          e("div", "sp-about-update-title", "Actualizaciones de XuperTV")
+          createEl("div", "sp-about-update-title", "Actualizaciones de XuperTV")
         ),
           o.appendChild(
-            e(
+            createEl(
               "div",
               "sp-about-update-desc",
               "Versión instalada: v" + APP_VERSION + ". Puedes actualizar la app directamente desde tu televisor sin necesidad de usar un PC."
             )
           ));
-        var s = e("div", "sp-about-update-row"),
-          l = e(
+        var s = createEl("div", "sp-about-update-row"),
+          l = createEl(
             "button",
             "sp-about-update-btn focusable",
             "Buscar actualizaciones"
           ),
-          d = e("span", "sp-about-update-msg");
+          d = createEl("span", "sp-about-update-msg");
         return (
           (l._activate = function () {
             ((l.textContent = "Comprobando..."),
@@ -8891,7 +8891,7 @@
         }
     e = Number(e) || 0;
     var n = (j[e] && j[e].id) || "profile",
-      r = t("screen-settings");
+      r = byId("screen-settings");
     if (
       (r && r.classList.toggle("is-history-view", "history" === n),
         "profile" === n && ze.profile && be)
@@ -8917,17 +8917,17 @@
   }
   window.openSettingsCategory = Ua;
   function Fa(t) {
-    var a = e("div", "settings-panel");
-    return (a.appendChild(e("div", "sp-title", t)), a);
+    var a = createEl("div", "settings-panel");
+    return (a.appendChild(createEl("div", "sp-title", t)), a);
   }
   function Ba(t, a, i, n, r, o) {
-    var s = e("div", "pb-row");
-    ((s.style.top = a + "px"), s.appendChild(e("div", "pb-label", i)));
+    var s = createEl("div", "pb-row");
+    ((s.style.top = a + "px"), s.appendChild(createEl("div", "pb-label", i)));
     for (var l = 0; l < n.length; l++) {
-      var d = e("div", "pb-opt focusable" + (l === o ? " is-checked" : ""));
+      var d = createEl("div", "pb-opt focusable" + (l === o ? " is-checked" : ""));
       ((d.style.marginLeft = (0 === l ? 0 : 28) + "px"),
-        d.appendChild(e("div", "radio")),
-        d.appendChild(e("span", null, n[l])),
+        d.appendChild(createEl("div", "radio")),
+        d.appendChild(createEl("span", null, n[l])),
         (d._group = r),
         (d._index = l),
         (d._activate = function () {
@@ -8950,45 +8950,45 @@
     t.appendChild(s);
   }
   function za() {
-    var t = e("div", "settings-panel account-panel");
-    var header = e("div", "account-header-row");
-    var a = e("div", "account-avatar");
+    var t = createEl("div", "settings-panel account-panel");
+    var header = createEl("div", "account-header-row");
+    var a = createEl("div", "account-avatar");
     a.innerHTML = W.profile;
     header.appendChild(a);
-    var info = e("div", "account-profile-info");
-    info.appendChild(e("div", "account-number", Q.id || "XUPER-TV-WEBOS-FLUX"));
-    var badges = e("div", "account-badges-row");
-    badges.appendChild(e("span", "account-badge badge-vip", "VIP PREMIUM"));
-    badges.appendChild(e("span", "account-badge badge-free", "100% GRATIS"));
-    badges.appendChild(e("span", "account-badge badge-device", "LG WEBOS"));
+    var info = createEl("div", "account-profile-info");
+    info.appendChild(createEl("div", "account-number", Q.id || "XUPER-TV-WEBOS-FLUX"));
+    var badges = createEl("div", "account-badges-row");
+    badges.appendChild(createEl("span", "account-badge badge-vip", "VIP PREMIUM"));
+    badges.appendChild(createEl("span", "account-badge badge-free", "100% GRATIS"));
+    badges.appendChild(createEl("span", "account-badge badge-device", "LG WEBOS"));
     info.appendChild(badges);
     header.appendChild(info);
     t.appendChild(header);
 
-    var grid = e("div", "account-metrics-grid");
-    var m1 = e("div", "account-metric-card");
-    m1.appendChild(e("div", "am-label", "PLAN Y SUSCRIPCIÓN"));
-    m1.appendChild(e("div", "am-val", "Acceso Ilimitado"));
-    m1.appendChild(e("div", "am-sub", "Sin pagos ni suscripciones"));
+    var grid = createEl("div", "account-metrics-grid");
+    var m1 = createEl("div", "account-metric-card");
+    m1.appendChild(createEl("div", "am-label", "PLAN Y SUSCRIPCIÓN"));
+    m1.appendChild(createEl("div", "am-val", "Acceso Ilimitado"));
+    m1.appendChild(createEl("div", "am-sub", "Sin pagos ni suscripciones"));
     grid.appendChild(m1);
 
-    var m2 = e("div", "account-metric-card");
-    m2.appendChild(e("div", "am-label", "MOTOR DE VIDEO"));
-    m2.appendChild(e("div", "am-val", "Modo Fluido fMP4"));
-    m2.appendChild(e("div", "am-sub", "Demuxer nativo webOS"));
+    var m2 = createEl("div", "account-metric-card");
+    m2.appendChild(createEl("div", "am-label", "MOTOR DE VIDEO"));
+    m2.appendChild(createEl("div", "am-val", "Modo Fluido fMP4"));
+    m2.appendChild(createEl("div", "am-sub", "Demuxer nativo webOS"));
     grid.appendChild(m2);
 
-    var m3 = e("div", "account-metric-card");
-    m3.appendChild(e("div", "am-label", "SEGURIDAD Y RED"));
-    m3.appendChild(e("div", "am-val", "DoH Anycast Activo"));
-    m3.appendChild(e("div", "am-sub", "Camuflaje anti-bloqueo SNI"));
+    var m3 = createEl("div", "account-metric-card");
+    m3.appendChild(createEl("div", "am-label", "SEGURIDAD Y RED"));
+    m3.appendChild(createEl("div", "am-val", "DoH Anycast Activo"));
+    m3.appendChild(createEl("div", "am-sub", "Camuflaje anti-bloqueo SNI"));
     grid.appendChild(m3);
     t.appendChild(grid);
 
-    var n = e("div", "account-actions-row"),
-      r = e("div", "account-action-btn focusable"),
-      o = e("div", "account-action-btn focusable"),
-      s = e("div", "account-action-btn focusable");
+    var n = createEl("div", "account-actions-row"),
+      r = createEl("div", "account-action-btn focusable"),
+      o = createEl("div", "account-action-btn focusable"),
+      s = createEl("div", "account-action-btn focusable");
     r.innerHTML = W.history + "<span>Ver mi lista</span>";
     o.innerHTML = W.addons + "<span>Administrar Addons</span>";
     s.innerHTML = W.share + "<span>Compartir APP</span>";
@@ -9013,10 +9013,10 @@
     n.appendChild(s);
     t.appendChild(n);
 
-    var l = e("div", "account-card");
-    l.appendChild(e("div", "account-card-title", "Almacenamiento Local Seguro"));
+    var l = createEl("div", "account-card");
+    l.appendChild(createEl("div", "account-card-title", "Almacenamiento Local Seguro"));
     l.appendChild(
-      e(
+      createEl(
         "div",
         "account-card-text",
         "Tus canales favoritos, el progreso de películas, capítulos vistos y configuración se guardan exclusivamente en la memoria interna de tu televisor LG webOS. Esta app es 100% privada y no transmite datos a servidores externos."
@@ -9027,8 +9027,8 @@
   }
   function ja() {
     for (
-      var t = e("div", "settings-panel history-panel"),
-      a = e("div", "history-tabs"),
+      var t = createEl("div", "settings-panel history-panel"),
+      a = createEl("div", "history-tabs"),
       i = [
         { id: "history", label: "Historia" },
         { id: "favs", label: "Mi favoritos" },
@@ -9038,7 +9038,7 @@
       n++
     )
       (function (t) {
-        var i = e(
+        var i = createEl(
           "div",
           "history-tab focusable" + (We === t.id ? " is-selected" : ""),
           t.label
@@ -9048,7 +9048,7 @@
         }),
           a.appendChild(i));
       })(i[n]);
-    (t.appendChild(a), t.appendChild(e("div", "history-rule")));
+    (t.appendChild(a), t.appendChild(createEl("div", "history-rule")));
     var r = [];
     if ("history" === We) r = Q.history || [];
     else if ("favs" === We)
@@ -9059,16 +9059,16 @@
             id: l[o].id,
             title: l[o].title,
             poster: l[o].poster || l[o].cover,
-            series: x(l[o]),
+            series: isMovieItem(l[o]),
             position: 0,
           });
-    var s = e("div", "history-total", "Total ");
-    (s.appendChild(e("span", null, String(r.length))), t.appendChild(s));
-    var d = e("div", "history-grid");
+    var s = createEl("div", "history-total", "Total ");
+    (s.appendChild(createEl("span", null, String(r.length))), t.appendChild(s));
+    var d = createEl("div", "history-grid");
     if (r.length)
       for (var c = 0; c < r.length && c < 30; c++)
         (function (t) {
-          var a = e("div", "history-card focusable"),
+          var a = createEl("div", "history-card focusable"),
             i = document.createElement("img");
           ((i.className = "history-poster"),
             (i.alt = ""),
@@ -9080,9 +9080,9 @@
             (t.episodeNumber ? "epis. " + t.episodeNumber : "un episodio") +
             (t.position ? " · " + ai(t.position) : "")
             : "Ya miró hasta " + ai(t.position || 0);
-          (a.appendChild(e("div", "history-progress", n)),
+          (a.appendChild(createEl("div", "history-progress", n)),
             a.appendChild(
-              e("div", "history-card-title", t.title || "Contenido")
+              createEl("div", "history-card-title", t.title || "Contenido")
             ),
             (a._activate = function () {
               cn(t);
@@ -9091,33 +9091,33 @@
         })(r[c]);
     else
       d.appendChild(
-        e("div", "history-grid-empty", "No hay títulos para mostrar todavía.")
+        createEl("div", "history-grid-empty", "No hay títulos para mostrar todavía.")
       );
     return (t.appendChild(d), t);
   }
   function Wa() {
-    var t = e("div", "settings-panel addons-panel");
-    t.appendChild(e("div", "sp-title", "Addons y Listas M3U"));
+    var t = createEl("div", "settings-panel addons-panel");
+    t.appendChild(createEl("div", "sp-title", "Addons y Listas M3U"));
     t.appendChild(
-      e(
+      createEl(
         "div",
         "sp-global-note",
         "Extiende tu catálogo con miles de canales en vivo: Anime 24/7, Telenovelas, Cine continuo, Pluto TV y señales de TV abierta de Latinoamérica y España."
       )
     );
-    var a = e("div", "account-card");
+    var a = createEl("div", "account-card");
     a.appendChild(
-      e("div", "account-card-title", "Canales en Vivo e IPTV Personalizado")
+      createEl("div", "account-card-title", "Canales en Vivo e IPTV Personalizado")
     );
     a.appendChild(
-      e(
+      createEl(
         "div",
         "account-card-text",
         "Instala listas temáticas con un solo clic o añade tus propios enlaces M3U / M3U8 para disfrutar de televisión en vivo sin límites."
       )
     );
     t.appendChild(a);
-    var n = e(
+    var n = createEl(
       "button",
       "account-action-btn focusable"
     );
@@ -9137,7 +9137,7 @@
       return !1;
     };
     t.appendChild(n);
-    var r = e(
+    var r = createEl(
       "div",
       "sp-global-note addons-tip",
       'Consejo: También puedes administrar tus listas directamente desde la sección En Vivo pulsando en la categoría "Addons M3U".'
@@ -9179,7 +9179,7 @@
       : "";
   }
   function renderNetworkDiagnostics(t, i, n) {
-    a(i);
+    removeAllChildren(i);
     var r = (function (e) {
       switch (e) {
         case "ok":
@@ -9235,38 +9235,38 @@
       (t.className = "dg-summary" + (r.cls ? " " + r.cls : "")));
     for (var o = n.hosts || [], s = 0; s < o.length; s++) {
       var l = o[s],
-        d = e("div", "dg-row " + isLayerOk(l)),
+        d = createEl("div", "dg-row " + isLayerOk(l)),
         c =
           l.doh && l.doh.ok && l.doh.ips.length
             ? l.doh.ips
             : l.system.ips || [],
         p = l.system && l.system.ok ? l.system.ips.join(", ") : "sin respuesta";
-      (d.appendChild(e("span", "dg-host", l.host)),
-        d.appendChild(e("span", "dg-local", p)),
-        d.appendChild(e("span", "dg-state", layerVerdictLabel(l))),
-        d.appendChild(e("span", "dg-ip", c.join(", "))),
+      (d.appendChild(createEl("span", "dg-host", l.host)),
+        d.appendChild(createEl("span", "dg-local", p)),
+        d.appendChild(createEl("span", "dg-state", layerVerdictLabel(l))),
+        d.appendChild(createEl("span", "dg-ip", c.join(", "))),
         i.appendChild(d));
     }
     for (var u = n.providers || [], v = [], f = [], h = 0; h < u.length; h++)
       u[h].reachable ? v.push(u[h].ip) : f.push(u[h].ip);
     var m = u.length > 0,
-      g = e("div", "dg-row dns");
-    (g.appendChild(e("span", "dg-host", "DNS seguro (DoH)")),
+      g = createEl("div", "dg-row dns");
+    (g.appendChild(createEl("span", "dg-host", "DNS seguro (DoH)")),
       g.appendChild(
-        e(
+        createEl(
           "span",
           "dg-local",
           m ? v.length + "/" + u.length + " disponibles" : "sin datos"
         )
       ),
       g.appendChild(
-        e(
+        createEl(
           "span",
           "dg-state",
           m ? (v.length ? "Correcto" : "Bloqueado") : "No evaluado"
         )
       ),
-      g.appendChild(e("span", "dg-ip", v.join(", "))),
+      g.appendChild(createEl("span", "dg-ip", v.join(", "))),
       m
         ? v.length
           ? (g.className = "dg-row dns ok")
@@ -9275,16 +9275,16 @@
       i.appendChild(g));
     var y = n.codec || {},
       b = !!(y.h264 || y.hevc || y.hls),
-      C = e("div", "dg-row" + (b ? " ok" : " warn")),
+      C = createEl("div", "dg-row" + (b ? " ok" : " warn")),
       w = [
         "H.264: " + (y.h264 || "no informado"),
         "HEVC: " + (y.hevc || "no informado"),
         "HLS: " + (y.hls || "no informado"),
       ].join("  ");
-    (C.appendChild(e("span", "dg-host", "Códec")),
-      C.appendChild(e("span", "dg-local", "")),
-      C.appendChild(e("span", "dg-state", b ? "Informado" : "No confirmado")),
-      C.appendChild(e("span", "dg-ip", w)),
+    (C.appendChild(createEl("span", "dg-host", "Códec")),
+      C.appendChild(createEl("span", "dg-local", "")),
+      C.appendChild(createEl("span", "dg-state", b ? "Informado" : "No confirmado")),
+      C.appendChild(createEl("span", "dg-ip", w)),
       i.appendChild(C));
     for (
       var S = n.layers || {},
@@ -9305,7 +9305,7 @@
       if (M) {
         ("live" !== L.key || M.ok || M.timeout || (T = !0),
           "vod" !== L.key || M.ok || M.timeout || (_ = !0));
-        var I = e(
+        var I = createEl(
           "div",
           "dg-row " + (M.ok ? "ok" : M.timeout ? "warn" : "bad")
         ),
@@ -9314,16 +9314,16 @@
         "session" === L.key &&
           (E = "userId " + (M.userId || "?") + "  token " + (M.token || "?"));
         var A = M.ms ? " " + M.ms + " ms" : "";
-        (I.appendChild(e("span", "dg-host", L.label)),
-          I.appendChild(e("span", "dg-local", "")),
+        (I.appendChild(createEl("span", "dg-host", L.label)),
+          I.appendChild(createEl("span", "dg-local", "")),
           I.appendChild(
-            e(
+            createEl(
               "span",
               "dg-state",
               M.ok ? "OK" : M.timeout ? "Sin respuesta" : "Error"
             )
           ),
-          I.appendChild(e("span", "dg-ip", E + A)),
+          I.appendChild(createEl("span", "dg-ip", E + A)),
           i.appendChild(I));
       }
     }
@@ -9427,8 +9427,8 @@
       (i.className = "dg-summary"),
       (i.textContent =
         "Consultando el DNS del televisor, el DNS seguro y los servidores…"),
-      a(n),
-      n.appendChild(e("div", "dg-row", "Analizando…")));
+      removeAllChildren(n),
+      n.appendChild(createEl("div", "dg-row", "Analizando…")));
     var s = !1,
       l = setTimeout(function () {
         s ||
@@ -9526,7 +9526,7 @@
     var t = Math.floor(e / 3600),
       a = Math.floor((e % 3600) / 60),
       i = e % 60;
-    return r(t) + ":" + r(a) + ":" + r(i);
+    return pad2(t) + ":" + pad2(a) + ":" + pad2(i);
   }
   function ii(e) {
     if ("number" == typeof e && isFinite(e) && e > 0) return e;
@@ -9593,7 +9593,7 @@
         i && i.end > 0 && (a = Math.round(i.end + 60));
       }
       if (((e = Number(e) || 0), (Ae.textContent = ai(e)), !a || a <= 0))
-        e > (a = x(X.playerItem) ? 2700 : 6300) && (a = Math.round(1.15 * e));
+        e > (a = isMovieItem(X.playerItem) ? 2700 : 6300) && (a = Math.round(1.15 * e));
       De.textContent = ai(a);
       var n = Math.min(100, Math.max(0, (e / a) * 100));
       if (
@@ -9610,7 +9610,7 @@
     }
   }
   function si(e) {
-    (Re || (Re = t("player-osd-icon")),
+    (Re || (Re = byId("player-osd-icon")),
       Re &&
       (ti && (clearTimeout(ti), (ti = null)),
         "pause" === e
@@ -9796,7 +9796,7 @@
               id: o,
               title: i.title || i.name || "Contenido",
               poster: i.poster || i.cover || "",
-              series: !!x(i),
+              series: !!isMovieItem(i),
               episodeId: r && r.id ? String(r.id) : "",
               episodeNumber: (r && (r.number || r.seriesNumber)) || "",
               position: Math.floor(e),
@@ -9841,7 +9841,7 @@
     if (e) {
       for (var t = 0; t < l.length; t++)
         if (String(l[t].id) === String(e.id)) return ((ln = e), void ba(l[t]));
-      for (var a = o(e.title || ""), i = 0; i < l.length; i++) {
+      for (var a = normalizeText(e.title || ""), i = 0; i < l.length; i++) {
         for (
           var n = l[i], r = n._catalogSeasons || [], s = !1, d = 0;
           d < r.length;
@@ -9851,7 +9851,7 @@
             s = !0;
             break;
           }
-        if (s || (a && o(n.title || "") === a)) return ((ln = e), void ba(n));
+        if (s || (a && normalizeText(n.title || "") === a)) return ((ln = e), void ba(n));
       }
       var c = T(
         {
@@ -9970,7 +9970,7 @@
     wn = "";
   function Sn(e) {
     if (!e) return "";
-    if (x(e))
+    if (isMovieItem(e))
       return (
         "series:" +
         (e.seriesContentId || e.seriesId || e.seasonId || e.id || "")
@@ -10007,7 +10007,7 @@
       Bi && (Bi.innerHTML = ""));
   }
   function kn(e) {
-    return e && x(e)
+    return e && isMovieItem(e)
       ? "player" === X.screen && X.playerEpisode
         ? X.playerEpisode
         : X.detailEpisode
@@ -10157,12 +10157,12 @@
         Dn());
       var e = X.playerItem;
       var initFocus = null;
-      if (x(e) && yi) {
+      if (isMovieItem(e) && yi) {
         var t = yi.querySelector(".psv-ep-btn");
         if (t) initFocus = t;
       }
       if (!initFocus) {
-        initFocus = (x(e) && _i) ? _i : bi;
+        initFocus = (isMovieItem(e) && _i) ? _i : bi;
       }
       if (window.DialogManager) {
         window.DialogManager.open("playSettingView", hi, {
@@ -10199,7 +10199,7 @@
       !skipFocus && ("player" !== X.screen || ji || setFocus(Ce)));
   }
   function qn() {
-    var e = X.focus ? n(X.focus, ".psv-row") : null,
+    var e = X.focus ? closestMatch(X.focus, ".psv-row") : null,
       t = e ? e.id : "",
       a = e && X.focus ? X.focus.textContent : "";
     if (
@@ -10233,16 +10233,16 @@
     if (hi) {
       for (var e = hi.querySelectorAll(".psv-row"), t = 0; t < e.length; t++)
         e[t].classList.remove("is-row-focused");
-      var a = X.focus ? n(X.focus, ".psv-row") : null;
+      var a = X.focus ? closestMatch(X.focus, ".psv-row") : null;
       a && a.classList.add("is-row-focused");
     }
   }
   function renderPlayerEpisodes() {
     if (gi) {
       var t = X.playerItem;
-      if (t && x(t)) {
+      if (t && isMovieItem(t)) {
         if (((gi.style.display = "block"), yi)) {
-          a(yi);
+          removeAllChildren(yi);
           var i = Vn(t),
             n = i[X.playerSeasonIndex] || i[0],
             r =
@@ -10268,7 +10268,7 @@
               (X.playerEpisodeRange = Math.floor(o / 20));
             for (
               var d = l[X.playerEpisodeRange] || l[0],
-              c = e("div", "psv-episode-numbers scrollable"),
+              c = createEl("div", "psv-episode-numbers scrollable"),
               p = d.start;
               p < d.end;
               p++
@@ -10277,7 +10277,7 @@
                 var i = String(
                   void 0 !== t.number && null !== t.number ? t.number : a + 1
                 ),
-                  n = e(
+                  n = createEl(
                     "button",
                     "psv-ep-btn focusable" + (a === o ? " is-selected" : ""),
                     i
@@ -10296,12 +10296,12 @@
               })(r[p], p);
             yi.appendChild(c);
             for (
-              var u = e("div", "psv-episode-ranges scrollable"), v = 0;
+              var u = createEl("div", "psv-episode-ranges scrollable"), v = 0;
               v < l.length;
               v++
             )
               (function (t, a) {
-                var i = e(
+                var i = createEl(
                   "button",
                   "psv-range-btn focusable" +
                   (t === X.playerEpisodeRange ? " is-selected" : ""),
@@ -10346,7 +10346,7 @@
             yi.appendChild(u);
           } else
             yi.appendChild(
-              e("div", "psv-selection-empty", "Temporadas y episodios")
+              createEl("div", "psv-selection-empty", "Temporadas y episodios")
             );
         }
       } else gi.style.display = "none";
@@ -10411,7 +10411,7 @@
   }
   function Bn() {
     var t = X.playerItem;
-    if (t && x(t) && (zi && On(), ki || lr(), ki)) {
+    if (t && isMovieItem(t) && (zi && On(), ki || lr(), ki)) {
       if (!((t.episodes && t.episodes.length) || t._detailsLoaded))
         return (
           jr("Cargando capítulos…"),
@@ -10459,10 +10459,10 @@
               ((n && n.number) || X.browserSeason + 1));
           ((function (t, i) {
             if (!Ii || !Ei) return;
-            (a(Ii), (Ei.style.display = "flex"));
+            (removeAllChildren(Ii), (Ei.style.display = "flex"));
             for (var n = 0; n < i.length; n++)
               (function (t) {
-                var a = e(
+                var a = createEl(
                   "div",
                   "pe-season focusable",
                   "Temporada " + (i[t].number || t + 1)
@@ -10559,19 +10559,19 @@
   }
   function jn(t, i) {
     if (Ai && i) {
-      a(Ai);
+      removeAllChildren(Ai);
       var r =
         i.id === (t.seasonId || t.id) && t.episodes && t.episodes.length
           ? t.episodes
           : i._episodes || [];
       if (!r.length)
         return (
-          Ai.appendChild(e("div", "pe-loading", "Cargando episodios…")),
+          Ai.appendChild(createEl("div", "pe-loading", "Cargando episodios…")),
           void Hn(t, i, function (e) {
             if (
               X.episodeBrowserOpen &&
               Vn(t)[X.browserSeason] === i &&
-              (jn(t, i), n(X.focus, "#pe-episodes"))
+              (jn(t, i), closestMatch(X.focus, "#pe-episodes"))
             ) {
               var a = Ai.querySelector(".pe-ep.is-current") || findFirstFocusable(Ai);
               a && setFocus(a);
@@ -10585,28 +10585,28 @@
       X.episodeBrowserPage = s;
       for (var c = l; c < d; c++)
         (function (a, i) {
-          var n = e("div", "pe-ep focusable"),
+          var n = createEl("div", "pe-ep focusable"),
             r = void 0 !== a.number && null !== a.number ? a.number : i + 1;
-          n.appendChild(e("div", "pe-num", String(r)));
-          var o = e("div", "pe-thumb"),
-            s = e("div", "pe-thumb-play");
+          n.appendChild(createEl("div", "pe-num", String(r)));
+          var o = createEl("div", "pe-thumb"),
+            s = createEl("div", "pe-thumb-play");
           s.innerHTML = playSvg();
           (o.appendChild(s), n.appendChild(o));
-          var l = e("div", "pe-info");
-          l.appendChild(e("div", "pe-name", Un(t, a, i)));
+          var l = createEl("div", "pe-info");
+          l.appendChild(createEl("div", "pe-name", Un(t, a, i)));
           var d = [],
             c = Fn(a);
           (c && d.push(c),
             a.quality && d.push(String(a.quality).split(",")[0].toUpperCase()),
-            l.appendChild(e("div", "pe-meta", d.join("   ·   "))),
-            a.description && l.appendChild(e("div", "pe-desc", a.description)),
+            l.appendChild(createEl("div", "pe-meta", d.join("   ·   "))),
+            a.description && l.appendChild(createEl("div", "pe-desc", a.description)),
             n.appendChild(l));
           var p =
             X.playerEpisode &&
             (X.playerEpisode.id === a.id ||
               (void 0 !== X.playerEpisode.number &&
                 X.playerEpisode.number === a.number));
-          (n.appendChild(e("div", "pe-badge", "REPRODUCIENDO")),
+          (n.appendChild(createEl("div", "pe-badge", "REPRODUCIENDO")),
             p && n.classList.add("is-current"),
             (n._onMove = function (e) {
               var t = Ai ? Ai.querySelectorAll(".pe-ep") : [],
@@ -10627,7 +10627,7 @@
         })(r[c], c);
       r.length > o &&
         Ai.appendChild(
-          e(
+          createEl(
             "div",
             "pe-loading",
             "Capítulos " + (l + 1) + "-" + d + " de " + r.length + " · usa → para ver más"
@@ -10705,7 +10705,7 @@
   }
   var loadingBackdropTimer = null;
   function showLoadingBackdrop(e, text) {
-    if ((ke || (ke = t("next-episode-loading")), ke)) {
+    if ((ke || (ke = byId("next-episode-loading")), ke)) {
       var a = (e && (e.backdrop || e.landscape || e.poster)) || "";
       ke.style.backgroundImage = a ? 'url("' + String(a).replace(/"/g, "%22") + '")' : "";
       var txtEl = ke.querySelector(".next-episode-loading-text");
@@ -10731,14 +10731,14 @@
       clearTimeout(loadingBackdropTimer);
       loadingBackdropTimer = null;
     }
-    (ke || (ke = t("next-episode-loading")),
+    (ke || (ke = byId("next-episode-loading")),
       ke &&
       (ke.classList.remove("is-active"), (ke.style.backgroundImage = "")));
   }
   var autoNextKey = "";
   function Qn() {
     var e = X.playerItem;
-    if (e && x(e) && "player" === X.screen) {
+    if (e && isMovieItem(e) && "player" === X.screen) {
       /* Protección 1: No cambiar de capítulo si el video no terminó de verdad.
          Si el CDN o relay se desconectó a mitad del capítulo, el navegador dispara 'ended'
          porque se cerró la conexión HTTP. En ese caso NO se debe cambiar de capítulo,
@@ -10925,7 +10925,7 @@
   }
   function ar() {
     if (Pi) {
-      a(Pi);
+      removeAllChildren(Pi);
       var t = un[Ln(bn())];
       t && !$i && (Xi = preferredAudioIndex(t.audio));
       var i = (function (e) {
@@ -10942,7 +10942,7 @@
       i.length || (i = [{ index: Xi || 0, label: "Español" }]);
       for (var n = 0; n < i.length; n++)
         (function (t) {
-          var a = e("button", "dps-btn focusable");
+          var a = createEl("button", "dps-btn focusable");
           ((a.textContent = t.label),
             Xi === t.index && a.classList.add("is-selected"),
             (a._activate = function () {
@@ -10954,7 +10954,7 @@
   }
   function refreshQualityOptions() {
     if (!ZiOptsQuality) return;
-    a(ZiOptsQuality);
+    removeAllChildren(ZiOptsQuality);
     var info = window.__xuperStreamInfo || null,
       mi = un[Ln(bn())],
       tracks = (mi && mi.tracks) || (info && info.availableTracks) || [],
@@ -10998,7 +10998,7 @@
       });
     for (k = 0; k < opts.length; k++)
       (function (opt) {
-        var b = e("button", "dps-btn focusable", opt.label);
+        var b = createEl("button", "dps-btn focusable", opt.label);
         (b.setAttribute("data-quality", opt.value),
           opt.value === cur && b.classList.add("is-selected"),
           (b._activate = function () {
@@ -11028,10 +11028,10 @@
         Ji)
     ) {
       if (Vi) {
-        a(Vi);
+        removeAllChildren(Vi);
         for (var r = 0; r < t.length; r++)
           (function (t) {
-            var a = e("button", "dps-btn focusable");
+            var a = createEl("button", "dps-btn focusable");
             ((a.textContent = nr(t.lang || "Sub")),
               Qi && Qi.url === t.url && a.classList.add("is-selected"),
               (a._activate = function () {
@@ -11319,27 +11319,27 @@
   }
   function lr() {
     if (
-      ((Ce = t("player-stage")),
-        (we = t("player-infobar")),
-        (Me = t("player-vod-infobar")),
-        (Se = t("player-channels")),
-        ($e = t("player-categories")),
-        (Ge = t("pcat-grid")),
-        (Qe = t("pcat-sub")),
-        (xe = t("player-video")),
-        (_e = t("player-status")),
-        (ke = t("next-episode-loading")),
-        (Le = t("player-mode-hint")),
-        (Re = t("player-osd-icon")),
+      ((Ce = byId("player-stage")),
+        (we = byId("player-infobar")),
+        (Me = byId("player-vod-infobar")),
+        (Se = byId("player-channels")),
+        ($e = byId("player-categories")),
+        (Ge = byId("pcat-grid")),
+        (Qe = byId("pcat-sub")),
+        (xe = byId("player-video")),
+        (_e = byId("player-status")),
+        (ke = byId("next-episode-loading")),
+        (Le = byId("player-mode-hint")),
+        (Re = byId("player-osd-icon")),
         (Te = Ce ? Ce.querySelector(".player-frame") : null),
-        (Ie = t("vod-infobar-poster")),
-        (Ee = t("vod-infobar-title")),
-        (Ae = t("vod-time-current")),
-        (De = t("vod-time-total")),
-        (Pe = t("vod-seekbar")),
-        (Oe = t("vod-seek-progress")),
-        (qe = t("vod-seek-buffered")),
-        (Ne = t("vod-seek-thumb")),
+        (Ie = byId("vod-infobar-poster")),
+        (Ee = byId("vod-infobar-title")),
+        (Ae = byId("vod-time-current")),
+        (De = byId("vod-time-total")),
+        (Pe = byId("vod-seekbar")),
+        (Oe = byId("vod-seek-progress")),
+        (qe = byId("vod-seek-buffered")),
+        (Ne = byId("vod-seek-thumb")),
         Pe &&
         (Pe.classList.add("focusable"),
           (Pe._activate = function (evt) {
@@ -11369,27 +11369,27 @@
             evt.stopPropagation();
           }
         }),
-        (hi = t("player-playsetting-view")),
-        (gi = t("psv-sec-selection")),
-        (yi = t("psv-episodes-row")),
-        (_i = t("psv-btn-episodes")),
-        (bi = t("psv-btn-config")),
-        (Ci = t("psv-btn-p1")),
-        (wi = t("psv-btn-p2")),
-        (Si = t("psv-sec-audio")),
-        t("psv-sec-quality"),
-        t("psv-quality-row"),
-        t("psv-sec-aspect"),
-        t("psv-sec-player"),
-        (xi = t("psv-btn-feedback")),
-        (Ti = t("psv-aspect-row")),
-        (ki = t("player-episodes")),
-        (Li = t("pe-title")),
-        (Mi = t("pe-sub")),
-        (Ii = t("pe-seasons")),
-        (Ei = t("pe-seasons-col")),
-        (Ai = t("pe-episodes")),
-        (Di = t("pe-season-label")),
+        (hi = byId("player-playsetting-view")),
+        (gi = byId("psv-sec-selection")),
+        (yi = byId("psv-episodes-row")),
+        (_i = byId("psv-btn-episodes")),
+        (bi = byId("psv-btn-config")),
+        (Ci = byId("psv-btn-p1")),
+        (wi = byId("psv-btn-p2")),
+        (Si = byId("psv-sec-audio")),
+        byId("psv-sec-quality"),
+        byId("psv-quality-row"),
+        byId("psv-sec-aspect"),
+        byId("psv-sec-player"),
+        (xi = byId("psv-btn-feedback")),
+        (Ti = byId("psv-aspect-row")),
+        (ki = byId("player-episodes")),
+        (Li = byId("pe-title")),
+        (Mi = byId("pe-sub")),
+        (Ii = byId("pe-seasons")),
+        (Ei = byId("pe-seasons-col")),
+        (Ai = byId("pe-episodes")),
+        (Di = byId("pe-season-label")),
         _i &&
         (_i._activate = function () {
           Bn();
@@ -11419,20 +11419,20 @@
           };
         })(i[n]);
     if (
-      ((mi = t("dialog-playsettings")),
-        (Pi = t("dps-audio-options")),
-        (Oi = t("dps-sub-switch")),
-        (qi = t("dps-row-lang")),
-        (Ni = t("dps-row-size")),
-        (Ri = t("dps-row-style")),
-        (ZiRowBg = t("dps-row-bg")),
-        (Vi = t("dps-lang-options")),
-        (Hi = t("dps-size-options")),
-        (Ui = t("dps-style-options")),
-        (ZiOptsBg = t("dps-bg-options")),
-        (ZiOptsQuality = t("dps-quality-options")),
-        (Fi = t("dps-btn-exit")),
-        (Bi = t("player-subtitles")),
+      ((mi = byId("dialog-playsettings")),
+        (Pi = byId("dps-audio-options")),
+        (Oi = byId("dps-sub-switch")),
+        (qi = byId("dps-row-lang")),
+        (Ni = byId("dps-row-size")),
+        (Ri = byId("dps-row-style")),
+        (ZiRowBg = byId("dps-row-bg")),
+        (Vi = byId("dps-lang-options")),
+        (Hi = byId("dps-size-options")),
+        (Ui = byId("dps-style-options")),
+        (ZiOptsBg = byId("dps-bg-options")),
+        (ZiOptsQuality = byId("dps-quality-options")),
+        (Fi = byId("dps-btn-exit")),
+        (Bi = byId("player-subtitles")),
         Oi &&
         (Oi._activate = function () {
           if (((Ki = !0), (Ji = !Ji))) {
@@ -11491,8 +11491,8 @@
             (xe.currentTime || 0) <= 0 ||
             jr(""));
       }, 2e3),
-      a(we),
-      a(Se),
+      removeAllChildren(we),
+      removeAllChildren(Se),
       Ce.classList.add("focusable"),
       (Ce._onMove = function (e) {
         return "vod" === X.playerMode
@@ -11514,28 +11514,28 @@
       (Ce._activate = function () {
         "vod" !== X.playerMode ? (X.infobar ? ui() : pi()) : di();
       }),
-      we.appendChild(e("div", "pi-logo")),
-      we.appendChild(e("div", "pi-index")));
-    var d = e("div", "pi-namerow"),
-      c = e("div", "pi-name");
+      we.appendChild(createEl("div", "pi-logo")),
+      we.appendChild(createEl("div", "pi-index")));
+    var d = createEl("div", "pi-namerow"),
+      c = createEl("div", "pi-name");
     d.appendChild(c);
-    var p = e("div", "pi-uhd");
+    var p = createEl("div", "pi-uhd");
     ((p.style.left = "20px"),
       d.appendChild(p),
       we.appendChild(d),
-      we.appendChild(e("div", "pi-date")),
-      we.appendChild(e("div", "pi-range")),
-      we.appendChild(e("div", "pi-now")),
-      we.appendChild(e("div", "pi-next")));
-    var u = e("div", "pi-seek");
-    (u.appendChild(e("div", "bar")),
+      we.appendChild(createEl("div", "pi-date")),
+      we.appendChild(createEl("div", "pi-range")),
+      we.appendChild(createEl("div", "pi-now")),
+      we.appendChild(createEl("div", "pi-next")));
+    var u = createEl("div", "pi-seek");
+    (u.appendChild(createEl("div", "bar")),
       we.appendChild(u),
-      we.appendChild(e("div", "pi-menu", "info")),
-      we.appendChild(e("div", "pi-quality", "HD")),
-      we.appendChild(e("div", "pi-scale", "Normal")),
-      we.appendChild(e("div", "pi-func", "Selecion de función")));
+      we.appendChild(createEl("div", "pi-menu", "info")),
+      we.appendChild(createEl("div", "pi-quality", "HD")),
+      we.appendChild(createEl("div", "pi-scale", "Normal")),
+      we.appendChild(createEl("div", "pi-func", "Selecion de función")));
     for (
-      var v = e("div", "pi-actions"),
+      var v = createEl("div", "pi-actions"),
       f = [
         { label: "Pip", right: 446, w: 67, hidden: !0 },
         { label: "HD", right: 389, w: 67 },
@@ -11552,7 +11552,7 @@
     ) {
       var m = f[h];
       if (!m.hidden) {
-        var g = e("div", "pi-act focusable", m.label);
+        var g = createEl("div", "pi-act focusable", m.label);
         ((g.style.width = 1.5 * m.w + "px"),
           (g.style.left = 1920 - 1.5 * m.right - 1.5 * m.w + "px"),
           (g._kind = m.label),
@@ -11585,15 +11585,15 @@
       }
     }
     we.appendChild(v);
-    var y = e("div", "pc-header"),
-      titleRow = e("div", "pc-title-row"),
-      titleText = e("div", "pc-title", "Canales de TV"),
-      catBadge = e("span", "pc-cat-badge", Mt ? Mt.name : "Todos"),
-      toolbar = e("div", "pc-toolbar"),
-      channelSearch = e("button", "pc-toolbar-btn pc-btn-search focusable"),
-      channelFavorites = e("button", "pc-toolbar-btn pc-btn-fav focusable"),
-      channelAll = e("button", "pc-toolbar-btn pc-btn-all focusable"),
-      channelCategory = e("button", "pc-toolbar-btn pc-btn-filter focusable");
+    var y = createEl("div", "pc-header"),
+      titleRow = createEl("div", "pc-title-row"),
+      titleText = createEl("div", "pc-title", "Canales de TV"),
+      catBadge = createEl("span", "pc-cat-badge", Mt ? Mt.name : "Todos"),
+      toolbar = createEl("div", "pc-toolbar"),
+      channelSearch = createEl("button", "pc-toolbar-btn pc-btn-search focusable"),
+      channelFavorites = createEl("button", "pc-toolbar-btn pc-btn-fav focusable"),
+      channelAll = createEl("button", "pc-toolbar-btn pc-btn-all focusable"),
+      channelCategory = createEl("button", "pc-toolbar-btn pc-btn-filter focusable");
 
     titleRow.appendChild(titleText);
     titleRow.appendChild(catBadge);
@@ -11653,16 +11653,16 @@
       toolbar.appendChild(channelCategory),
       y.appendChild(toolbar),
       Se.appendChild(y));
-    var b = e("div", "pc-categories scrollable");
+    var b = createEl("div", "pc-categories scrollable");
     ((b.id = "pc-categories"),
       Se.appendChild(b),
-      Se.appendChild(e("div", "pc-div")));
-    var C = e("div", "pc-list scrollable");
+      Se.appendChild(createEl("div", "pc-div")));
+    var C = createEl("div", "pc-list scrollable");
     (Se.appendChild(C), renderPlayerCategories(), renderLiveChannelList());
-    var w = e("div", "pc-menu");
-    (w.appendChild(e("div", "ic")),
-      w.appendChild(e("div", "l1", "[OK] Reproducir  •  [AMARILLO / →] Favorito")),
-      w.appendChild(e("div", "l2", "[SALIR] Pantalla completa  •  ← Menú")),
+    var w = createEl("div", "pc-menu");
+    (w.appendChild(createEl("div", "ic")),
+      w.appendChild(createEl("div", "l1", "[OK] Reproducir  •  [AMARILLO / →] Favorito")),
+      w.appendChild(createEl("div", "l2", "[SALIR] Pantalla completa  •  ← Menú")),
       Se.appendChild(w));
   }
   function closeLiveChannelSearch(returnFocus) {
@@ -11679,10 +11679,10 @@
     if (!Se) return;
     if (liveSearchOpen) return void closeLiveChannelSearch(returnFocus);
     liveSearchOpen = !0;
-    var box = e("div", "pc-search-box"),
-      label = e("label", "pc-search-label", "Buscar canal"),
+    var box = createEl("div", "pc-search-box"),
+      label = createEl("label", "pc-search-label", "Buscar canal"),
       input = document.createElement("input"),
-      clear = e("button", "pc-search-clear focusable", "Limpiar");
+      clear = createEl("button", "pc-search-clear focusable", "Limpiar");
     ((input.type = "search"),
       (input.className = "pc-search-input focusable"),
       (input.placeholder = "Escribe el nombre del canal"),
@@ -11753,10 +11753,10 @@
           n += i[r].id + "|";
         var o = X.focus && X.focus._cat ? X.focus._cat : null;
         if (n !== Je) {
-          a(t);
+          removeAllChildren(t);
           for (var s = [], l = 0; l < i.length; l++) {
             var d = i[l],
-              c = e("button", "pc-cat-pill focusable", d.name);
+              c = createEl("button", "pc-cat-pill focusable", d.name);
             ((c._cat = d),
               (c._idx = l),
               (c._activate = (function (e) {
@@ -11840,19 +11840,19 @@
   function openPlayerCategoryPicker(returnFocus) {
     categoryPickerReturnFocus = returnFocus || X.focus;
     if (!$e) {
-      $e = t("player-categories");
-      Ge = t("pcat-grid");
-      Qe = t("pcat-sub");
+      $e = byId("player-categories");
+      Ge = byId("pcat-grid");
+      Qe = byId("pcat-sub");
     }
     if ($e && Ge) {
-      var scrP = t("screen-player");
+      var scrP = byId("screen-player");
       scrP && scrP.classList.add("categories-open");
       Se && Se.classList.remove("is-active");
       we && (we.classList.remove("is-active"), (we.style.display = "none"));
       X.categoryPickerOpen = !0;
       $e.classList.add("is-active");
       ui();
-      var pClose = t("pcat-close");
+      var pClose = byId("pcat-close");
       if (pClose) {
         pClose._activate = function () { ur(); };
         pClose._onMove = function (dir) {
@@ -11870,7 +11870,7 @@
           (cats = cats.filter(function (el) {
             return !!(el && (el.isAddon || !isAdultLiveChannel(el)));
           }));
-        a(Ge);
+        removeAllChildren(Ge);
         if (Qe) {
           Qe.textContent = cats.length
             ? cats.length + " categorías · selecciona para ver canales"
@@ -11879,8 +11879,8 @@
         var catTiles = [];
         for (var i = 0; i < cats.length; i++) {
           (function (catObj, idx) {
-            var tile = e("div", "pcat-tile focusable");
-            tile.appendChild(e("div", "pcat-name", catObj.name));
+            var tile = createEl("div", "pcat-tile focusable");
+            tile.appendChild(createEl("div", "pcat-name", catObj.name));
             if (Mt && Mt.id === catObj.id) tile.classList.add("is-selected");
             tile._cat = catObj;
             tile._activate = function () {
@@ -11917,7 +11917,7 @@
               }
               if ("up" === dir) {
                 if (idx - cols >= 0 && catTiles[idx - cols]) return setFocus(catTiles[idx - cols]), !0;
-                var pCloseBtn = t("pcat-close");
+                var pCloseBtn = byId("pcat-close");
                 if (pCloseBtn && at(pCloseBtn)) return setFocus(pCloseBtn), !0;
                 return !0;
               }
@@ -11952,7 +11952,7 @@
             return null;
           },
           onClose: function () {
-            var scrP2 = t("screen-player");
+            var scrP2 = byId("screen-player");
             scrP2 && scrP2.classList.remove("categories-open");
             if ($e) $e.classList.remove("is-active");
             X.categoryPickerOpen = !1;
@@ -11974,9 +11974,9 @@
       window.DialogManager.close("playerCategories", !!skipFocus);
       if (!skipFocus) return;
     }
-    var scrP = t("screen-player");
+    var scrP = byId("screen-player");
     scrP && scrP.classList.remove("categories-open");
-    if (!$e) $e = t("player-categories");
+    if (!$e) $e = byId("player-categories");
     if ($e) $e.classList.remove("is-active");
     X.categoryPickerOpen = !1;
     if ("player" === X.screen) {
@@ -12053,17 +12053,17 @@
     if (Se) {
       var i = Se.querySelector(".pc-list");
       if (i) {
-        if ((a(i), (Xe = {}), Mt && Mt.isAddon)) {
-          var n = e("div", "pc-row-addon-promo focusable");
-          var promoIcon = e("div", "promo-icon");
+        if ((removeAllChildren(i), (Xe = {}), Mt && Mt.isAddon)) {
+          var n = createEl("div", "pc-row-addon-promo focusable");
+          var promoIcon = createEl("div", "promo-icon");
           promoIcon.innerHTML = gearSvg();
           n.appendChild(promoIcon);
-          var o = e("div", "promo-info");
+          var o = createEl("div", "promo-info");
           (o.appendChild(
-            e("div", "promo-text", "Administrar Addons y Listas M3U")
+            createEl("div", "promo-text", "Administrar Addons y Listas M3U")
           ),
             o.appendChild(
-              e(
+              createEl(
                 "div",
                 "promo-sub",
                 "Instala listas recomendadas o agrega tu enlace"
@@ -12088,7 +12088,7 @@
         }
         var visible = visibleLiveIndexes();
         if (!visible.length) {
-          var s = e(
+          var s = createEl(
             "div",
             "pc-empty-channels",
             liveSearchText
@@ -12117,18 +12117,18 @@
           c++
         ) {
           var channelIndex = visible[c];
-          var p = e("div", "pc-row focusable");
+          var p = createEl("div", "pc-row focusable");
           p._channel = channelIndex;
-          var u = e("div", "ic");
+          var u = createEl("div", "ic");
           F[channelIndex].logo &&
             ((u.style.backgroundImage = "url(" + F[channelIndex].logo + ")"),
               (u.style.backgroundSize = "contain"),
               (u.style.backgroundRepeat = "no-repeat"),
               (u.style.backgroundPosition = "center"));
-          var v = e("div", "num", r(F[channelIndex].index || channelIndex + 1)),
-            f = e("div", "nm", F[channelIndex].name),
-            h = e("div", "epg", F[channelIndex].now || "En vivo"),
-            m = e(
+          var v = createEl("div", "num", pad2(F[channelIndex].index || channelIndex + 1)),
+            f = createEl("div", "nm", F[channelIndex].name),
+            h = createEl("div", "epg", F[channelIndex].now || "En vivo"),
+            m = createEl(
               "button",
               "pc-channel-fav focusable" +
               (X.liveFavorites[liveChannelKey(F[channelIndex])] || F[channelIndex].fav
@@ -12513,13 +12513,13 @@
         Te && (Te.style.display = "block"),
         (function () {
           Wr && (clearTimeout(Wr), (Wr = null));
-          Le || (Le = t("player-mode-hint"));
+          Le || (Le = byId("player-mode-hint"));
           Le && (Le.classList.remove("is-active"), (Le.textContent = ""));
         })());
     }
   }
   function jr(e) {
-    (_e || (_e = t("player-status")),
+    (_e || (_e = byId("player-status")),
       _e &&
       (e
         ? ((_e.textContent = e), _e.classList.add("is-active"))
@@ -12532,7 +12532,7 @@
       "vod" === X.playerMode &&
       ("smooth" === X.streamMode || "relay" === X.streamMode) &&
       "player" === X.screen &&
-      (Le || (Le = t("player-mode-hint")), Le)
+      (Le || (Le = byId("player-mode-hint")), Le)
     ) {
       var a =
         String((X.playerItem && X.playerItem.id) || "") +
@@ -12541,9 +12541,9 @@
       ("|" !== a && a === Xr) ||
         ((Xr = a),
           (Le.textContent = ""),
-          Le.appendChild(e("span", "pmh-title", "Modo Fluido activado")),
+          Le.appendChild(createEl("span", "pmh-title", "Modo Fluido activado")),
           Le.appendChild(
-            e(
+            createEl(
               "span",
               "pmh-sub",
               "Úsalo cuando las películas van trabadas o se cortan. Si tu TV las reproduce bien en Normal, déjalo en Normal para ver mejor imagen."
@@ -13001,7 +13001,7 @@
     var a = yr;
     function i() {
       if ((!X.resumePosition || X.resumePosition <= 3) && e) {
-        var isSeries = x(e);
+        var isSeries = isMovieItem(e);
         var curEpId = X.playerEpisode && String(X.playerEpisode.id);
         var hist = (Q && Q.history) || [];
         for (var h = 0; h < hist.length; h++) {
@@ -13059,7 +13059,7 @@
         ((Xi = preferredAudioIndex(l)),
           (i.audioTrack = Xi || 0),
           (i.audioPreference = X.audioPreferenceCode || ""),
-          x(e))
+          isMovieItem(e))
       ) {
         var d = X.playerEpisode,
           c = e.seasonId || e.id;
@@ -13137,7 +13137,7 @@
       P(i.forceRelay ? "resolveSmooth" : "resolve", i, done);
     }
     if (
-      x(e) &&
+      isMovieItem(e) &&
       !X.playerEpisode &&
       (!e.episodes || !e.episodes.length) &&
       !e._detailsLoaded
@@ -13215,8 +13215,8 @@
       a && (X.playerEpisode = a),
       e && xn(e),
       (X.playerReturn = { screen: "detail", focus: X.focus }));
-    var r = t("screen-player"),
-      o = t("screen-detail");
+    var r = byId("screen-player"),
+      o = byId("screen-detail");
     (r && (r.classList.remove("is-mini"), r.classList.add("is-active")),
       o && o.classList.remove("is-active"),
       (X.screen = "player"),
@@ -13513,7 +13513,7 @@
     if (e)
       (Me && Me.classList.remove("is-active"),
         (a.style.display = "block"),
-        (a.textContent = r(t.index || X.channel + 1)),
+        (a.textContent = pad2(t.index || X.channel + 1)),
         (i.textContent = t.name || ""),
         (n.textContent = "Hoy"),
         (o.textContent = t.time || ""),
@@ -13531,7 +13531,7 @@
       we && (we.classList.remove("is-active"), (we.style.display = "none"));
       var u = X.playerItem || l[0];
       if (Ee)
-        if (x(u) && X.playerEpisode) {
+        if (isMovieItem(u) && X.playerEpisode) {
           var v = X.playerEpisode.title || X.playerEpisode.name,
             f = X.playerEpisode.number || X.playerEpisode.seriesNumber,
             h = v || (f ? "Capítulo " + f : "");
@@ -13593,7 +13593,7 @@
       "player" === X.screen && (ao(), pi(), setFocus(Ce)));
   }
   function applyViewportScale() {
-    var e = t("app");
+    var e = byId("app");
     if (e) {
       var a = (function () {
         var e =
@@ -13639,7 +13639,7 @@
     }
   }
   function bootstrapApp() {
-    var welcomeVersion = t("screen-welcome");
+    var welcomeVersion = byId("screen-welcome");
     welcomeVersion = welcomeVersion && welcomeVersion.querySelector(".welcome-version");
     welcomeVersion && (welcomeVersion.textContent = "v" + APP_VERSION);
     applyViewportScale();
@@ -13682,13 +13682,13 @@
       if (now - lastBackKeyDown < 500) return;
       if (now - lastHoverAt < 80) return;
       lastHoverAt = now;
-      var tElem = n(e.target, ".focusable");
+      var tElem = closestMatch(e.target, ".focusable");
       if (tElem && at(tElem) && X.focus !== tElem) {
         setFocus(tElem, !0);
       }
     }, !1);
     document.addEventListener("click", function (e) {
-      var t = n(e.target, ".focusable");
+      var t = closestMatch(e.target, ".focusable");
       if (t) {
         setFocus(t, !0);
         if (t._activate) {
@@ -13699,37 +13699,37 @@
         return;
       }
       if (Ht) {
-        if (!n(e.target, ".dialog-addons-box")) {
+        if (!closestMatch(e.target, ".dialog-addons-box")) {
           la();
           return;
         }
       } else if (catalogFilterDialog) {
-        if (!n(e.target, ".catalog-filter-card")) {
+        if (!closestMatch(e.target, ".catalog-filter-card")) {
           closeCatalogFilter();
           return;
         }
       } else if (liveFavoritePrompt) {
-        if (!n(e.target, ".pc-favorite-box")) {
+        if (!closestMatch(e.target, ".pc-favorite-box")) {
           closeLiveFavoriteConfirm();
           return;
         }
       } else if (xa || (DialogManager && DialogManager.isOpen("seasonPopup"))) {
-        if (!n(e.target, ".season-popup")) {
+        if (!closestMatch(e.target, ".season-popup")) {
           Ta();
           return;
         }
       } else if (X.categoryPickerOpen) {
-        if (!n(e.target, ".player-categories") && !n(e.target, ".pcat-box")) {
+        if (!closestMatch(e.target, ".player-categories") && !closestMatch(e.target, ".pcat-box")) {
           ur();
           return;
         }
       } else if (X.episodeBrowserOpen) {
-        if (!n(e.target, "#player-episodes")) {
+        if (!closestMatch(e.target, "#player-episodes")) {
           zn();
           return;
         }
       } else if ("player" === X.screen) {
-        if (!n(e.target, ".player-channels") && !n(e.target, ".player-infobar") && !n(e.target, ".player-vod-infobar")) {
+        if (!closestMatch(e.target, ".player-channels") && !closestMatch(e.target, ".player-infobar") && !closestMatch(e.target, ".player-vod-infobar")) {
           if (X.channelsOpen) {
             no();
           } else {
@@ -13801,7 +13801,7 @@
       P("prewarm", {}, function () { });
     } catch (e) { }
     var e, a;
-    ((e = t("welcome-loading-img")),
+    ((e = byId("welcome-loading-img")),
       (a = 1),
       et && (clearInterval(et), (et = null)),
       tt && (clearTimeout(tt), (tt = null)),

@@ -56,3 +56,37 @@ test("rechaza nombres ausentes del archivo", () => {
   assert.match(out, /__ERROR__/);
   assert.match(out, /no aparece/);
 });
+
+/* Los nombres de una letra son el 65% de las funciones, pero además son
+   parámetros locales en cientos de sitios. Renombrar por texto los convierte a
+   todos y deja `function createEl(createEl, createEl)`. El renombrado debe
+   respetar el ámbito: solo el binding de nivel superior. */
+
+test("no renombra un parámetro que se llama igual", () => {
+  const out = run("function e(x){return x}function f(e){return e+1}var y=e(2);", { e: "createEl" });
+  assert.match(out, /function createEl\(x\)/);
+  assert.match(out, /function f\(e\)\{return e\+1\}/);
+  assert.match(out, /y=createEl\(2\)/);
+});
+
+test("no renombra una variable local que se llama igual", () => {
+  const out = run("function e(){return 1}function g(){var e=9;return e}var z=e();", { e: "readConfig" });
+  assert.match(out, /function readConfig\(\)/);
+  assert.match(out, /var e=9;return e/);
+  assert.match(out, /z=readConfig\(\)/);
+});
+
+test("no renombra el parámetro de un catch que se llama igual", () => {
+  const out = run("function e(){}try{e()}catch(e){e()}", { e: "runTask" });
+  assert.match(out, /function runTask\(\)/);
+  assert.match(out, /catch\(e\)\{e\(\)\}/);
+});
+
+test("renombra una función cuyos parámetros repiten su propio nombre", () => {
+  // Caso real del bundle: `function e(e, t, a) { ... document.createElement(e) }`.
+  // Si el id se resuelve en el ámbito interno, el parámetro lo tapa y la
+  // declaración no se renombra mientras las llamadas sí: bundle roto.
+  const out = run("function e(e,t){return document.createElement(e)}var x=e(1,2);", { e: "createEl" });
+  assert.match(out, /function createEl\(e,t\)/);
+  assert.match(out, /x=createEl\(1,2\)/);
+});
