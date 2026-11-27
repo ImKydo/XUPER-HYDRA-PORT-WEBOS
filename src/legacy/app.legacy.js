@@ -1517,18 +1517,35 @@
       el._smoothAnim = null;
     }
     var startTime = (window.performance && window.performance.now) ? window.performance.now() : Date.now();
+    /* Escribir scrollLeft con el mismo entero que ya tiene el elemento obliga
+       al navegador a recalcular estilo y layout sin cambiar nada. Con el
+       redondeo, los ultimos frames repiten valor muchas veces. */
+    var lastX = null,
+      lastY = null;
     function step(now) {
       var currentTime = (window.performance && window.performance.now) ? now : Date.now();
       var elapsed = currentTime - startTime;
       var p = Math.min(1, elapsed / duration);
       var ease = p * (2 - p);
-      if (hasX) el.scrollLeft = Math.round(startX + diffX * ease);
-      if (hasY) el.scrollTop = Math.round(startY + diffY * ease);
+      if (hasX) {
+        var nextX = Math.round(startX + diffX * ease);
+        if (nextX !== lastX) {
+          el.scrollLeft = nextX;
+          lastX = nextX;
+        }
+      }
+      if (hasY) {
+        var nextY = Math.round(startY + diffY * ease);
+        if (nextY !== lastY) {
+          el.scrollTop = nextY;
+          lastY = nextY;
+        }
+      }
       if (p < 1) {
         el._smoothAnim = requestAnimationFrame(step);
       } else {
-        if (hasX) el.scrollLeft = targetLeft;
-        if (hasY) el.scrollTop = targetTop;
+        if (hasX && targetLeft !== lastX) el.scrollLeft = targetLeft;
+        if (hasY && targetTop !== lastY) el.scrollTop = targetTop;
         el._smoothAnim = null;
       }
     }
