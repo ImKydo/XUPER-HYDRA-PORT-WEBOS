@@ -3164,10 +3164,15 @@
       removeAllChildren(ee),
       (He = []),
       (ht = {}));
+    /* He va indexado por raíz del catálogo, no por pestaña: la página visible
+       inicial debe ser la de la pestaña activa (Inicio -> Destacados), no la
+       primera del arreglo, que es TV. */
     for (var i = 0; i < ft.length; i++) {
       var n = createEl("div", "home-page scrollable");
-      (0 === i && n.classList.add("is-current"), ee.appendChild(n), He.push(n));
+      (ee.appendChild(n), He.push(n));
     }
+    var initialPage = z[X.tab] && z[X.tab].page >= 0 ? z[X.tab].page : 1;
+    He[initialPage] && He[initialPage].classList.add("is-current");
     (mt(z[X.tab] && z[X.tab].page >= 0 ? z[X.tab].page : 0),
       (function () {
         var i = byId("home-tabs");

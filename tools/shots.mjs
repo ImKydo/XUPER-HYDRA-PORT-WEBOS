@@ -26,8 +26,8 @@ const USE_SERVICE = process.argv.includes("--service");
 
 const SCREENS = [
   { name: "welcome", q: "?screen=welcome", wait: 2500 },
-  { name: "tv", q: "?screen=home&tab=0", wait: 5000 },
-  { name: "home", q: "?screen=home&tab=1", wait: 5000 },
+  { name: "tv", q: "?screen=home&tab=1", wait: 5000 },
+  { name: "home", q: "?screen=home&tab=0", wait: 5000 },
   { name: "pelicula", q: "?screen=home&tab=2", wait: 5000 },
   { name: "detail", q: "?screen=detail&vod=3", wait: 5000 },
   { name: "search", q: "?screen=search&q=dragon", wait: 4000 },
