@@ -30,6 +30,9 @@ const SCREENS = [
   { name: "detail", q: "?screen=detail&vod=3" },
   { name: "search", q: "?screen=search&q=dragon" },
   { name: "settings", q: "?screen=settings" },
+  // TV en vivo sin stream: comprueba que la pantalla monta y da foco. La
+  // reproducción en sí se valida en el televisor.
+  { name: "player", q: "?screen=player&channels=1" },
 ];
 
 const APP_VER = JSON.parse(readFileSync(path.join(APP_DIR, "appinfo.json"), "utf8")).version;

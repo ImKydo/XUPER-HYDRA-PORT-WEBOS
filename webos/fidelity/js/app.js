@@ -2858,7 +2858,7 @@
             (r._activate = function () {
               liveFavoritesOnly = !liveFavoritesOnly;
               syncLiveFavoriteButtons();
-              Qt(liveFavoritesOnly);
+              renderLiveChannelRow(liveFavoritesOnly);
               Yt(liveFavoritesOnly ? "Mostrando canales favoritos" : "Mostrando todos los canales");
               setFocus(r);
             }),
@@ -2866,7 +2866,7 @@
               selectAllLiveChannels(o);
             }),
             (c._activate = function () {
-              pr(c);
+              openPlayerCategoryPicker(c);
             }),
             (i._onMove = function (e) {
               if ("right" === e) return (setFocus(r), !0);
@@ -2947,8 +2947,8 @@
         })(),
         (re = e("div", "live-list scrollable")),
         t.appendChild(re),
-        Qt(!1),
-        Gt(),
+        renderLiveChannelRow(!1),
+        loadLiveCategory(),
         ((ne = e("div", "live-focus focusable"))._onMove = function (e) {
           if ("up" === e) {
             var a = document.querySelector(".live-fast .f-srch");
@@ -3941,9 +3941,9 @@
       if (star) { star.innerHTML = starSvg(isFav); }
     }
     if ("player" === X.screen) {
-      hr(channelIndex);
+      renderLiveChannelList(channelIndex);
     } else if ("home" === X.screen) {
-      Qt(liveFavoritesOnly);
+      renderLiveChannelRow(liveFavoritesOnly);
     }
     syncLiveFavoriteButtons();
   }
@@ -3972,8 +3972,8 @@
     liveSearchText = "";
     syncLiveFavoriteButtons();
     Xt(getAllLiveCategory());
-    if ("home" === X.screen) Qt(!1);
-    else if ("player" === X.screen) hr(0);
+    if ("home" === X.screen) renderLiveChannelRow(!1);
+    else if ("player" === X.screen) renderLiveChannelList(0);
     Yt("Mostrando todos los canales");
     returnFocus && setFocus(returnFocus);
   }
@@ -4084,14 +4084,14 @@
       /* "Todos" y Favoritos son filtros excluyentes. */
       if (isAllLiveCategory(e)) liveFavoritesOnly = !1;
       syncLiveFavoriteButtons();
-      dr();
+      renderPlayerCategories();
       updatePlayerCatBadge();
       if (e.addonUrl || (e.channels && e.channels.length)) {
         loadAddonCategory(e, function () { t && t(); });
       } else if (e.isAddon) {
         $t(function () { t && t(); });
       } else {
-        Gt(e.id, function () { t && t(); }, !0);
+        loadLiveCategory(e.id, function () { t && t(); }, !0);
       }
     }
   }
@@ -4124,8 +4124,8 @@
     for (var o = 0; o < list.length; o++)
       ((list[o].index = o + 1), F.push(list[o]));
     ((X.channel = 0),
-      Qt(liveFavoritesOnly),
-      hr(),
+      renderLiveChannelRow(liveFavoritesOnly),
+      renderLiveChannelList(),
       F[0] && ae && (ae.textContent = F[0].name),
       "player" === X.screen &&
       "live" === X.playerMode &&
@@ -4142,7 +4142,7 @@
             (cat.name || "esta categoría") +
             " en este momento."
           ));
-        return (F.splice(0, F.length), Qt(liveFavoritesOnly), hr(), void (done && done()));
+        return (F.splice(0, F.length), renderLiveChannelRow(liveFavoritesOnly), renderLiveChannelList(), void (done && done()));
       }
       showLoadedChannels(list, done);
     });
@@ -4150,20 +4150,20 @@
   function $t(e) {
     var t = _t();
     if (!t || !t.length)
-      return (F.splice(0, F.length), Qt(liveFavoritesOnly), hr(), void (e && e()));
+      return (F.splice(0, F.length), renderLiveChannelRow(liveFavoritesOnly), renderLiveChannelList(), void (e && e()));
     jr("Cargando canales de Addon…");
     loadM3uChannels(t, function (list) {
       showLoadedChannels(list, e);
     });
   }
-  function Gt(e, t, force) {
+  function loadLiveCategory(e, t, force) {
     var a = e || 76182;
     if (force || !At || Pt !== a) {
       var i = ++Dt;
       ((Pt = a),
         (At = !0),
         (Et = !1),
-        F.length || ((X.channel = 0), Qt(liveFavoritesOnly), hr()));
+        F.length || ((X.channel = 0), renderLiveChannelRow(liveFavoritesOnly), renderLiveChannelList()));
       var n = 1,
         r = !1,
         fails = 0;
@@ -4198,8 +4198,8 @@
                 ((Et = !0),
                   X.channel >= F.length && (X.channel = 0),
                   (isFirstPage || isLastPage) &&
-                  (Qt(liveFavoritesOnly),
-                    "player" === X.screen && X.channelsOpen && hr()),
+                  (renderLiveChannelRow(liveFavoritesOnly),
+                    "player" === X.screen && X.channelsOpen && renderLiveChannelList()),
                   F[X.channel] && ae && (ae.textContent = F[X.channel].name),
                   "player" === X.screen && "live" === X.playerMode
                     ? ((isFirstPage || isLastPage) && ao())
@@ -4245,7 +4245,7 @@
                             (Lt = i),
                             (It = !0),
                             Mt || (Mt = Lt[0]),
-                            dr(),
+                            renderPlayerCategories(),
                             e && e(null, Lt));
                         });
                     })(),
@@ -4259,7 +4259,7 @@
               if (o && Et && fails < 2)
                 return (fails++, void setTimeout(e, 900));
               if (o && Et) {
-                (Qt(liveFavoritesOnly),
+                (renderLiveChannelRow(liveFavoritesOnly),
                   Yt("Lista incompleta: el portal no respondió. Vuelve a elegir la categoría."));
                 return void (At = !1);
               }
@@ -4267,7 +4267,7 @@
                 o &&
                 !Et &&
                 setTimeout(function () {
-                  i === Dt && Gt(a);
+                  i === Dt && loadLiveCategory(a);
                 }, 2500));
             }
           }
@@ -4284,7 +4284,7 @@
       n = Math.min(e.length, i + Ke);
     return e.slice(Math.max(0, n - Ke), n);
   }
-  function Qt(t, currentChannel) {
+  function renderLiveChannelRow(t, currentChannel) {
     var previousFocus = X.focus,
       previousChannel =
         previousFocus && void 0 !== previousFocus._channel
@@ -4342,7 +4342,7 @@
                     previousChannel = channelPos > 0 ? visible[channelPos - 1] : -1,
                     previousRow = previousChannel >= 0 ? homeRows[previousChannel] : null;
                   if (previousChannel >= 0) {
-                    previousRow || (Qt(!!currentFavorites, previousChannel), (previousRow = homeRows[previousChannel]));
+                    previousRow || (renderLiveChannelRow(!!currentFavorites, previousChannel), (previousRow = homeRows[previousChannel]));
                     return previousRow ? (setFocus(previousRow), !0) : !0;
                   }
                   return (Ue[0] ? setFocus(Ue[0]) : !0, !0);
@@ -4352,7 +4352,7 @@
                     nextChannel = channelPos < visible.length - 1 ? visible[channelPos + 1] : -1,
                     nextRow = nextChannel >= 0 ? homeRows[nextChannel] : null;
                   if (nextChannel >= 0) {
-                    nextRow || (Qt(!!currentFavorites, nextChannel), (nextRow = homeRows[nextChannel]));
+                    nextRow || (renderLiveChannelRow(!!currentFavorites, nextChannel), (nextRow = homeRows[nextChannel]));
                     return nextRow ? (setFocus(nextRow), !0) : !0;
                   }
                   var fastBtn = document.querySelector(".live-fast .fast-btn");
@@ -4382,7 +4382,7 @@
                     o = r >= 0 ? homeRows[r] : null,
                     s = o && o.querySelector(".channel-star");
                   if (r >= 0) {
-                    s || (Qt(currentFavorites, r), (o = homeRows[r]), (s = o && o.querySelector(".channel-star")));
+                    s || (renderLiveChannelRow(currentFavorites, r), (o = homeRows[r]), (s = o && o.querySelector(".channel-star")));
                     return s ? (setFocus(s), !0) : !0;
                   }
                   if ("up" === a) {
@@ -4452,7 +4452,7 @@
   }
   function Kt(e, t) {
     (e < 0 && (e = 0), e > F.length - 1 && (e = F.length - 1), (X.channel = e));
-    "home" === X.screen && 0 === X.tab && Qt(liveFavoritesOnly, e);
+    "home" === X.screen && 0 === X.tab && renderLiveChannelRow(liveFavoritesOnly, e);
     for (var a = 0; a < Fe.length; a++)
       Fe[a].classList.toggle("is-current", Fe[a]._channel === e);
     (F[e] && ae && (ae.textContent = F[e].name),
@@ -8549,7 +8549,7 @@
                       ": " +
                       Ka(n[r].host) +
                       " — " +
-                      Ga(n[r])
+                      layerVerdictLabel(n[r])
                     );
                   var lg = e.liveLog || [];
                   if (lg.length) {
@@ -8724,8 +8724,8 @@
               (i.textContent = X.adultEnabled
                 ? "Activo: se mostrarán categorías y canales +18."
                 : "Desactivado: se ocultarán categorías y canales +18."),
-              Qt(liveFavoritesOnly),
-              hr(X.channel),
+              renderLiveChannelRow(liveFavoritesOnly),
+              renderLiveChannelList(X.channel),
               Yt(X.adultEnabled ? "Contenido +18 habilitado" : "Contenido +18 oculto"),
               setFocus(a));
           }),
@@ -9147,7 +9147,7 @@
   }
   var Xa = { running: !1, report: null, error: null, runId: 0 },
     $a = null;
-  function Ga(e) {
+  function layerVerdictLabel(e) {
     if (!e) return "Sin datos";
     switch (e.verdict) {
       case "ok":
@@ -9166,7 +9166,7 @@
         return "Sin datos";
     }
   }
-  function Qa(e) {
+  function isLayerOk(e) {
     return e
       ? "ok" === e.verdict
         ? "ok"
@@ -9235,7 +9235,7 @@
       (t.className = "dg-summary" + (r.cls ? " " + r.cls : "")));
     for (var o = n.hosts || [], s = 0; s < o.length; s++) {
       var l = o[s],
-        d = e("div", "dg-row " + Qa(l)),
+        d = e("div", "dg-row " + isLayerOk(l)),
         c =
           l.doh && l.doh.ok && l.doh.ips.length
             ? l.doh.ips
@@ -9243,7 +9243,7 @@
         p = l.system && l.system.ok ? l.system.ips.join(", ") : "sin respuesta";
       (d.appendChild(e("span", "dg-host", l.host)),
         d.appendChild(e("span", "dg-local", p)),
-        d.appendChild(e("span", "dg-state", Ga(l))),
+        d.appendChild(e("span", "dg-state", layerVerdictLabel(l))),
         d.appendChild(e("span", "dg-ip", c.join(", "))),
         i.appendChild(d));
     }
@@ -10203,7 +10203,7 @@
       t = e ? e.id : "",
       a = e && X.focus ? X.focus.textContent : "";
     if (
-      (Rn(),
+      (renderPlayerEpisodes(),
         (function () {
           if (!Si) return;
           Si.classList.remove("is-hidden");
@@ -10237,7 +10237,7 @@
       a && a.classList.add("is-row-focused");
     }
   }
-  function Rn() {
+  function renderPlayerEpisodes() {
     if (gi) {
       var t = X.playerItem;
       if (t && x(t)) {
@@ -10308,7 +10308,7 @@
                   a.start + 1 + "-" + a.end
                 );
                 ((i._activate = function () {
-                  ((X.playerEpisodeRange = t), Rn());
+                  ((X.playerEpisodeRange = t), renderPlayerEpisodes());
                   var e = yi.querySelector(".psv-ep-btn");
                   e && setFocus(e);
                 }),
@@ -11572,7 +11572,7 @@
                 var a = F[X.channel];
                 a &&
                   (toggleLiveFavorite(a),
-                    hr(X.channel),
+                    renderLiveChannelList(X.channel),
                     Yt(
                       X.liveFavorites[liveChannelKey(a)]
                         ? "Canal agregado a favoritos"
@@ -11614,7 +11614,7 @@
       (channelFavorites._activate = function () {
         liveFavoritesOnly = !liveFavoritesOnly;
         syncLiveFavoriteButtons();
-        hr(X.channel);
+        renderLiveChannelList(X.channel);
         Yt(liveFavoritesOnly ? "Mostrando canales favoritos" : "Mostrando todos los canales");
         setFocus(channelFavorites);
       }),
@@ -11622,7 +11622,7 @@
         selectAllLiveChannels(channelAll);
       }),
       (channelCategory._activate = function () {
-        pr(channelCategory);
+        openPlayerCategoryPicker(channelCategory);
       }),
       (channelSearch._onMove = function (e) {
         if ("right" === e) return setFocus(channelFavorites), !0;
@@ -11658,7 +11658,7 @@
       Se.appendChild(b),
       Se.appendChild(e("div", "pc-div")));
     var C = e("div", "pc-list scrollable");
-    (Se.appendChild(C), dr(), hr());
+    (Se.appendChild(C), renderPlayerCategories(), renderLiveChannelList());
     var w = e("div", "pc-menu");
     (w.appendChild(e("div", "ic")),
       w.appendChild(e("div", "l1", "[OK] Reproducir  •  [AMARILLO / →] Favorito")),
@@ -11672,7 +11672,7 @@
       liveSearchInput && liveSearchInput.blur && liveSearchInput.blur(),
       (liveSearchInput = null),
       e && e.parentNode && e.parentNode.removeChild(e),
-      hr(X.channel),
+      renderLiveChannelList(X.channel),
       returnFocus && setFocus(returnFocus));
   }
   function openLiveChannelSearch(returnFocus) {
@@ -11698,13 +11698,13 @@
           })();
       }),
       (input._activate = function () {
-        hr(X.channel);
+        renderLiveChannelList(X.channel);
       }),
       input.addEventListener("input", function () {
-        ((liveSearchText = input.value || ""), hr(X.channel));
+        ((liveSearchText = input.value || ""), renderLiveChannelList(X.channel));
       }),
       (clear._activate = function () {
-        ((input.value = ""), (liveSearchText = ""), hr(X.channel), setFocus(input));
+        ((input.value = ""), (liveSearchText = ""), renderLiveChannelList(X.channel), setFocus(input));
       }),
       (clear._onMove = function (e) {
         if ("left" === e) return (setFocus(input), !0);
@@ -11721,7 +11721,7 @@
       Se.appendChild(box),
       Se.classList.add("pc-searching"),
       (liveSearchInput = input),
-      hr(X.channel),
+      renderLiveChannelList(X.channel),
       setFocus(input),
       setTimeout(function () {
         try {
@@ -11729,7 +11729,7 @@
         } catch (e) { }
       }, 0));
   }
-  function dr() {
+  function renderPlayerCategories() {
     if (Se) {
       var t = Se.querySelector(".pc-categories");
       if (t) {
@@ -11778,7 +11778,7 @@
                     }
                     X.channel = Math.max(0, Math.min(F.length - 1, j));
                     if ("player" === X.screen) fr(X.channel);
-                    else if ("home" === X.screen) Qt(liveFavoritesOnly);
+                    else if ("home" === X.screen) renderLiveChannelRow(liveFavoritesOnly);
                   });
                 };
               })(d)),
@@ -11837,7 +11837,7 @@
     }
   }
   var categoryPickerReturnFocus = null;
-  function pr(returnFocus) {
+  function openPlayerCategoryPicker(returnFocus) {
     categoryPickerReturnFocus = returnFocus || X.focus;
     if (!$e) {
       $e = t("player-categories");
@@ -11896,7 +11896,7 @@
                   }
                   no();
                 } else if ("home" === X.screen) {
-                  Qt(liveFavoritesOnly);
+                  renderLiveChannelRow(liveFavoritesOnly);
                   if (Fe[0] && at(Fe[0])) {
                     setFocus(Fe[0]);
                     Wt(F[0]);
@@ -12027,7 +12027,7 @@
       /* Si Favoritos acaba de ocultar el canal reproducido, ↓ debe entrar al
          primer favorito visible, nunca conservar un foco en una fila ausente. */
       if (visible.indexOf(e) < 0) e = visible[0];
-      (Xe[e] || hr(e), Xe[e] && setFocus(Xe[e]));
+      (Xe[e] || renderLiveChannelList(e), Xe[e] && setFocus(Xe[e]));
     }
   }
   function closeLiveFavoriteConfirm(returnFocus) {
@@ -12040,7 +12040,7 @@
       e && e.parentNode && e.parentNode.removeChild(e),
       returnFocus && at(returnFocus) && setFocus(returnFocus));
   }
-  function hr(t) {
+  function renderLiveChannelList(t) {
     var previousFocus = X.focus,
       previousChannel =
         previousFocus && void 0 !== previousFocus._channel
@@ -12202,7 +12202,7 @@
                     o = r && r.querySelector(".pc-channel-fav");
                   r ||
                     (n >= 0 && n < visible.length &&
-                      (hr(visible[n]), (r = Xe[visible[n]]), (o = r && r.querySelector(".pc-channel-fav"))));
+                      (renderLiveChannelList(visible[n]), (r = Xe[visible[n]]), (o = r && r.querySelector(".pc-channel-fav"))));
                   return o && setFocus(o), !0;
                 }
                 return !1;
@@ -12276,8 +12276,8 @@
            segundos de espera al quitar la pausa). Sólo si el vídeo no avanza
            en 1.8 s se reinicia el relay en la misma posición. */
         try {
-          var pr = xe.play();
-          pr && pr.catch && pr.catch(function () { });
+          var openPlayerCategoryPicker = xe.play();
+          openPlayerCategoryPicker && openPlayerCategoryPicker.catch && openPlayerCategoryPicker.catch(function () { });
         } catch (e) { }
         var before = xe.currentTime || 0,
           startedAt = Date.now();
@@ -12825,9 +12825,9 @@
           if ("vod" === X.playerMode && !vodUserPaused && "player" === X.screen && !X.streamError) {
             Pr("Cargando buffer…");
             try {
-              var pr = xe.play();
-              if (pr && pr.catch) {
-                pr.catch(function () {
+              var openPlayerCategoryPicker = xe.play();
+              if (openPlayerCategoryPicker && openPlayerCategoryPicker.catch) {
+                openPlayerCategoryPicker.catch(function () {
                   setTimeout(function () {
                     if (xe && xe.paused && !vodUserPaused && "vod" === X.playerMode) {
                       var p2 = xe.play();
@@ -13369,8 +13369,8 @@
            pausó solo (vacío de buffer), se reanuda una vez. */
         if (!liveUserPaused) {
           try {
-            var pr = xe.play();
-            pr && pr.catch && pr.catch(function () { });
+            var openPlayerCategoryPicker = xe.play();
+            openPlayerCategoryPicker && openPlayerCategoryPicker.catch && openPlayerCategoryPicker.catch(function () { });
             logLive("resume");
           } catch (e) { }
         }
@@ -13570,8 +13570,8 @@
       we && we.classList.remove("is-active");
       ((X.channelsOpen = !0),
         Se.classList.add("is-active"),
-        dr(),
-        hr(X.channel),
+        renderPlayerCategories(),
+        renderLiveChannelList(X.channel),
         cr());
       var e = Xe[X.channel];
       if (e) {
@@ -13821,7 +13821,7 @@
       console.error("loadVodCatalog error:", e);
     }
     try {
-      Gt();
+      loadLiveCategory();
     } catch (e) {
       console.error("loadLiveChannels error:", e);
     }
