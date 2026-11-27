@@ -4,6 +4,7 @@ import http from "node:http";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseQuery } from "./helpers/dev-service-query.mjs";
 
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -29,6 +30,8 @@ const json = (res, status, data) => {
 
 const server = http.createServer((req, res) => {
   const u = new URL(req.url, `http://127.0.0.1:${PORT}`);
+  // La app llama ?q=<json>; los curl del README usan query plano. Ambas valen.
+  const Q = parseQuery(req.url);
   if (req.method === "OPTIONS") {
     res.writeHead(204, {
       "Access-Control-Allow-Origin": "*",
@@ -41,14 +44,14 @@ const server = http.createServer((req, res) => {
   const done = (err, data) => (err ? json(res, 502, { returnValue: false, errorText: String(err.message || err), errorCode: err.portalCode || 1 }) : json(res, 200, { returnValue: true, ...data }));
 
   if (u.pathname === "/ping") return json(res, 200, { returnValue: true, port: PORT, proxy: proxy.port() });
-  if (u.pathname === "/home") return magis.home(u.searchParams.get("root") || "movies", done);
-  if (u.pathname === "/search") return magis.search(u.searchParams.get("value") || "", done);
+  if (u.pathname === "/home") return magis.home(Q.root || "movies", done);
+  if (u.pathname === "/search") return magis.search(Q.value || "", done);
   if (u.pathname === "/detail") {
-    return magis.detail(u.searchParams.get("contentId") || u.searchParams.get("id") || "", done);
+    return magis.detail(Q.contentId || Q.id || "", done);
   }
   if (u.pathname === "/resolve") {
-    const contentId = u.searchParams.get("contentId") || u.searchParams.get("id") || "";
-    const seriesId = u.searchParams.get("seriesContentId") || u.searchParams.get("series") || "";
+    const contentId = Q.contentId || Q.id || "";
+    const seriesId = Q.seriesContentId || Q.series || "";
     return magis.resolve(contentId, seriesId, (err, stream) => {
       if (err) return done(err);
       proxy.start((perr) => {
@@ -70,11 +73,11 @@ const server = http.createServer((req, res) => {
     return magis.getLiveCategories((err, categories) => done(err, { categories }));
   }
   if (u.pathname === "/liveChannels") {
-    return magis.getLiveChannels(u.searchParams.get("columnId") || null, (err, channels) => done(err, { channels }));
+    return magis.getLiveChannels(Q.columnId || null, (err, channels) => done(err, { channels }));
   }
   if (u.pathname === "/resolveLive") {
-    const streamUrl = u.searchParams.get("streamUrl") || "";
-    const channelCode = u.searchParams.get("channelCode") || "";
+    const streamUrl = Q.streamUrl || "";
+    const channelCode = Q.channelCode || "";
     // Igual que index.js: los canales "tvplus:" se resuelven por tvplus.js y se
     // sirven a través del proxy con IP fijada por DoH (no con el DNS del equipo).
     const tvCode = /^tvplus:/i.test(streamUrl)
@@ -109,7 +112,7 @@ const server = http.createServer((req, res) => {
           return done(err || new Error("Señal TvPlus no disponible: " + tvCode));
         }
         serveLive(tvRes);
-      }, { force: u.searchParams.get("force") === "1" });
+      }, { force: Q.force === "1" });
     }
     if (streamUrl) {
       // La URL directa del portal se deja tal cual en el arnés de escritorio
@@ -123,30 +126,31 @@ const server = http.createServer((req, res) => {
     dnsx.summary().forEach((entry) => {
       if (entry && entry.host && hosts.indexOf(entry.host) === -1) hosts.push(entry.host);
     });
-    const screenW = Number(u.searchParams.get("screenW") || 0);
-    const screenH = Number(u.searchParams.get("screenH") || 0);
+    const screenW = Number(Q.screenW || 0);
+    const screenH = Number(Q.screenH || 0);
     const screen = (screenW > 0 && screenH > 0)
       ? {
           w: screenW,
           h: screenH,
-          scale: Number(u.searchParams.get("screenScale") || 0),
-          panelW: Number(u.searchParams.get("panelW") || 0),
-          panelH: Number(u.searchParams.get("panelH") || 0)
+          scale: Number(Q.screenScale || 0),
+          panelW: Number(Q.panelW || 0),
+          panelH: Number(Q.panelH || 0)
         }
       : null;
     // Mirrors the Luna route in index.js so the desktop harness exercises the
     // same layer probes (portal/session/live/VOD) and codec rows.
     const jsonParam = (name) => {
-      try { return JSON.parse(u.searchParams.get(name) || "{}") || {}; } catch { return {}; }
+      if (Q[name] && typeof Q[name] === "object") return Q[name];
+      try { return JSON.parse(Q[name] || "{}") || {}; } catch { return {}; }
     };
     const portalHost = (magis.constants.HOSTS || [])[0] || "";
     const sess = magis.session || {};
     const layerOpts = {
       portalUrl: portalHost ? `https://${portalHost}/api/portalCore/v8/active` : "",
       session: { userId: sess.userId || "", userToken: sess.userToken || "", ready: !!sess.ready },
-      liveUrl: u.searchParams.get("liveUrl") || "",
+      liveUrl: Q.liveUrl || "",
       liveHeaders: jsonParam("liveHeaders"),
-      vodUrl: u.searchParams.get("vodUrl") || "",
+      vodUrl: Q.vodUrl || "",
       vodHeaders: jsonParam("vodHeaders"),
     };
     return netdiag.run({ hosts, screen }, (err, report) => {
@@ -154,9 +158,9 @@ const server = http.createServer((req, res) => {
       netdiag.runLayers(layerOpts, (lerr, layers) => {
         report.layers = layers || {};
         report.codec = {
-          h264: u.searchParams.get("codecH264") || "",
-          hevc: u.searchParams.get("codecHEVC") || "",
-          hls: u.searchParams.get("codecHLS") || "",
+          h264: Q.codecH264 || "",
+          hevc: Q.codecHEVC || "",
+          hls: Q.codecHLS || "",
         };
         done(null, report);
       });
