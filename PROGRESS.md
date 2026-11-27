@@ -3,7 +3,7 @@
 Plan: `.hermes/plans/2026-11-26_224922-xupertv-v2-reconstruccion-verificada.md`
 Actualizado: 2026-11-27T04:55:49.328Z
 
-**Avance global: 38/54 tareas (70 %)**
+**Avance global: 39/55 tareas (71 %)**
 
 | Fase | Hechas | Total |
 |---|---|---|
@@ -13,7 +13,7 @@ Actualizado: 2026-11-27T04:55:49.328Z
 | F3 | 3 | 4 |
 | F4 | 4 | 7 |
 | F5 | 6 | 7 |
-| F6 | 5 | 12 |
+| F6 | 6 | 13 |
 | F7 | 0 | 4 |
 
 ## F0
@@ -100,6 +100,7 @@ Actualizado: 2026-11-27T04:55:49.328Z
 | ✔ | T6.10 | Cabecera sin reloj ni wifi y buscar accesible | done | `1e0ab60` | reloj y wifi fuera; acciones de cabecera reducidas a buscar y cuenta; sin icono de filtro duplicado | 2026-11-27 |
 | ✔ | T6.11 | Marca ZephyrTV | done | `1e0ab60` | icono 256/512 + marca 144; nombre en appinfo/index/arranque/barra; textos y errores sin XuperTV; créditos al código base | 2026-11-27 |
 | ✔ | T6.12 | Documentar la nueva navegación | done | `1e0ab60` | docs/engineering/navegacion.md con estructura, marca y por qué se retiraron las pestañas | 2026-11-27 |
+| ✔ | T6.13 | Portada (hero) en Inicio, Películas y Series | done | `d7846d8` | hero a sangre con degradados, sinopsis recortada, respaldo backdrop->landscape->poster; foco con teclado real: abajo->fila, arriba->portada, Enter->ficha; smoke 6/6 home 111 enfocables | 2026-11-27 |
 
 ## F7
 

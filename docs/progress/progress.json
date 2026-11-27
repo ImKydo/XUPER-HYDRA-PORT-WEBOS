@@ -453,6 +453,15 @@
       "date": "2026-11-27"
     },
     {
+      "id": "T6.13",
+      "phase": "F6",
+      "title": "Portada (hero) en Inicio, Películas y Series",
+      "status": "done",
+      "commit": "d7846d8",
+      "evidence": "hero a sangre con degradados, sinopsis recortada, respaldo backdrop->landscape->poster; foco con teclado real: abajo->fila, arriba->portada, Enter->ficha; smoke 6/6 home 111 enfocables",
+      "date": "2026-11-27"
+    },
+    {
       "id": "T7.1",
       "phase": "F7",
       "title": "Geometría pura + pruebas",
