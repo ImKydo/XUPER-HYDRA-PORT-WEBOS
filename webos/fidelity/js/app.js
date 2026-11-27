@@ -860,7 +860,7 @@
       var e = {},
         t = 0,
         a = !1;
-      !(function placeAbsolute() {
+      !(function i() {
         if (t >= h.length)
           return (
             (f.refreshing = !1),
@@ -12276,8 +12276,8 @@
            segundos de espera al quitar la pausa). Sólo si el vídeo no avanza
            en 1.8 s se reinicia el relay en la misma posición. */
         try {
-          var openPlayerCategoryPicker = xe.play();
-          openPlayerCategoryPicker && openPlayerCategoryPicker.catch && openPlayerCategoryPicker.catch(function () { });
+          var pr = xe.play();
+          pr && pr.catch && pr.catch(function () { });
         } catch (e) { }
         var before = xe.currentTime || 0,
           startedAt = Date.now();
@@ -12825,9 +12825,9 @@
           if ("vod" === X.playerMode && !vodUserPaused && "player" === X.screen && !X.streamError) {
             Pr("Cargando buffer…");
             try {
-              var openPlayerCategoryPicker = xe.play();
-              if (openPlayerCategoryPicker && openPlayerCategoryPicker.catch) {
-                openPlayerCategoryPicker.catch(function () {
+              var pr = xe.play();
+              if (pr && pr.catch) {
+                pr.catch(function () {
                   setTimeout(function () {
                     if (xe && xe.paused && !vodUserPaused && "vod" === X.playerMode) {
                       var p2 = xe.play();
@@ -13369,8 +13369,8 @@
            pausó solo (vacío de buffer), se reanuda una vez. */
         if (!liveUserPaused) {
           try {
-            var openPlayerCategoryPicker = xe.play();
-            openPlayerCategoryPicker && openPlayerCategoryPicker.catch && openPlayerCategoryPicker.catch(function () { });
+            var pr = xe.play();
+            pr && pr.catch && pr.catch(function () { });
             logLive("resume");
           } catch (e) { }
         }

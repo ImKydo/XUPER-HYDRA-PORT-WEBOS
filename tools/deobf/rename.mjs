@@ -19,6 +19,7 @@ import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import * as acorn from "acorn";
+import { buildScopes } from "./scope.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 // El renombrado se aplica a la FUENTE (src/legacy/app.legacy.js), no al
@@ -83,115 +84,26 @@ if (problems.length) {
   process.exit(1);
 }
 
-/* ---------- ámbitos: sólo se renombra el binding de nivel superior ---------- */
-// Los nombres de una letra son parámetros locales en cientos de funciones.
-// Renombrar `e` sin mirar el ámbito convierte también esos parámetros y deja
-// `function createEl(createEl, createEl)`: equivalente, pero ilegible.
+/* ---------- renombrado con ámbito ---------- */
+// El análisis vive en scope.mjs porque el chequeo de llamadas inexistentes
+// necesita el mismo criterio. Sólo se toca el binding de nivel superior.
 const ast = acorn.parse(src, { ecmaVersion: 5 });
-const scopeOfNode = new Map();
-const makeScope = (parent, node) => ({ parent, node, names: new Set() });
-
-function collectScopes(node, scope) {
-  if (!node || typeof node.type !== "string") return;
-
-  if (node.type === "FunctionDeclaration") {
-    // En ES5 la declaración se eleva al ámbito de la función contenedora.
-    if (node.id) scope.names.add(node.id.name);
-    const inner = makeScope(scope, node);
-    scopeOfNode.set(node, inner);
-    for (const p of node.params) if (p.type === "Identifier") inner.names.add(p.name);
-    for (const s of node.body.body) collectScopes(s, inner);
-    return;
-  }
-  if (node.type === "FunctionExpression") {
-    const inner = makeScope(scope, node);
-    scopeOfNode.set(node, inner);
-    // El nombre de una función con nombre sólo existe dentro de ella.
-    if (node.id) inner.names.add(node.id.name);
-    for (const p of node.params) if (p.type === "Identifier") inner.names.add(p.name);
-    for (const s of node.body.body) collectScopes(s, inner);
-    return;
-  }
-  if (node.type === "VariableDeclarator") {
-    if (node.id && node.id.type === "Identifier") scope.names.add(node.id.name);
-    collectScopes(node.init, scope);
-    return;
-  }
-  if (node.type === "CatchClause") {
-    const inner = makeScope(scope, node);
-    scopeOfNode.set(node, inner);
-    if (node.param && node.param.type === "Identifier") inner.names.add(node.param.name);
-    collectScopes(node.body, inner);
-    return;
-  }
-
-  for (const k of Object.keys(node)) {
-    if (k === "loc" || k === "range" || k === "start" || k === "end") continue;
-    const v = node[k];
-    if (Array.isArray(v)) for (const c of v) collectScopes(c, scope);
-    else if (v && typeof v.type === "string") collectScopes(v, scope);
-  }
-}
-
-const rootScope = makeScope(null, ast);
-for (const s of ast.body) collectScopes(s, rootScope);
-
-// El "nivel superior" es el cuerpo del IIFE que envuelve el bundle.
-let topScope = rootScope;
-for (const s of scopeOfNode.values()) {
-  if (s.parent === rootScope && s.names.size > topScope.names.size) topScope = s;
-}
-
-const resolveScope = (scope, name) => {
-  for (let s = scope; s; s = s.parent) if (s.names.has(name)) return s;
-  return null;
-};
-
-/* ---------- aplicar el renombrado sólo a Identifier del nivel superior ---------- */
+const scopes = buildScopes(ast);
 const edits = [];
 let renamed = 0;
 
-function renameWalk(node, scope, parent, key) {
-  if (!node || typeof node.type !== "string") return;
-
-  // En una función, el `id` pertenece al ámbito EXTERIOR (ahí se declara el
-  // nombre); parámetros y cuerpo al interior. Sin esta distinción, un parámetro
-  // con el mismo nombre que la función tapa la declaración y el bundle queda
-  // con llamadas renombradas y declaración sin renombrar.
-  if (node.type === "FunctionDeclaration" || node.type === "FunctionExpression") {
-    const inner = scopeOfNode.get(node) || scope;
-    if (node.id) renameWalk(node.id, scope, node, "id");
-    for (const p of node.params) renameWalk(p, inner, node, "params");
-    renameWalk(node.body, inner, node, "body");
-    return;
-  }
-  if (node.type === "CatchClause") {
-    const inner = scopeOfNode.get(node) || scope;
-    if (node.param) renameWalk(node.param, inner, node, "param");
-    renameWalk(node.body, inner, node, "body");
-    return;
-  }
-
-  if (node.type === "Identifier" && node.name in mapping) {
-    const isProperty =
-      parent &&
-      ((parent.type === "MemberExpression" && key === "property" && !parent.computed) ||
-        (parent.type === "Property" && key === "key" && !parent.computed));
-    // Sólo si el identificador resuelve al binding de nivel superior.
-    if (!isProperty && resolveScope(scope, node.name) === topScope) {
-      edits.push([node.start, node.end, mapping[node.name]]);
-      renamed++;
-    }
-  }
-
-  for (const k of Object.keys(node)) {
-    if (k === "loc" || k === "range" || k === "start" || k === "end") continue;
-    const v = node[k];
-    if (Array.isArray(v)) for (const c of v) renameWalk(c, scope, node, k);
-    else if (v && typeof v.type === "string") renameWalk(v, scope, node, k);
-  }
-}
-for (const s of ast.body) renameWalk(s, rootScope, null, null);
+scopes.walk(ast, scopes.rootScope, (node, scope, parent, key) => {
+  if (node.type !== "Identifier" || !(node.name in mapping)) return;
+  const isProperty =
+    parent &&
+    ((parent.type === "MemberExpression" && key === "property" && !parent.computed) ||
+      (parent.type === "Property" && key === "key" && !parent.computed));
+  if (isProperty) return;
+  // Sólo si el identificador resuelve al binding de nivel superior.
+  if (scopes.resolve(scope, node.name) !== scopes.topScope) return;
+  edits.push([node.start, node.end, mapping[node.name]]);
+  renamed++;
+});
 
 if (!renamed) {
   console.error("no se encontró ninguna aparición que renombrar");

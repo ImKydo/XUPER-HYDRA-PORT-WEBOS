@@ -90,3 +90,16 @@ test("renombra una función cuyos parámetros repiten su propio nombre", () => {
   assert.match(out, /function createEl\(e,t\)/);
   assert.match(out, /x=createEl\(1,2\)/);
 });
+
+test("respeta una expresión de función con nombre que hace sombra", () => {
+  // `(function i() { ... i() ... })()` enlaza `i` DENTRO de sí misma. El
+  // renombrador de nivel superior no debe tocar ni el nombre ni la recursión.
+  // Caso real: el bucle de refreshCatalog, que quedó roto con
+  // `(function placeAbsolute() { ... i(); ... })`.
+  const out = run(
+    "function i(){return 1}(function i(n){return n?i(n-1):2})();var z=i();",
+    { i: "placeAbsolute" }
+  );
+  assert.match(out, /\(function i\(n\)\{return n\?i\(n-1\):2\}\)\(\)/);
+  assert.match(out, /z=placeAbsolute\(\)/);
+});

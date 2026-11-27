@@ -3,17 +3,21 @@
 //
 // El bundle está repleto de identificadores de una letra: una llamada a un
 // nombre que nadie declaró no rompe la carga, solo explota cuando esa rama se
-// ejecuta (a veces meses después, en el televisor del usuario). Este check la
-// encuentra en frío.
+// ejecuta (a veces meses después, en el televisor del usuario).
 //
-// Encontró un fallo real: `firstFocusable()` se llamaba en el cierre del
-// diálogo de actualización y no estaba definida en ninguna parte.
+// Es consciente del ámbito: `i()` sólo es válido si `i` se declara en la
+// función que la contiene o en una que la envuelve. La versión anterior
+// comparaba contra una lista global de nombres declarados, así que una llamada
+// a `i()` pasaba por buena porque otra función cualquiera tenía un `var i`.
+// Ese falso negativo dejó pasar un bundle con
+// `(function placeAbsolute() { ... i(); ... })`, que reventaba en ejecución.
 //
 // Uso: node tools/check/undefined-calls.mjs [archivo.js]
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
 import { ROOT } from "./lib.mjs";
+import { buildScopes } from "../deobf/scope.mjs";
 
 const require = createRequire(import.meta.url);
 const acorn = require("acorn");
@@ -35,46 +39,18 @@ const GLOBALS = new Set(
   ).split(/\s+/)
 );
 
-const declared = new Set();
-
-const addPattern = (id) => {
-  if (!id) return;
-  if (id.type === "Identifier") declared.add(id.name);
-};
-
-const walk = (node, visit) => {
-  if (!node || typeof node.type !== "string") return;
-  visit(node);
-  for (const k of Object.keys(node)) {
-    if (k === "loc" || k === "range" || k === "start" || k === "end") continue;
-    const v = node[k];
-    if (Array.isArray(v)) for (const c of v) walk(c, visit);
-    else if (v && typeof v.type === "string") walk(v, visit);
-  }
-};
-
 const ast = acorn.parse(src, { ecmaVersion: 5 });
-
-walk(ast, (n) => {
-  if (n.type === "FunctionDeclaration") addPattern(n.id);
-  if (n.type === "FunctionExpression" && n.id) addPattern(n.id);
-  if (n.type === "VariableDeclarator") addPattern(n.id);
-  if (n.type === "CatchClause") addPattern(n.param);
-  if (
-    (n.type === "FunctionDeclaration" || n.type === "FunctionExpression") &&
-    Array.isArray(n.params)
-  ) {
-    for (const p of n.params) addPattern(p);
-  }
-});
+const scopes = buildScopes(ast);
 
 const missing = new Map();
-walk(ast, (n) => {
-  if (n.type !== "CallExpression" || !n.callee || n.callee.type !== "Identifier") return;
-  const name = n.callee.name;
-  if (declared.has(name) || GLOBALS.has(name)) return;
-  if (!missing.has(name)) missing.set(name, []);
-  missing.get(name).push(src.slice(0, n.start).split("\n").length);
+scopes.walk(ast, scopes.rootScope, (node, scope) => {
+  if (node.type !== "CallExpression" || !node.callee || node.callee.type !== "Identifier") return;
+  const name = node.callee.name;
+  if (GLOBALS.has(name)) return;
+  if (!scopes.resolve(scope, name)) {
+    if (!missing.has(name)) missing.set(name, []);
+    missing.get(name).push(src.slice(0, node.start).split("\n").length);
+  }
 });
 
 const names = [...missing.keys()].sort();
@@ -83,7 +59,7 @@ if (!names.length) {
   process.exit(0);
 }
 
-console.error(`FALLA: ${names.length} nombre(s) llamados como función y nunca declarados:`);
+console.error(`FALLA: ${names.length} nombre(s) llamados como función y no declarados en su ámbito:`);
 for (const name of names) {
   const lines = missing.get(name);
   console.error(`  ${name}()  ${lines.length} llamada(s), primera en línea ${lines[0]}`);
