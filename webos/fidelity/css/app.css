@@ -1244,3 +1244,105 @@ body {
 .hero {
   background: radial-gradient(120% 140% at 72% 18%, #1c2436 0%, #0d0f17 55%, #08080d 100%);
 }
+
+/* ------------------------------------------------------------------
+   Estados de la barra de pestañas
+   La capa heredada conservaba un hover/foco pensado para la barra ancha
+   original: alto 52, padding 22, margen 8, degradado rojo y una pastilla de
+   302x78 detrás del texto. Con las pestañas compactas eso hacia crecer la
+   pestaña de 172 a 202 px y la pastilla se salia tapando a la vecina.
+   Aqui el hover solo cambia color: la caja nunca se mueve.
+   ------------------------------------------------------------------ */
+.home-tabs .tab-item .tab-pill {
+  display: none;
+}
+
+/* Una sola geometria en reposo, foco y hover. La capa heredada daba 22 px de
+   relleno a la pestaña seleccionada y 8 al resto: el mismo elemento cambiaba
+   de ancho al interactuar con el. Se fija aqui para todos los estados. */
+.home-tabs .tab-item {
+  height: 52px;
+  padding: 0 8px;
+  margin: 0 8px 0 0;
+  border-radius: 999px;
+}
+
+.home-tabs .tab-item:hover,
+.home-tabs .tab-item.is-focused {
+  /* Mismo alto, relleno y margen que en reposo: el hover no debe mover la caja
+     ni un pixel, o las pestañas de al lado bailan al pasar el raton. */
+  height: 52px;
+  padding: 0 8px;
+  margin: 0 8px 0 0;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.10);
+  color: #f4f5f8;
+  box-shadow: none;
+  -webkit-transform: none;
+  transform: none;
+}
+
+.home-tabs .tab-item.is-focused {
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 0 0 2px #ffffff;
+}
+
+.home-tabs .tab-item.is-selected,
+.home-tabs .tab-item.is-selected:hover,
+.home-tabs .tab-item.is-selected.is-focused {
+  background: #f4f5f8;
+  border-color: #f4f5f8;
+  color: #07070b;
+  box-shadow: 0 0 0 2px #ffffff;
+}
+
+.home-tabs .tab-item:hover .tab-title,
+.home-tabs .tab-item:hover .tab-icon {
+  color: inherit;
+}
+
+.home-tabs .tab-item.is-selected .tab-title,
+.home-tabs .tab-item.is-selected .tab-icon,
+.home-tabs .tab-item.is-selected:hover .tab-title,
+.home-tabs .tab-item.is-selected:hover .tab-icon,
+.home-tabs .tab-item.is-selected.is-focused .tab-title,
+.home-tabs .tab-item.is-selected.is-focused .tab-icon {
+  color: #07070b;
+}
+
+/* La capa heredada subia el titulo de la pestaña a 21 px/800 al enfocar y lo
+   dejaba en 18/600 en reposo: como el mando por aire enfoca al pasar por
+   encima, la barra entera cambiaba de anchos con solo mover el raton. Se fija
+   una sola tipografia para reposo, hover, foco y seleccion. */
+.home-tabs .tab-item .tab-title,
+.home-tabs.is-collapsed .tab-item .tab-title,
+.home-tabs .tab-item:hover .tab-title,
+.home-tabs .tab-item.is-focused .tab-title,
+.home-tabs .tab-item.is-selected .tab-title,
+.home-tabs.is-collapsed .tab-item:hover .tab-title,
+.home-tabs.is-collapsed .tab-item.is-focused .tab-title,
+.home-tabs.is-collapsed .tab-item.is-selected .tab-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: inherit;
+}
+
+.home-tabs .tab-item .tab-icon,
+.home-tabs.is-collapsed .tab-item .tab-icon,
+.home-tabs .tab-item:hover .tab-icon,
+.home-tabs .tab-item.is-focused .tab-icon,
+.home-tabs .tab-item.is-selected .tab-icon {
+  width: 22px;
+  height: 22px;
+  color: inherit;
+}
+
+.home-tabs .tab-item.is-selected .tab-title,
+.home-tabs .tab-item.is-selected .tab-icon,
+.home-tabs .tab-item.is-selected:hover .tab-title,
+.home-tabs .tab-item.is-selected:hover .tab-icon,
+.home-tabs .tab-item.is-selected.is-focused .tab-title,
+.home-tabs .tab-item.is-selected.is-focused .tab-icon {
+  color: #07070b;
+}
