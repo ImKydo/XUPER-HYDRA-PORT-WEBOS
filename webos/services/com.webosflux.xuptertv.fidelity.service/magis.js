@@ -1415,6 +1415,40 @@ var treeCache = {},
   itemCache = {},
   searchCache = {},
   slbCache = null;
+/* Proyección para rejillas y carruseles: solo lo que pinta una tarjeta.
+   `synopsis`, `actors`, `director`, `alias`, `country`, `releaseDate` y
+   `tagline` son ~60% del payload de /home y solo se usan en el detalle, que
+   sigue recibiendo el ítem completo. */
+var GRID_FIELDS = [
+  "id",
+  "title",
+  "category",
+  "kind",
+  "score",
+  "year",
+  "duration",
+  "genres",
+  "poster",
+  "landscape",
+  "backdrop",
+  "type"
+];
+var projectItem = function (e) {
+  if (!e) return e;
+  var out = {};
+  for (var i = 0; i < GRID_FIELDS.length; i++) {
+    var k = GRID_FIELDS[i];
+    if (void 0 !== e[k]) out[k] = e[k];
+  }
+  if (out.genres && out.genres.length > 3) out.genres = out.genres.slice(0, 3);
+  return out;
+};
+var projectItems = function (list) {
+  if (!list || !list.length) return list || [];
+  var out = [];
+  for (var i = 0; i < list.length; i++) out.push(projectItem(list[i]));
+  return out;
+};
 function pruneCache(cache, maxEntries, ttlMs) {
   if (!cache) return;
   var now = Date.now();
@@ -1486,7 +1520,7 @@ function home(e, r, t) {
   var n = e + ":" + r,
     s = treeCache[n];
   if (s && Date.now() - s.at < TREE_TTL)
-    return t(null, { root: e, pageNum: r, items: s.items, cached: !0 });
+    return t(null, { root: e, pageNum: r, items: projectItems(s.items), cached: !0 });
   var responded = false;
   var finish = function (errRes, dataRes) {
     if (responded) return;
@@ -1537,14 +1571,14 @@ function home(e, r, t) {
             enrichCatalog(e, o, function (enriched) {
               ((treeCache[n] = { at: Date.now(), items: enriched }),
                 pruneCache(treeCache, 12, TREE_TTL),
-                finish(null, { root: e, pageNum: r, items: enriched, cached: !1 }));
+                finish(null, { root: e, pageNum: r, items: projectItems(enriched), cached: !1 }));
             });
           });
         }
         enrichCatalog(e, o, function (enriched) {
           ((treeCache[n] = { at: Date.now(), items: enriched }),
             pruneCache(treeCache, 12, TREE_TTL),
-            finish(null, { root: e, pageNum: r, items: enriched, cached: !1 }));
+            finish(null, { root: e, pageNum: r, items: projectItems(enriched), cached: !1 }));
         });
       }
     );
@@ -1660,7 +1694,7 @@ function search(e, r, t) {
     cacheKey = n.toLowerCase() + ":p" + page,
     s = searchCache[cacheKey];
   if (s && Date.now() - s.at < SEARCH_TTL)
-    return t(null, { items: s.items, cached: !0 });
+    return t(null, { items: projectItems(s.items), cached: !0 });
   var tryFallback = function (errOrig) {
     if (moviezone) {
       return moviezone.search(n, page, function (mzErr, mzData) {
@@ -1707,7 +1741,7 @@ function search(e, r, t) {
             }
             searchCache[cacheKey] = { at: Date.now(), items: a };
             pruneCache(searchCache, 16, SEARCH_TTL);
-            t(null, { items: a, total: rResp && rResp.totalSize, cached: !1 });
+            t(null, { items: projectItems(a), total: rResp && rResp.totalSize, cached: !1 });
           });
         }
         ((searchCache[cacheKey] = { at: Date.now(), items: a }),
@@ -2838,6 +2872,8 @@ function resolveLive(e, r, force) {
   });
 }
 module.exports = {
+  projectItem: projectItem,
+  projectItems: projectItems,
   home: home,
   search: search,
   detail: detail,
