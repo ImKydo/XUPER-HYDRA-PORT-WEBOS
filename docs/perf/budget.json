@@ -1,0 +1,12 @@
+{
+  "_nota": "Umbrales medidos con CPU x4 y viewport 1920x1080. Base: docs/perf/baseline.json (dcl 961, fcp 288, dom 740, script 1011 KB, foco p95 12.5 ms, fuga 0.6 MB, tarea larga 512 ms). Margen ~60% para no fallar por ruido de máquina; se aprieta al cerrar cada fase.",
+  "budget": {
+    "dcl_ms": 1600,
+    "fcp_ms": 800,
+    "dom_nodes": 1200,
+    "script_kb": 1400,
+    "focus_p95_ms": 40,
+    "leak_growth_mb": 8,
+    "long_task_ms": 1200
+  }
+}

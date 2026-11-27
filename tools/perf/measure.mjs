@@ -145,7 +145,7 @@ async function main() {
       const sceneResult = { nav, settleMs };
       if (scene === "focus") sceneResult.focus = JSON.parse(await browser.eval(sid, FOCUS_PROBE));
       if (scene === "leak") sceneResult.leak = JSON.parse(await browser.eval(sid, LEAK_PROBE));
-      sceneResult.longTasks = await browser.eval(sid, `JSON.stringify(window.__lt || [])`);
+      sceneResult.longTasks = JSON.parse((await browser.eval(sid, `JSON.stringify(window.__lt || [])`)) || "[]");
 
       result.scenes[scene] = sceneResult;
       await browser.send("Target.closeTarget", { targetId }).catch(() => {});
