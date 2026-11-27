@@ -7,14 +7,14 @@
     "node": ">=22"
   },
   "scripts": {
-    "check": "node tools/check/protected.mjs && node tools/check/css-compat.mjs && node tools/check/es5.mjs && node tools/check/inline-scripts.mjs && node tools/check/undefined-calls.mjs",
+    "check": "node tools/check/protected.mjs && node tools/check/css-compat.mjs && node tools/check/es5.mjs && node tools/check/inline-scripts.mjs && node tools/check/undefined-calls.mjs && node tools/check/compat.mjs",
     "build": "node tools/build.mjs --write",
     "build:check": "node tools/build.mjs --check",
     "tokens": "node tools/css-tokens.mjs --write",
     "nogap": "node tools/gen-nogap.mjs --write",
     "ipk": "node tools/build-ipk.mjs",
     "test": "node --test \"tests/unit/*.test.mjs\"",
-    "test:e2e": "node tests/e2e/smoke.mjs",
+    "test:e2e": "node tests/e2e/smoke.mjs && node tests/e2e/dual-bus.mjs && node tests/e2e/version-check.mjs",
     "serve": "node tools/serve.mjs",
     "perf": "node tools/perf/measure.mjs --throttle=4 --out=docs/perf/latest.json",
     "budget": "node tools/perf/budget.mjs docs/perf/latest.json",

@@ -30,6 +30,9 @@ jobs:
       - name: Llamadas a funciones inexistentes
         run: node tools/check/undefined-calls.mjs
 
+      - name: APIs fuera del motor mínimo (Chromium 38)
+        run: node tools/check/compat.mjs
+
       - name: Artefacto generado sincronizado
         run: node tools/build.mjs --check
 
