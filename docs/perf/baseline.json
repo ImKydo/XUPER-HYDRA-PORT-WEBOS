@@ -1,0 +1,78 @@
+{
+  "generatedAt": "2026-11-27T02:35:55.014Z",
+  "target": {
+    "url": "?screen=home&tab=1",
+    "throttle": 4,
+    "chromium": "Chrome/158.0.8127.36"
+  },
+  "scenes": {
+    "boot": {
+      "nav": {
+        "dcl": 961,
+        "load": 1064,
+        "fcp": 288,
+        "domNodes": 740,
+        "imgs": 119,
+        "imgsLoaded": 9,
+        "heapMB": 3.3,
+        "cssRules": 1539,
+        "scriptKB": 1011,
+        "posters": 110,
+        "rails": 10,
+        "screen": "screen-home"
+      },
+      "settleMs": 1034,
+      "longTasks": "[184,512]"
+    },
+    "focus": {
+      "nav": {
+        "dcl": 855,
+        "load": 945,
+        "fcp": 284,
+        "domNodes": 740,
+        "imgs": 119,
+        "imgsLoaded": 9,
+        "heapMB": 3.9,
+        "cssRules": 1539,
+        "scriptKB": 1011,
+        "posters": 110,
+        "rails": 10,
+        "screen": "screen-home"
+      },
+      "settleMs": 1009,
+      "focus": {
+        "moves": 24,
+        "avgMs": 8.44,
+        "medianMs": 7.3,
+        "p95Ms": 12.5,
+        "maxMs": 19,
+        "over33": 0
+      },
+      "longTasks": "[80,182,400]"
+    },
+    "leak": {
+      "nav": {
+        "dcl": 846,
+        "load": 970,
+        "fcp": 264,
+        "domNodes": 740,
+        "imgs": 119,
+        "imgsLoaded": 9,
+        "heapMB": 3.8,
+        "cssRules": 1539,
+        "scriptKB": 1011,
+        "posters": 110,
+        "rails": 10,
+        "screen": "screen-home"
+      },
+      "settleMs": 997,
+      "leak": {
+        "heapBeforeMB": 3.9,
+        "heapAfterMB": 4.4,
+        "growthMB": 0.6,
+        "domNodes": 741
+      },
+      "longTasks": "[67,170,428,57,62,104,53,61,52,59,53,58,56,52,59,59,54]"
+    }
+  }
+}

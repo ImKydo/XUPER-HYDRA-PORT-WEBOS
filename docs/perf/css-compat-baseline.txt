@@ -1,0 +1,16 @@
+CSS analizado: 3 archivos, 1535 reglas, 12013 líneas
+
+BLOQ  flex-gap           14 reglas  (Chromium 84+) — en flex se ignora: los elementos quedan pegados
+        .dps-options
+        .player-channels .pc-toolbar
+        .pi-now
+BLOQ  backdrop-filter     8 reglas  (Chromium 76+) — el panel translucent se vuelve opaco o invisible
+        webos/fidelity/css/clean.css:593  .player-channels
+        webos/fidelity/css/clean.css:1379  .live-list
+        webos/fidelity/css/clean.css:1570  .player-categories
+INFO  will-change         2 reglas  (Chromium 36+) — soportado, pero crea capas GPU: usar con cuidado en TV
+        webos/fidelity/css/style.css:294  .poster
+        webos/fidelity/css/style.css:668  .bento
+
+!important totales: 3622
+Reglas con alguna característica no soportada por Chromium <=53: 22
