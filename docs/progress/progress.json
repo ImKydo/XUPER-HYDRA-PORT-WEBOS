@@ -1,6 +1,6 @@
 {
   "plan": ".hermes/plans/2026-11-26_224922-xupertv-v2-reconstruccion-verificada.md",
-  "updatedAt": "2026-11-27T02:39:53.877Z",
+  "updatedAt": "2026-11-27T03:17:46.437Z",
   "tasks": [
     {
       "id": "T0.1",
@@ -87,55 +87,55 @@
       "id": "T0.10",
       "phase": "F0",
       "title": "Higiene del proyecto en GitHub",
-      "status": "blocked",
-      "commit": "827f3b0",
-      "evidence": "local hecho; remoto bloqueado: push=false y sin fork",
-      "date": null
+      "status": "done",
+      "commit": "81f6505",
+      "evidence": "origin=ImKydo; 17 ramas borradas; 11 etiquetas; upstream no_push",
+      "date": "2026-11-27"
     },
     {
       "id": "T1.1",
       "phase": "F1",
       "title": "Servidor estático con `no-store`",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "57eb122",
+      "evidence": "no-store verificado; 404 en traversal y rutas inexistentes",
+      "date": "2026-11-27"
     },
     {
       "id": "T1.2",
       "phase": "F1",
       "title": "El servicio local entiende `?q=`",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "730473d",
+      "evidence": "5 tests; /home?q= devuelve items reales del portal",
+      "date": "2026-11-27"
     },
     {
       "id": "T1.3",
       "phase": "F1",
       "title": "Fallback al servicio HTTP sin puente Luna",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "6617e4a",
+      "evidence": "12 llamadas a 127.0.0.1:8910; servicio del TV tambien acepta ?q=",
+      "date": "2026-11-27"
     },
     {
       "id": "T1.4",
       "phase": "F1",
       "title": "Smoke E2E",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "11fa655",
+      "evidence": "5/5 pantallas con foco; 0 excepciones; hallazgo de version corregido en 9294bb7",
+      "date": "2026-11-27"
     },
     {
       "id": "T1.5",
       "phase": "F1",
       "title": "Presupuesto de rendimiento",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "266a95d",
+      "evidence": "24 tests; baseline dcl 961 foco p95 12.5; Presupuesto OK",
+      "date": "2026-11-27"
     },
     {
       "id": "T2.1",

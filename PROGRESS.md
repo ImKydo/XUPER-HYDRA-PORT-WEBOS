@@ -1,14 +1,14 @@
 # Progreso — XuperTV webOS
 
 Plan: `.hermes/plans/2026-11-26_224922-xupertv-v2-reconstruccion-verificada.md`
-Actualizado: 2026-11-27T02:39:53.877Z
+Actualizado: 2026-11-27T03:17:46.437Z
 
-**Avance global: 9/49 tareas (18 %)**
+**Avance global: 15/49 tareas (31 %)**
 
 | Fase | Hechas | Total |
 |---|---|---|
-| F0 | 9 | 10 |
-| F1 | 0 | 5 |
+| F0 | 10 | 10 |
+| F1 | 5 | 5 |
 | F2 | 0 | 5 |
 | F3 | 0 | 4 |
 | F4 | 0 | 7 |
@@ -29,17 +29,17 @@ Actualizado: 2026-11-27T02:39:53.877Z
 | ✔ | T0.7 | Empaquetador Linux y verificación de paridad con el IPK | done | `dfe24cd` | IPK 216 archivos; PARIDAD OK salvo index.html; ffmpeg 755 en ambos | 2026-11-27 |
 | ✔ | T0.8 | Línea base y compatibilidad | done | `24b64ae` | dcl 961 fcp 288 dom 740 p95 12.5; CSS 22 bloqueos; ES5 26/26 | 2026-11-27 |
 | ✔ | T0.9 | CI de calidad (incluye scripts inline) | done | `946d14d` | npm run check verde; 7 tests; inline-scripts detecta error inyectado | 2026-11-27 |
-| ✖ | T0.10 | Higiene del proyecto en GitHub | blocked | `827f3b0` | local hecho; remoto bloqueado: push=false y sin fork |  |
+| ✔ | T0.10 | Higiene del proyecto en GitHub | done | `81f6505` | origin=ImKydo; 17 ramas borradas; 11 etiquetas; upstream no_push | 2026-11-27 |
 
 ## F1
 
 | | ID | Tarea | Estado | Commit | Evidencia | Fecha |
 |---|---|---|---|---|---|---|
-| · | T1.1 | Servidor estático con `no-store` | pending |  |  |  |
-| · | T1.2 | El servicio local entiende `?q=` | pending |  |  |  |
-| · | T1.3 | Fallback al servicio HTTP sin puente Luna | pending |  |  |  |
-| · | T1.4 | Smoke E2E | pending |  |  |  |
-| · | T1.5 | Presupuesto de rendimiento | pending |  |  |  |
+| ✔ | T1.1 | Servidor estático con `no-store` | done | `57eb122` | no-store verificado; 404 en traversal y rutas inexistentes | 2026-11-27 |
+| ✔ | T1.2 | El servicio local entiende `?q=` | done | `730473d` | 5 tests; /home?q= devuelve items reales del portal | 2026-11-27 |
+| ✔ | T1.3 | Fallback al servicio HTTP sin puente Luna | done | `6617e4a` | 12 llamadas a 127.0.0.1:8910; servicio del TV tambien acepta ?q= | 2026-11-27 |
+| ✔ | T1.4 | Smoke E2E | done | `11fa655` | 5/5 pantallas con foco; 0 excepciones; hallazgo de version corregido en 9294bb7 | 2026-11-27 |
+| ✔ | T1.5 | Presupuesto de rendimiento | done | `266a95d` | 24 tests; baseline dcl 961 foco p95 12.5; Presupuesto OK | 2026-11-27 |
 
 ## F2
 
