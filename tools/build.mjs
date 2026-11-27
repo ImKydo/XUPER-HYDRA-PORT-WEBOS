@@ -64,8 +64,13 @@ const appVer = (output.match(/var APP_VERSION\s*=\s*"([^"]+)"/) || [])[1];
 if (!appVer) fail("no se encontró APP_VERSION en el bundle generado");
 
 const html = readFileSync(INDEX_HTML, "utf8");
-const htmlFixed = html.replace(/(src="js\/app\.js\?v=)[\w.-]+(")/, `$1${appVer}$2`);
-if (htmlFixed === html && !html.includes(`app.js?v=${appVer}`)) {
+// Dos textos deben seguir a APP_VERSION: el cache-buster del <script> y la
+// versión que muestra la bienvenida (también la lee el diagnóstico, así que si
+// el JS no llega a cargar el usuario ve una versión falsa).
+const htmlFixed = html
+  .replace(/(src="js\/app\.js\?v=)[\w.-]+(")/, `$1${appVer}$2`)
+  .replace(/(class="welcome-version">)v?[\d.]+(<\/div>)/, `$1v${appVer}$2`);
+if (!html.includes(`app.js?v=${appVer}`) && !html.includes("js/app.js?v=")) {
   fail("index.html no referencia js/app.js?v=: revisar la etiqueta <script>");
 }
 
@@ -77,7 +82,7 @@ if (mode === "check") {
     const b = output.split("\n").length;
     problems.push(`app.js desincronizado (${a} líneas en disco vs ${b} generadas)`);
   }
-  if (htmlFixed !== html) problems.push(`index.html tiene un ?v= distinto de ${appVer}`);
+  if (htmlFixed !== html) problems.push(`index.html desincronizado (¿v= o welcome-version?) respecto de ${appVer}`);
   if (problems.length) {
     console.error("build --check FALLA:");
     for (const p of problems) console.error(`  - ${p}`);
