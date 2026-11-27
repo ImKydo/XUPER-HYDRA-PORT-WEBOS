@@ -93,6 +93,14 @@
   function pad2(e) {
     return e < 10 ? "0" + e : "" + e;
   }
+  /* "v3.1.86" y "3.1.86" son la misma versión. El diagnóstico comparaba las
+     cadenas tal cual y marcaba "SERVICIO DESACTUALIZADO" para siempre cuando el
+     servicio respondía con prefijo (issue #22). */
+  function normalizeVersion(v) {
+    return String(null == v ? "" : v)
+      .replace(/^v/i, "")
+      .replace(/[^\d.]/g, "");
+  }
   function normalizeText(e) {
     return (
       (e = String(e).toLowerCase()).normalize &&
@@ -9392,10 +9400,11 @@
         D.scale && P.push("escala " + Math.round(100 * D.scale) / 100),
         n.version && P.push("versión " + n.version));
       var O = document.querySelector(".welcome-version"),
-        q = O ? String(O.textContent || "").replace(/[^\d.]/g, "") : "";
+        q = O ? normalizeVersion(O.textContent) : "",
+        svcVer = normalizeVersion(n.version);
       (n.version &&
         q &&
-        n.version !== q &&
+        svcVer !== q &&
         P.push(
           "SERVICIO DESACTUALIZADO (app " + q + "): desenchufa la TV 30 s"
         ),

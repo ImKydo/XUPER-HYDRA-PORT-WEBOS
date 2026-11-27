@@ -43,7 +43,11 @@ const server = http.createServer((req, res) => {
   }
   const done = (err, data) => (err ? json(res, 502, { returnValue: false, errorText: String(err.message || err), errorCode: err.portalCode || 1 }) : json(res, 200, { returnValue: true, ...data }));
 
-  if (u.pathname === "/ping") return json(res, 200, { returnValue: true, port: PORT, proxy: proxy.port() });
+  // `version` imita lo que devuelve el servicio del televisor (index.js:355).
+  // SERVICE_VERSION permite simular un servicio viejo que responde "v3.1.86",
+  // el caso que disparaba el falso "SERVICIO DESACTUALIZADO" (issue #22).
+  const svcVersion = process.env.SERVICE_VERSION || require(path.join(svcDir, "package.json")).version;
+  if (u.pathname === "/ping") return json(res, 200, { returnValue: true, port: PORT, proxy: proxy.port(), version: svcVersion });
   if (u.pathname === "/home") return magis.home(Q.root || "movies", done);
   if (u.pathname === "/search") return magis.search(Q.value || "", done);
   if (u.pathname === "/detail") {
@@ -157,6 +161,9 @@ const server = http.createServer((req, res) => {
       if (err) return done(err);
       netdiag.runLayers(layerOpts, (lerr, layers) => {
         report.layers = layers || {};
+        /* El servicio del televisor adjunta su versión al informe (index.js);
+           aquí se replica para poder probar la comparación del diagnóstico. */
+        report.version = svcVersion;
         report.codec = {
           h264: Q.codecH264 || "",
           hevc: Q.codecHEVC || "",
