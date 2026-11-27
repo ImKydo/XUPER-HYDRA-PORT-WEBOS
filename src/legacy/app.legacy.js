@@ -5667,13 +5667,19 @@
     var o = n || 772,
       s = createEl("div", "kids-subtitle", r || "Catálogo");
     (placeAbsolute(s, 48, o, 1824, 40), t.appendChild(s), (o += 54));
+    /* Siete tarjetas completas y un asomo de la octava: con paso 264 solo
+       cabian seis y la septima quedaba cortada por 24 px, que no se lee como
+       "hay mas" sino como un defecto de recorte. */
+    var RAIL_STEP = 254,
+      RAIL_W = 234,
+      RAIL_H = 346;
     var l = createEl("div", "catalog-rail scrollable"),
       d,
       c;
-    placeAbsolute(l, 48, o, 1824, 380);
+    placeAbsolute(l, 48, o, 1824, RAIL_H + 20);
     t.appendChild(l);
     l.style.width = "1824px";
-    l.style.height = "380px";
+    l.style.height = RAIL_H + 20 + "px";
     l.style.position = "absolute";
     l.style.overflowX = "auto";
     l.style.overflowY = "hidden";
@@ -5737,7 +5743,7 @@
       };
     d = Math.min(a.length, MAX_RAIL);
     for (c = 0; c < d; c++) {
-      var poster = xt(a[c], 264 * c, 0, 244, 360, { gold: !0 });
+      var poster = xt(a[c], RAIL_STEP * c, 0, RAIL_W, RAIL_H, { gold: !0 });
       poster._onMove = railMove(l, c);
       poster._onFocus = (function (rail, card) {
         return function () {
@@ -5748,7 +5754,7 @@
     }
     if (hasMore) {
       var moreCard = createEl("div", "poster gold focusable see-more");
-      (placeAbsolute(moreCard, 264 * d, 0, 244, 360),
+      (placeAbsolute(moreCard, RAIL_STEP * d, 0, RAIL_W, RAIL_H),
         moreCard.appendChild(createEl("div", "see-more-dots", "···")),
         moreCard.appendChild(createEl("div", "see-more-label", "Ver más")),
         moreCard.appendChild(

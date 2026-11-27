@@ -1346,3 +1346,42 @@ body {
 .home-tabs .tab-item.is-selected.is-focused .tab-icon {
   color: #07070b;
 }
+
+/* ------------------------------------------------------------------
+   Truncado (T6.1)
+   Medido en Chromium: el titulo del detalle se salia 96 px, la sinopsis se
+   cortaba 40 px a media linea, los nombres de episodio 23 px y los resultados
+   de busqueda hasta 526 px. Nada de eso tenia ellipsis ni envoltura.
+   ------------------------------------------------------------------ */
+.detail-title {
+  white-space: normal;
+  max-width: 880px;
+  max-height: 152px;
+  overflow: hidden;
+  line-height: 1.06;
+}
+
+.detail-synopsis {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+  max-height: 132px;
+}
+
+.s-name,
+.d-name,
+.settings-desc,
+.settings-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hero-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
