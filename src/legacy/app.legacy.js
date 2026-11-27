@@ -758,22 +758,38 @@
         );
       }, o + 1e3)),
         hasServiceBridge() && window.PalmServiceBridge)
-    )
+    ) {
+      var busTried = !1;
+      /* webOS 3 rechaza luna:// para los servicios del propio paquete; el bus
+         legacy palm:// sigue funcionando. Se reintenta UNA vez (issue #22).
+         Se usa `var f = function () {}` y no `function f() {}` para no mezclar
+         convenciones con el servicio (AGENTS.md §5). */
+      var requestOn = function (scheme) {
+        window.webOS.service.request(scheme + "://" + n, {
+          method: e,
+          parameters: t || {},
+          timeout: i || parseInt(p.timeoutMs, 10) || 2e4,
+          onSuccess: function (res) {
+            l(null, res);
+          },
+          onFailure: function (err) {
+            var msg = (err && err.errorText) || "Error del servicio XuperTV";
+            if (!busTried && /denied|not permitted|unknown method/i.test(msg)) {
+              busTried = !0;
+              try {
+                requestOn(scheme === "luna" ? "palm" : "luna");
+              } catch (retryErr) {
+                l("Error comunicando con el servicio: " + (retryErr.message || retryErr), null);
+              }
+              return;
+            }
+            l(msg, null);
+          },
+        });
+      };
       try {
-        return (
-          window.webOS.service.request("luna://" + n, {
-            method: e,
-            parameters: t || {},
-            timeout: i || parseInt(p.timeoutMs, 10) || 2e4,
-            onSuccess: function (e) {
-              l(null, e);
-            },
-            onFailure: function (e) {
-              l((e && e.errorText) || "Error del servicio XuperTV", null);
-            },
-          }),
-          !0
-        );
+        requestOn("luna");
+        return !0;
       } catch (e) {
         if (!p.devServiceUrl)
           return (
@@ -781,6 +797,7 @@
             !1
           );
       }
+    }
     return p.devServiceUrl
       ? (_(
         String(p.devServiceUrl).replace(/\/$/, "") +
