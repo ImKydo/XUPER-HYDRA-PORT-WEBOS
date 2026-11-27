@@ -1,0 +1,27 @@
+{
+  "name": "xupertv-webos-tooling",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Herramientas de calidad y empaquetado para el port XuperTV webOS. No se empaqueta en el IPK.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "check": "node tools/check/protected.mjs && node tools/check/css-compat.mjs && node tools/check/es5.mjs && node tools/check/inline-scripts.mjs",
+    "build": "node tools/build.mjs --write",
+    "build:check": "node tools/build.mjs --check",
+    "tokens": "node tools/css-tokens.mjs --write",
+    "nogap": "node tools/gen-nogap.mjs --write",
+    "ipk": "node tools/build-ipk.mjs",
+    "test": "node --test tests/unit/",
+    "test:e2e": "node tests/e2e/smoke.mjs",
+    "serve": "node tools/serve.mjs",
+    "perf": "node tools/perf/measure.mjs --throttle=4 --out=docs/perf/latest.json",
+    "progress": "node tools/progress.mjs",
+    "progress:check": "node tools/progress.mjs --check"
+  },
+  "devDependencies": {
+    "acorn": "^8.19.0",
+    "terser": "^5.36.0"
+  }
+}

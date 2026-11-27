@@ -1,0 +1,447 @@
+{
+  "plan": ".hermes/plans/2026-11-26_224922-xupertv-v2-reconstruccion-verificada.md",
+  "updatedAt": "2026-11-27T02:00:28.287Z",
+  "tasks": [
+    {
+      "id": "T0.1",
+      "phase": "F0",
+      "title": "Clonar y aislar",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T0.2",
+      "phase": "F0",
+      "title": "Herramientas verificadas y dependencias",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T0.3",
+      "phase": "F0",
+      "title": "Restaurar FFmpeg (necesario para empaquetar)",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T0.4",
+      "phase": "F0",
+      "title": "El contrato falla donde debe",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T0.5",
+      "phase": "F0",
+      "title": "Artefacto generado y cache-buster",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T0.6",
+      "phase": "F0",
+      "title": "Recuperar los 3 archivos que solo existen en el IPK",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T0.7",
+      "phase": "F0",
+      "title": "Empaquetador Linux y verificación de paridad con el IPK",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T0.8",
+      "phase": "F0",
+      "title": "Línea base y compatibilidad",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T0.9",
+      "phase": "F0",
+      "title": "CI de calidad (incluye scripts inline)",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T0.10",
+      "phase": "F0",
+      "title": "Higiene del proyecto en GitHub",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T1.1",
+      "phase": "F1",
+      "title": "Servidor estático con `no-store`",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T1.2",
+      "phase": "F1",
+      "title": "El servicio local entiende `?q=`",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T1.3",
+      "phase": "F1",
+      "title": "Fallback al servicio HTTP sin puente Luna",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T1.4",
+      "phase": "F1",
+      "title": "Smoke E2E",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T1.5",
+      "phase": "F1",
+      "title": "Presupuesto de rendimiento",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T2.1",
+      "phase": "F2",
+      "title": "Inventario de las 313 funciones",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T2.2",
+      "phase": "F2",
+      "title": "Pruebas del renombrador (antes de usarlo)",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T2.3",
+      "phase": "F2",
+      "title": "Lote 1: el núcleo (≈20 funciones)",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T2.4",
+      "phase": "F2",
+      "title": "Lotes 2 a 6, por dominio",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T2.5",
+      "phase": "F2",
+      "title": "Cierre de la reconstrucción",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T3.1",
+      "phase": "F3",
+      "title": "Dual-bus `palm://` (issue #22)",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T3.2",
+      "phase": "F3",
+      "title": "Diagnóstico de la escala en webOS 3.4 (issue #18)",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T3.3",
+      "phase": "F3",
+      "title": "Comparación de versión (\"SERVICIO DESACTUALIZADO\")",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T3.4",
+      "phase": "F3",
+      "title": "Matriz de compatibilidad en CI (patrón TiviBro)",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T4.1",
+      "phase": "F4",
+      "title": "Recortar el payload del catálogo (274 KB → ≤ 100 KB)",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T4.2",
+      "phase": "F4",
+      "title": "Imágenes con placeholder y dimensiones",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T4.3",
+      "phase": "F4",
+      "title": "Culling por frame, no por temporizador",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T4.4",
+      "phase": "F4",
+      "title": "Temporizadores y cachés sin límite (ideas del PR #24)",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T4.5",
+      "phase": "F4",
+      "title": "Sacar `portal.js` (507 KB) del camino crítico",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T4.6",
+      "phase": "F4",
+      "title": "Rangos sin acumular en memoria",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T4.7",
+      "phase": "F4",
+      "title": "Scroll sin escrituras redundantes",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T5.1",
+      "phase": "F5",
+      "title": "Tokens",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T5.2",
+      "phase": "F5",
+      "title": "Consolidar 3 capas en `app.css`",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T5.3",
+      "phase": "F5",
+      "title": "Capa `.nogap` generada (patrón TiviBro)",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T5.4",
+      "phase": "F5",
+      "title": "`backdrop-filter` → fondo sólido",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T5.5",
+      "phase": "F5",
+      "title": "CSS muerto",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T5.6",
+      "phase": "F5",
+      "title": "`!important` a cero",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T5.7",
+      "phase": "F5",
+      "title": "Cerrar la puerta",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T6.1",
+      "phase": "F6",
+      "title": "Tipografía y truncado",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T6.2",
+      "phase": "F6",
+      "title": "Un solo lenguaje de foco",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T6.3",
+      "phase": "F6",
+      "title": "Safe area (overscan 5 %)",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T6.4",
+      "phase": "F6",
+      "title": "Estados de carga, error y vacío",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T6.5",
+      "phase": "F6",
+      "title": "Carrusel de 7 + asomo",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T6.6",
+      "phase": "F6",
+      "title": "Issue #83: retomar, favoritos y Back",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T6.7",
+      "phase": "F6",
+      "title": "Regresión visual",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T7.1",
+      "phase": "F7",
+      "title": "Geometría pura + pruebas",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T7.2",
+      "phase": "F7",
+      "title": "Conectar a Ajustes",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T7.3",
+      "phase": "F7",
+      "title": "Migrar Búsqueda, Sección, Detalle, Inicio",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    },
+    {
+      "id": "T7.4",
+      "phase": "F7",
+      "title": "Reproductor intocable",
+      "status": "pending",
+      "commit": null,
+      "evidence": "",
+      "date": null
+    }
+  ]
+}

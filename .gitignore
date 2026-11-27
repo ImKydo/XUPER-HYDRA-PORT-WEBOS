@@ -48,3 +48,6 @@ __pycache__/
 .claude/
 agent/
 skills-lock.json
+# Tooling de calidad (no se empaqueta en el IPK)
+node_modules/
+.hermes/
