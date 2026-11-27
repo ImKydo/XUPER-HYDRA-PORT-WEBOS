@@ -1,95 +1,95 @@
 {
   "plan": ".hermes/plans/2026-11-26_224922-xupertv-v2-reconstruccion-verificada.md",
-  "updatedAt": "2026-11-27T02:00:28.287Z",
+  "updatedAt": "2026-11-27T02:39:53.877Z",
   "tasks": [
     {
       "id": "T0.1",
       "phase": "F0",
       "title": "Clonar y aislar",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "df0e64d",
+      "evidence": "clon en df0e64d; rama chore/calidad-v2; legacy/ excluido",
+      "date": "2026-11-27"
     },
     {
       "id": "T0.2",
       "phase": "F0",
       "title": "Herramientas verificadas y dependencias",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "736488c",
+      "evidence": "11 herramientas; acorn 8.19.0 + terser 5.51.4",
+      "date": "2026-11-27"
     },
     {
       "id": "T0.3",
       "phase": "F0",
       "title": "Restaurar FFmpeg (necesario para empaquetar)",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "736488c",
+      "evidence": "ffmpeg ELF ARM 0755 desde vendor; P24 PASS (binario gitignored)",
+      "date": "2026-11-27"
     },
     {
       "id": "T0.4",
       "phase": "F0",
       "title": "El contrato falla donde debe",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "661239d",
+      "evidence": "23/24 antes del fix; P22: index.html=3.1.37 vs APP_VERSION=3.1.86",
+      "date": "2026-11-27"
     },
     {
       "id": "T0.5",
       "phase": "F0",
       "title": "Artefacto generado y cache-buster",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "661239d",
+      "evidence": "build --write deja sha256 757d9b80 identico; protected 24/24",
+      "date": "2026-11-27"
     },
     {
       "id": "T0.6",
       "phase": "F0",
       "title": "Recuperar los 3 archivos que solo existen en el IPK",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "15b14a3",
+      "evidence": "logo-mark 256x256 carga (naturalWidth 256); logo-full y design-v4 recuperados",
+      "date": "2026-11-27"
     },
     {
       "id": "T0.7",
       "phase": "F0",
       "title": "Empaquetador Linux y verificación de paridad con el IPK",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "dfe24cd",
+      "evidence": "IPK 216 archivos; PARIDAD OK salvo index.html; ffmpeg 755 en ambos",
+      "date": "2026-11-27"
     },
     {
       "id": "T0.8",
       "phase": "F0",
       "title": "Línea base y compatibilidad",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "24b64ae",
+      "evidence": "dcl 961 fcp 288 dom 740 p95 12.5; CSS 22 bloqueos; ES5 26/26",
+      "date": "2026-11-27"
     },
     {
       "id": "T0.9",
       "phase": "F0",
       "title": "CI de calidad (incluye scripts inline)",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
-      "date": null
+      "status": "done",
+      "commit": "946d14d",
+      "evidence": "npm run check verde; 7 tests; inline-scripts detecta error inyectado",
+      "date": "2026-11-27"
     },
     {
       "id": "T0.10",
       "phase": "F0",
       "title": "Higiene del proyecto en GitHub",
-      "status": "pending",
-      "commit": null,
-      "evidence": "",
+      "status": "blocked",
+      "commit": "827f3b0",
+      "evidence": "local hecho; remoto bloqueado: push=false y sin fork",
       "date": null
     },
     {
