@@ -596,7 +596,7 @@
             r = !(!X.focus || !n(X.focus, "#home-notify")),
             o = !(!X.focus || !n(X.focus, ".home-page"));
           if (
-            ((He = []), (Ue = []), gt(), bt(X.tab, !1), "home" === X.screen)
+            ((He = []), (Ue = []), renderHomeScreen(), bt(X.tab, !1), "home" === X.screen)
           ) {
             if (i && Ue[X.tab]) setFocus(Ue[X.tab], !0);
             else if (r) {
@@ -2653,7 +2653,7 @@
     var e = t("screen-welcome"),
       a = t("screen-home");
     try {
-      Ve || gt();
+      Ve || renderHomeScreen();
     } catch (e) {
       console.error("buildHome error:", e);
     }
@@ -2985,7 +2985,7 @@
         return true;
       });
       n.length &&
-        ya(e, n, 860, {
+        renderSectionRows(e, n, 860, {
           sectionTitle: "Destacados",
           popularTitle: "Títulos más vistos",
           bentoItems: a,
@@ -3003,7 +3003,7 @@
         return true;
       });
       n.length &&
-        ya(e, n, 860, {
+        renderSectionRows(e, n, 860, {
           sectionTitle: "Películas",
           popularTitle: "Películas más populares",
           bentoItems: a,
@@ -3021,7 +3021,7 @@
         return true;
       });
       n.length &&
-        ya(e, n, 860, {
+        renderSectionRows(e, n, 860, {
           sectionTitle: "Series",
           popularTitle: "Series más populares",
           bentoItems: a,
@@ -3039,7 +3039,7 @@
         return true;
       });
       n.length &&
-        ya(e, n, 860, {
+        renderSectionRows(e, n, 860, {
           sectionTitle: "Infantil",
           popularTitle: "Contenido infantil popular",
           bentoItems: a,
@@ -3057,7 +3057,7 @@
         return true;
       });
       n.length &&
-        ya(e, n, 860, {
+        renderSectionRows(e, n, 860, {
           sectionTitle: "Anime",
           popularTitle: "Anime más popular",
           bentoItems: a,
@@ -3076,7 +3076,7 @@
           return true;
         });
         remaining.length &&
-          ya(t, remaining, 860, {
+          renderSectionRows(t, remaining, 860, {
             sectionTitle: "Novelas",
             popularTitle: "Novelas y Dramas más populares",
             bentoItems: hero,
@@ -3112,7 +3112,7 @@
   function mt(e) {
     !ht[e] && He[e] && ft[e] && ((ht[e] = !0), ft[e](He[e]));
   }
-  function gt() {
+  function renderHomeScreen() {
     ((Ve = !0),
       (ee = t("home-pages")),
       (te = t("home-notify")),
@@ -4506,7 +4506,7 @@
           }, 300));
       }, 3200)));
   }
-  function Zt(i) {
+  function openUpdateDialog(i) {
     ((Ft = i || {}), (Ut = !0));
     var n = t("dialog-update");
     if (n) {
@@ -4790,7 +4790,7 @@
     function i(i) {
       (t && t(null, i),
         i && i.updateAvailable
-          ? (e && Bt) || Zt(i)
+          ? (e && Bt) || openUpdateDialog(i)
           : e || Yt("Tienes la versión más reciente (v" + a + ")"));
     }
     P(
@@ -4821,7 +4821,7 @@
     if (e) {
       var ret = returnFocus || X.focus;
       e.classList.add("is-active");
-      da();
+      renderAddonPresets();
       var a = t("da-btn-write-url") || t("da-custom-url") || e.querySelector(".focusable");
       if (window.DialogManager) {
         window.DialogManager.open("addons", e, {
@@ -4994,7 +4994,7 @@
   window.openUrlKeyboard = openUrlKeyboard;
   window.closeUrlKeyboard = closeUrlKeyboard;
 
-  function da() {
+  function renderAddonPresets() {
     for (
       var i = t("da-presets-list"),
       n = t("da-installed-list"),
@@ -5029,7 +5029,7 @@
                       setTimeout(function () {
                         s.textContent = "+ Instalar";
                       }, 2e3))
-                    : (da(), Mt && Mt.isAddon && $t());
+                    : (renderAddonPresets(), Mt && Mt.isAddon && $t());
                 }));
           }),
             bindMagicActivate(s),
@@ -5053,7 +5053,7 @@
             (o.appendChild(s), o.appendChild(l), i.appendChild(o));
             var d = e("button", "da-del-btn focusable", "Eliminar");
             ((d._activate = function () {
-              (r.splice(a, 1), kt(r), da(), Mt && Mt.isAddon && $t());
+              (r.splice(a, 1), kt(r), renderAddonPresets(), Mt && Mt.isAddon && $t());
             }),
               bindMagicActivate(d),
               i.appendChild(d),
@@ -5101,7 +5101,7 @@
                 ((c.textContent = "Agregar"),
                   t
                     ? alert("No se pudo cargar la lista M3U: " + t)
-                    : (e && (e.value = ""), da(), Mt && Mt.isAddon && $t()));
+                    : (e && (e.value = ""), renderAddonPresets(), Mt && Mt.isAddon && $t()));
               }
             ))
           : alert("Por favor introduce una URL válida (http:// o https://)");
@@ -6287,7 +6287,7 @@
     else Ue[X.tab] && setFocus(Ue[X.tab]);
   }
 
-  function ya(e, t, a, i) {
+  function renderSectionRows(e, t, a, i) {
     if (!t || !t.length) return a;
     var n,
       r,
@@ -8313,7 +8313,7 @@
         return (
           i(c, 52, 852, 1380, 110),
           (n._activate = function () {
-            Za(n, o, l);
+            runDiagnostics(n, o, l);
           }),
           (q._activate = function () {
             P(
@@ -8676,7 +8676,7 @@
             })(o, l);
           }),
           (t._ensureDiag = function () {
-            Xa.report ? Ja(o, l, Xa.report) : Za(n, o, l);
+            Xa.report ? renderNetworkDiagnostics(o, l, Xa.report) : runDiagnostics(n, o, l);
           }),
           t.appendChild(n),
           t.appendChild(r),
@@ -9178,7 +9178,7 @@
           : "bad"
       : "";
   }
-  function Ja(t, i, n) {
+  function renderNetworkDiagnostics(t, i, n) {
     a(i);
     var r = (function (e) {
       switch (e) {
@@ -9389,7 +9389,7 @@
           : "error" + (e.error ? ": " + Ka(e.error) : "")
       : "sin datos";
   }
-  function Za(t, i, n) {
+  function runDiagnostics(t, i, n) {
     var r = Xa.runId + 1;
     function o(e) {
       var a;
@@ -9418,7 +9418,7 @@
             providers: [],
           }),
           (t.textContent = "Analizar de nuevo"),
-          Ja(i, n, Xa.report));
+          renderNetworkDiagnostics(i, n, Xa.report));
     }
     ((Xa.runId = r),
       (Xa.running = !0),
@@ -9497,7 +9497,7 @@
               setFocus(t),
               !e && a)
           )
-            ((Xa.report = a), Ja(i, n, a));
+            ((Xa.report = a), renderNetworkDiagnostics(i, n, a));
           else {
             ((Xa.error = e || "sin respuesta"),
               (i.className = "dg-summary bad"));
@@ -13638,7 +13638,7 @@
         }));
     }
   }
-  function so() {
+  function bootstrapApp() {
     var welcomeVersion = t("screen-welcome");
     welcomeVersion = welcomeVersion && welcomeVersion.querySelector(".welcome-version");
     welcomeVersion && (welcomeVersion.textContent = "v" + APP_VERSION);
@@ -14019,6 +14019,6 @@
       return !1;
     }),
     "loading" === document.readyState
-      ? document.addEventListener("DOMContentLoaded", so)
-      : so());
+      ? document.addEventListener("DOMContentLoaded", bootstrapApp)
+      : bootstrapApp());
 })();
