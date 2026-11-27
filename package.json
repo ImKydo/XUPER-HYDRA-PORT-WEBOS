@@ -7,7 +7,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "check": "node tools/check/protected.mjs && node tools/check/css-compat.mjs && node tools/check/es5.mjs && node tools/check/inline-scripts.mjs",
+    "check": "node tools/check/protected.mjs && node tools/check/css-compat.mjs && node tools/check/es5.mjs && node tools/check/inline-scripts.mjs && node tools/check/undefined-calls.mjs",
     "build": "node tools/build.mjs --write",
     "build:check": "node tools/build.mjs --check",
     "tokens": "node tools/css-tokens.mjs --write",

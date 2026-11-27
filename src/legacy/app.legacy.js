@@ -598,14 +598,14 @@
           if (
             ((He = []), (Ue = []), gt(), bt(X.tab, !1), "home" === X.screen)
           ) {
-            if (i && Ue[X.tab]) rt(Ue[X.tab], !0);
+            if (i && Ue[X.tab]) setFocus(Ue[X.tab], !0);
             else if (r) {
-              var s = ot(t("home-notify"));
-              s && rt(s, !0);
+              var s = findFirstFocusable(t("home-notify"));
+              s && setFocus(s, !0);
             } else if (o) {
               var l = He[z[X.tab].page],
-                d = l ? ot(l) : null;
-              d && rt(d, !0);
+                d = l ? findFirstFocusable(l) : null;
+              d && setFocus(d, !0);
             }
             if (a && e) {
               (e.classList.add("is-expanded"),
@@ -617,7 +617,7 @@
           }
         }
         ce && (_a(), X.searchQuery && Pa());
-        X.detail && Ca(X.detail);
+        X.detail && renderDetailScreen(X.detail);
       })(),
       !0
     );
@@ -658,7 +658,7 @@
   /* Puerto de la API local del servicio. Se usa solo como respaldo cuando
      Luna deniega la llamada (webOS 3.x con comandos "public": false). */
   var SERVICE_HTTP_PORT = 8910;
-  function Ph(e, t, a, i) {
+  function serviceCallHttp(e, t, a, i) {
     var n = !1,
       r = null,
       o = null,
@@ -733,7 +733,7 @@
          API HTTP local del servicio en lugar de dejar al usuario sin nada. */
       if (err && !w && /denied|permission|not permitted/i.test(String(err))) {
         w = !0;
-        return void Ph(e, t, l, o);
+        return void serviceCallHttp(e, t, l, o);
       }
       ((r = !0),
         s && (clearTimeout(s), (s = null)),
@@ -1027,7 +1027,7 @@
           for (var l = s.length > 0, d = 0; d < s.length; d++) s[d](e);
           X.detail === e &&
             "detail" === X.screen &&
-            (Ca(e),
+            (renderDetailScreen(e),
               restoreDetailFocus(),
               l || (xe && xe.src && !xe.paused) || Jr(e, X.detailEpisode));
         })
@@ -1047,7 +1047,7 @@
                   (e._detailsLoaded = !0),
                   X.detail === e &&
                   "detail" === X.screen &&
-                  (Ca(e),
+                  (renderDetailScreen(e),
                     restoreDetailFocus(),
                     (xe && xe.src && !xe.paused) || Jr(e, X.detailEpisode)));
             }
@@ -1564,7 +1564,7 @@
       cur = t;
     }
   }
-  function rt(e, a) {
+  function setFocus(e, a) {
     if (e)
       if (X.focus !== e) {
         (X.focus && X.focus.classList.remove("is-focused"),
@@ -1584,13 +1584,20 @@
           var s = t("screen-home");
           s && s.classList.toggle("is-rail-open", !!r);
         }
-        (a || nt(e), "player" !== X.screen && wt());
+        (a || nt(e), "player" !== X.screen && schedulePosterLoad());
       } else a || nt(e);
   }
-  function ot(e) {
+  function findFirstFocusable(e) {
     for (var t = e.querySelectorAll(".focusable"), a = 0; a < t.length; a++)
       if (at(t[a])) return t[a];
     return null;
+  }
+  /* El cierre del diálogo de actualización llamaba a firstFocusable() sin
+     argumentos y esa función no existía: lanzaba ReferenceError. Devuelve el
+     primer enfocable de la pantalla activa. */
+  function firstFocusable() {
+    var screen = document.querySelector(".screen.is-active");
+    return screen ? findFirstFocusable(screen) : null;
   }
   /* =========================================================================
      DialogManager: Nucleo unificado de gestion de dialogos y modales (ES5)
@@ -1674,8 +1681,8 @@
       }
       var screenId = X && X.screen ? "screen-" + X.screen : "";
       var screenElem = screenId ? (t(screenId) || document.getElementById(screenId)) : null;
-      if (typeof ot === "function" && screenElem) {
-        var f = ot(screenElem);
+      if (typeof findFirstFocusable === "function" && screenElem) {
+        var f = findFirstFocusable(screenElem);
         if (f) return f;
       }
       var root = screenElem || document.documentElement || document;
@@ -1691,8 +1698,8 @@
     var restoreFocus = function (target, customFallback) {
       var elem = target;
       if (elem && isNavigable(elem)) {
-        if (typeof rt === "function") {
-          rt(elem);
+        if (typeof setFocus === "function") {
+          setFocus(elem);
         } else if (elem.focus) {
           elem.focus();
         }
@@ -1701,8 +1708,8 @@
       if (customFallback) {
         var cElem = typeof customFallback === "function" ? customFallback() : customFallback;
         if (cElem && isNavigable(cElem)) {
-          if (typeof rt === "function") {
-            rt(cElem);
+          if (typeof setFocus === "function") {
+            setFocus(cElem);
           } else if (cElem.focus) {
             cElem.focus();
           }
@@ -1711,8 +1718,8 @@
       }
       var fallback = findActiveFallback();
       if (fallback) {
-        if (typeof rt === "function") {
-          rt(fallback);
+        if (typeof setFocus === "function") {
+          setFocus(fallback);
         } else if (fallback.focus) {
           fallback.focus();
         }
@@ -1740,7 +1747,7 @@
             }
             var initFocus = options && options.initialFocus ? options.initialFocus : null;
             if (initFocus && isNavigable(initFocus)) {
-              if (typeof rt === "function") rt(initFocus);
+              if (typeof setFocus === "function") setFocus(initFocus);
             }
             return true;
           }
@@ -1769,12 +1776,12 @@
         element.classList.add("is-active");
 
         if (entry.initialFocus && isNavigable(entry.initialFocus)) {
-          if (typeof rt === "function") rt(entry.initialFocus);
+          if (typeof setFocus === "function") setFocus(entry.initialFocus);
         } else {
           var firstInModal = element.querySelectorAll(".focusable");
           for (var m = 0; m < firstInModal.length; m++) {
             if (isNavigable(firstInModal[m])) {
-              if (typeof rt === "function") rt(firstInModal[m]);
+              if (typeof setFocus === "function") setFocus(firstInModal[m]);
               break;
             }
           }
@@ -1884,9 +1891,9 @@
     if (X.focus) {
       if (!at(X.focus)) {
         var screenElem = document.getElementById("screen-" + X.screen) || document;
-        var fallback = ot(screenElem);
+        var fallback = findFirstFocusable(screenElem);
         if (fallback) {
-          rt(fallback);
+          setFocus(fallback);
           return;
         }
       }
@@ -1941,11 +1948,11 @@
             y < d && ((d = y), (l = p));
           }
         }
-        l ? rt(l) : ("left" === e || "up" === e) && t && Ue[X.tab] && rt(Ue[X.tab]);
+        l ? setFocus(l) : ("left" === e || "up" === e) && t && Ue[X.tab] && setFocus(Ue[X.tab]);
       }
     } else {
       var b = it();
-      b.length && rt(b[0]);
+      b.length && setFocus(b[0]);
     }
   }
   function lt(e) {
@@ -1975,11 +1982,11 @@
         (pn = []),
         Bi && (Bi.innerHTML = ""));
     }
-    wt();
+    schedulePosterLoad();
   }
   var dt = 0,
     lastBackKeyDown = 0;
-  function ct() {
+  function handleBackKey() {
     var e = Date.now();
     if (!(e - dt < 250))
       if (((dt = e), "welcome" !== X.screen))
@@ -2024,20 +2031,20 @@
                                 var n = !1;
                                 if (X.detailNeedsRebuild && X.detail) {
                                   ((X.detailNeedsRebuild = !1),
-                                    Ca(X.detail),
+                                    renderDetailScreen(X.detail),
                                     (n = !0));
                                   var r = de
                                     ? de.querySelector(".detail-season")
                                     : null;
-                                  r && rt(r);
+                                  r && setFocus(r);
                                 } else X.detail && Jn(X.detail);
                                 if (!n)
-                                  if (e.focus && at(e.focus)) rt(e.focus);
+                                  if (e.focus && at(e.focus)) setFocus(e.focus);
                                   else {
                                     var o = le
                                       ? le.querySelector(".focusable")
                                       : null;
-                                    o && rt(o);
+                                    o && setFocus(o);
                                   }
                               } else {
                                 zr();
@@ -2046,12 +2053,12 @@
                                   (s.classList.remove("is-mini"),
                                     s.classList.remove("is-active")),
                                   e && "search" === e.screen
-                                    ? (lt("search"), rt(e.focus))
+                                    ? (lt("search"), setFocus(e.focus))
                                     : (lt("home"),
                                       bt(X.tab, !1),
                                       e && e.focus && at(e.focus)
-                                        ? rt(e.focus)
-                                        : Ue[X.tab] && rt(Ue[X.tab])));
+                                        ? setFocus(e.focus)
+                                        : Ue[X.tab] && setFocus(Ue[X.tab])));
                               }
                             })());
           if ("detail" !== X.screen) {
@@ -2064,15 +2071,15 @@
               X.searchReturn = null;
               if (sRet && "section" === sRet.screen) {
                 lt("section");
-                if (sRet.focus && at(sRet.focus)) rt(sRet.focus);
-                else if (t("screen-section")) rt(t("screen-section").querySelector(".focusable") || t("screen-section"));
+                if (sRet.focus && at(sRet.focus)) setFocus(sRet.focus);
+                else if (t("screen-section")) setFocus(t("screen-section").querySelector(".focusable") || t("screen-section"));
                 return;
               }
               lt("home");
               var destTab = (typeof X.tab === "number" && X.tab >= 0) ? X.tab : 0;
               bt(destTab, !1);
-              var homeTarget = (Ue && Ue[destTab]) || (Ue && Ue[0]) || ot(t("screen-home"));
-              if (homeTarget) rt(homeTarget);
+              var homeTarget = (Ue && Ue[destTab]) || (Ue && Ue[0]) || findFirstFocusable(t("screen-home"));
+              if (homeTarget) setFocus(homeTarget);
               return;
             }
             if ("settings" === X.screen) {
@@ -2089,18 +2096,18 @@
                   (t("settings-menu") && t("settings-menu").querySelector(".focusable")) ||
                   null;
                 if (menuTarget) {
-                  rt(menuTarget);
+                  setFocus(menuTarget);
                   return;
                 }
               }
               return (
                 lt("home"),
                 bt(X.tab, !1),
-                void (Ue[X.tab] && rt(Ue[X.tab]))
+                void (Ue[X.tab] && setFocus(Ue[X.tab]))
               );
             }
             if ("home" === X.screen) {
-              if (0 !== X.tab) return (bt(0, !0), void (Ue[0] && rt(Ue[0])));
+              if (0 !== X.tab) return (bt(0, !0), void (Ue[0] && setFocus(Ue[0])));
               window.webOSTV && window.webOSTV.platformBack
                 ? window.webOSTV.platformBack()
                 : window.PalmSystem &&
@@ -2115,7 +2122,7 @@
             if (xa) {
               Ta();
               var a = de ? de.querySelector(".detail-season") : null;
-              return void (a && rt(a));
+              return void (a && setFocus(a));
             }
             var i = t("screen-detail");
             if (i && i.classList.contains("is-synopsis-open"))
@@ -2139,20 +2146,20 @@
             if (r && "search" === r.screen) {
               lt("search");
               if (r.focus && at(r.focus)) {
-                rt(r.focus);
+                setFocus(r.focus);
               } else {
-                var searchTarget = ot(he) || (t("search-suggestions") && ot(t("search-suggestions"))) || (Be && Be[0]) || me;
-                if (searchTarget) rt(searchTarget);
+                var searchTarget = findFirstFocusable(he) || (t("search-suggestions") && findFirstFocusable(t("search-suggestions"))) || (Be && Be[0]) || me;
+                if (searchTarget) setFocus(searchTarget);
               }
             } else if (r && "section" === r.screen) {
               lt("section");
-              rt(r.focus);
+              setFocus(r.focus);
             } else {
               (lt("home"),
                 bt(X.tab, !1),
                 r && r.focus && at(r.focus)
-                  ? rt(r.focus)
-                  : Ue[X.tab] && rt(Ue[X.tab]));
+                  ? setFocus(r.focus)
+                  : Ue[X.tab] && setFocus(Ue[X.tab]));
             }
           }
         }
@@ -2170,7 +2177,7 @@
       return (
         t && t.preventDefault && t.preventDefault(),
         t && t.stopPropagation && t.stopPropagation(),
-        rt(e),
+        setFocus(e),
         a ? a.call(e, t) : e._activate && e._activate(),
         !1
       );
@@ -2179,7 +2186,7 @@
   function bindMagicTextInput(e) {
     if (!e) return;
     e._activate = function () {
-      rt(e);
+      setFocus(e);
       try {
         e.focus();
         e.setSelectionRange && e.setSelectionRange(e.value.length, e.value.length);
@@ -2189,7 +2196,7 @@
       return (e._activate(), !0);
     };
   }
-  function ut(e) {
+  function handleKeyDown(e) {
     var t = e.keyCode || e.which,
       a = e.key || "",
       i = !0;
@@ -2253,14 +2260,14 @@
       if (sRet && "section" === sRet.screen) {
         lt("section");
         var targetToFocus = sRet.focus || (t("screen-section") && t("screen-section").querySelector(".section-sidebar-btn"));
-        if (targetToFocus) rt(targetToFocus);
+        if (targetToFocus) setFocus(targetToFocus);
         return;
       }
       lt("home");
       var destTab = (typeof X.tab === "number" && X.tab >= 0) ? X.tab : 0;
       bt(destTab, !1);
-      var homeTarget = (Ue && Ue[destTab]) || (Ue && Ue[0]) || ot(t("screen-home"));
-      if (homeTarget) rt(homeTarget);
+      var homeTarget = (Ue && Ue[destTab]) || (Ue && Ue[0]) || findFirstFocusable(t("screen-home"));
+      if (homeTarget) setFocus(homeTarget);
       return;
     }
     if ("settings" === X.screen && (461 === t || 27 === t || 8 === t || "Back" === a || "GoBack" === a || "Escape" === a)) {
@@ -2291,7 +2298,7 @@
           (t("settings-menu") && t("settings-menu").querySelector(".focusable")) ||
           null;
         if (menuTarget) {
-          rt(menuTarget);
+          setFocus(menuTarget);
           return;
         }
       }
@@ -2302,8 +2309,8 @@
       lt("home");
       var destTab = (typeof X.tab === "number" && X.tab >= 0) ? X.tab : 0;
       bt(destTab, !1);
-      var homeTarget = (Ue && Ue[destTab]) || (Ue && Ue[0]) || ot(t("screen-home"));
-      if (homeTarget) rt(homeTarget);
+      var homeTarget = (Ue && Ue[destTab]) || (Ue && Ue[0]) || findFirstFocusable(t("screen-home"));
+      if (homeTarget) setFocus(homeTarget);
       return;
     }
     if (
@@ -2361,7 +2368,7 @@
                         On(),
                         e.preventDefault && e.preventDefault(),
                         void (e.stopPropagation && e.stopPropagation()))
-                      : (ct(),
+                      : (handleBackKey(),
                         e.preventDefault && e.preventDefault(),
                         void (e.stopPropagation && e.stopPropagation()));
     }
@@ -2455,7 +2462,7 @@
         if (p) return (di(), void (e.preventDefault && e.preventDefault()));
         if (u) return (li(15), void (e.preventDefault && e.preventDefault()));
         if (v) return (li(-15), void (e.preventDefault && e.preventDefault()));
-        if (f) return (ct(), void (e.preventDefault && e.preventDefault()));
+        if (f) return (handleBackKey(), void (e.preventDefault && e.preventDefault()));
       }
       var h =
         457 === t ||
@@ -2571,7 +2578,7 @@
               previous > 0
                 ? fr(visible[previous - 1])
                 : g
-                  ? rt(g)
+                  ? setFocus(g)
                   : fr(visible[0]);
               return void (e.preventDefault && e.preventDefault());
             }
@@ -2669,7 +2676,7 @@
     }
     try {
       var initialFocus = (typeof Ue !== "undefined" && Ue && Ue[0]) ? Ue[0] : ne;
-      initialFocus && rt(initialFocus);
+      initialFocus && setFocus(initialFocus);
     } catch (e) {
       console.error("setFocus error:", e);
     }
@@ -2810,14 +2817,14 @@
         (i._onMove = function (e) {
           if ("down" === e) {
             var btn = document.querySelector(".live-fast .fast-btn");
-            return btn ? (rt(btn), !0) : !1;
+            return btn ? (setFocus(btn), !0) : !1;
           }
           if ("right" === e) {
             var cRow = Fe.filter(function (el) { return el._channel === X.channel; })[0] || Fe[0];
-            return cRow ? (rt(cRow), !0) : !1;
+            return cRow ? (setFocus(cRow), !0) : !1;
           }
           if ("up" === e) {
-            return Ue[0] ? (rt(Ue[0]), !0) : !1;
+            return Ue[0] ? (setFocus(Ue[0]), !0) : !1;
           }
           return !1;
         }),
@@ -2853,7 +2860,7 @@
               syncLiveFavoriteButtons();
               Qt(liveFavoritesOnly);
               Yt(liveFavoritesOnly ? "Mostrando canales favoritos" : "Mostrando todos los canales");
-              rt(r);
+              setFocus(r);
             }),
             (o._activate = function () {
               selectAllLiveChannels(o);
@@ -2862,69 +2869,69 @@
               pr(c);
             }),
             (i._onMove = function (e) {
-              if ("right" === e) return (rt(r), !0);
+              if ("right" === e) return (setFocus(r), !0);
               if ("up" === e) {
                 var fs = document.querySelector(".live-info .live-fullscreen");
-                if (fs) return (rt(fs), !0);
-                return (Ue[0] ? rt(Ue[0]) : !0, !0);
+                if (fs) return (setFocus(fs), !0);
+                return (Ue[0] ? setFocus(Ue[0]) : !0, !0);
               }
               if ("left" === e) return !0;
               if ("down" === e) {
                 var t = Fe.filter(function (e) {
                   return e._channel === X.channel;
                 })[0];
-                return (t ? rt(t) : Fe[0] && rt(Fe[0]), !0);
+                return (t ? setFocus(t) : Fe[0] && setFocus(Fe[0]), !0);
               }
               return !1;
             }),
             (r._onMove = function (e) {
-              if ("left" === e) return (rt(i), !0);
-              if ("right" === e) return (rt(o), !0);
+              if ("left" === e) return (setFocus(i), !0);
+              if ("right" === e) return (setFocus(o), !0);
               if ("up" === e) {
                 var fs = document.querySelector(".live-info .live-fullscreen");
-                if (fs) return (rt(fs), !0);
-                return (Ue[0] ? rt(Ue[0]) : !0, !0);
+                if (fs) return (setFocus(fs), !0);
+                return (Ue[0] ? setFocus(Ue[0]) : !0, !0);
               }
               if ("down" === e) {
                 var t = Fe.filter(function (e) {
                   return e._channel === X.channel;
                 })[0];
-                return (t ? rt(t) : Fe[0] && rt(Fe[0]), !0);
+                return (t ? setFocus(t) : Fe[0] && setFocus(Fe[0]), !0);
               }
               return !1;
             }),
             (o._onMove = function (e) {
-              if ("left" === e) return (rt(r), !0);
-              if ("right" === e) return (rt(c), !0);
+              if ("left" === e) return (setFocus(r), !0);
+              if ("right" === e) return (setFocus(c), !0);
               if ("up" === e) {
                 var fs = document.querySelector(".live-info .live-fullscreen");
-                if (fs) return (rt(fs), !0);
-                return (Ue[0] ? rt(Ue[0]) : !0, !0);
+                if (fs) return (setFocus(fs), !0);
+                return (Ue[0] ? setFocus(Ue[0]) : !0, !0);
               }
               if ("down" === e) {
                 var t = Fe.filter(function (e) {
                   return e._channel === X.channel;
                 })[0];
-                return (t ? rt(t) : Fe[0] && rt(Fe[0]), !0);
+                return (t ? setFocus(t) : Fe[0] && setFocus(Fe[0]), !0);
               }
               return !1;
             }),
             (c._onMove = function (e) {
-              if ("left" === e) return (rt(o), !0);
+              if ("left" === e) return (setFocus(o), !0);
               if ("right" === e) {
                 var cRow = Fe.filter(function (el) { return el._channel === X.channel; })[0] || Fe[0];
-                return (cRow ? rt(cRow) : !0, !0);
+                return (cRow ? setFocus(cRow) : !0, !0);
               }
               if ("up" === e) {
                 var fs = document.querySelector(".live-info .live-fullscreen");
-                if (fs) return (rt(fs), !0);
-                return (Ue[0] ? rt(Ue[0]) : !0, !0);
+                if (fs) return (setFocus(fs), !0);
+                return (Ue[0] ? setFocus(Ue[0]) : !0, !0);
               }
               if ("down" === e) {
                 var t = Fe.filter(function (e) {
                   return e._channel === X.channel;
                 })[0];
-                return (t ? rt(t) : Fe[0] && rt(Fe[0]), !0);
+                return (t ? setFocus(t) : Fe[0] && setFocus(Fe[0]), !0);
               }
               return !1;
             }),
@@ -2945,22 +2952,22 @@
         ((ne = e("div", "live-focus focusable"))._onMove = function (e) {
           if ("up" === e) {
             var a = document.querySelector(".live-fast .f-srch");
-            return (a ? rt(a) : !0, !0);
+            return (a ? setFocus(a) : !0, !0);
           }
           if ("down" === e) {
             X.channel < F.length - 1 && Kt(X.channel + 1);
             var a = Fe.filter(function (e) {
               return e._channel === X.channel;
             })[0];
-            return (a && rt(a), !0);
+            return (a && setFocus(a), !0);
           }
           if ("right" === e) {
             var t = Fe.filter(function (e) {
               return e._channel === X.channel;
             })[0];
-            return (t ? rt(t) : Fe.length && rt(Fe[0]), !0);
+            return (t ? setFocus(t) : Fe.length && setFocus(Fe[0]), !0);
           }
-          return "left" === e && (Ue[0] && rt(Ue[0]), !0);
+          return "left" === e && (Ue[0] && setFocus(Ue[0]), !0);
         }),
         (ne._activate = function () {
           Yr("live");
@@ -3158,10 +3165,10 @@
                   var t = Fe.filter(function (e) {
                     return e._channel === X.channel;
                   })[0];
-                  t ? rt(t) : Fe.length ? rt(Fe[0]) : ne && rt(ne);
+                  t ? setFocus(t) : Fe.length ? setFocus(Fe[0]) : ne && setFocus(ne);
                 } else if (z[e].page >= 0) {
-                  var a = ot(He[z[e].page]);
-                  a && rt(a);
+                  var a = findFirstFocusable(He[z[e].page]);
+                  a && setFocus(a);
                 }
               };
             })(n)),
@@ -3169,19 +3176,19 @@
               return function (t) {
                 if ("left" === t) {
                   if (e > 0 && Ue[e - 1]) {
-                    rt(Ue[e - 1]);
+                    setFocus(Ue[e - 1]);
                     return !0;
                   }
                   return !0;
                 }
                 if ("right" === t) {
                   if (e < Ue.length - 1 && Ue[e + 1]) {
-                    rt(Ue[e + 1]);
+                    setFocus(Ue[e + 1]);
                     return !0;
                   }
                   var notify = te ? te.querySelector(".notify-item") : null;
                   if (notify) {
-                    return (rt(notify), !0);
+                    return (setFocus(notify), !0);
                   }
                   return !0;
                 }
@@ -3195,10 +3202,10 @@
                     var a = Fe.filter(function (e) {
                       return e._channel === X.channel;
                     })[0];
-                    a ? rt(a) : Fe.length ? rt(Fe[0]) : ne && rt(ne);
+                    a ? setFocus(a) : Fe.length ? setFocus(Fe[0]) : ne && setFocus(ne);
                   } else if (z[e].page >= 0) {
-                    var i = ot(He[z[e].page]);
-                    i && rt(i);
+                    var i = findFirstFocusable(He[z[e].page]);
+                    i && setFocus(i);
                   }
                   return !0;
                 }
@@ -3260,31 +3267,31 @@
             (r._onMove = (function (e) {
               return function (t) {
                 if ("left" === t) {
-                  if (e > 0) return (rt(te.querySelectorAll(".notify-item")[e - 1]), !0);
+                  if (e > 0) return (setFocus(te.querySelectorAll(".notify-item")[e - 1]), !0);
                   if (Ue && Ue.length) {
                     var lastIdx = Ue.length - 1;
-                    rt(Ue[lastIdx]);
+                    setFocus(Ue[lastIdx]);
                     if (X.tab !== lastIdx) scheduleTabSwitch(lastIdx);
                     return !0;
                   }
                   return !0;
                 }
                 if ("right" === t) {
-                  if (e < 2) return (rt(te.querySelectorAll(".notify-item")[e + 1]), !0);
+                  if (e < 2) return (setFocus(te.querySelectorAll(".notify-item")[e + 1]), !0);
                   return !0;
                 }
                 if ("down" === t) {
                   if (0 === X.tab) {
                     var fastSrch = document.querySelector(".live-fast .f-srch");
-                    if (fastSrch) return (rt(fastSrch), !0);
+                    if (fastSrch) return (setFocus(fastSrch), !0);
                     var a = Fe.filter(function (e) {
                       return e._channel === X.channel;
                     })[0] || Fe[0];
-                    return a ? (rt(a), !0) : !0;
+                    return a ? (setFocus(a), !0) : !0;
                   }
                   if (z[X.tab] && z[X.tab].page >= 0) {
-                    var pageElem = ot(He[z[X.tab].page]);
-                    if (pageElem) return (rt(pageElem), !0);
+                    var pageElem = findFirstFocusable(He[z[X.tab].page]);
+                    if (pageElem) return (setFocus(pageElem), !0);
                   }
                   return !0;
                 }
@@ -3359,16 +3366,16 @@
           var s = Fe.filter(function (e) {
             return e._channel === X.channel;
           })[0];
-          s ? rt(s) : Fe.length ? rt(Fe[0]) : ne && rt(ne);
+          s ? setFocus(s) : Fe.length ? setFocus(Fe[0]) : ne && setFocus(ne);
         } else {
-          var l = ot(He[a.page]);
-          l && rt(l);
+          var l = findFirstFocusable(He[a.page]);
+          l && setFocus(l);
         }
-      wt(160);
+      schedulePosterLoad(160);
     }
   }
   var Ct = null;
-  function wt(delay) {
+  function schedulePosterLoad(delay) {
     var wait = typeof delay === "number" ? delay : 80;
     Ct && clearTimeout(Ct);
     Ct = setTimeout(function () {
@@ -3968,7 +3975,7 @@
     if ("home" === X.screen) Qt(!1);
     else if ("player" === X.screen) hr(0);
     Yt("Mostrando todos los canales");
-    returnFocus && rt(returnFocus);
+    returnFocus && setFocus(returnFocus);
   }
   function jt() {
     if (
@@ -4328,7 +4335,7 @@
               return function (t) {
                 if ("left" === t) {
                   var fastAll = document.querySelector(".live-fast .f-all") || document.querySelector(".live-fast .fast-btn");
-                  return fastAll ? (rt(fastAll), !0) : (Ue[0] && rt(Ue[0]), !0);
+                  return fastAll ? (setFocus(fastAll), !0) : (Ue[0] && setFocus(Ue[0]), !0);
                 }
                 if ("up" === t) {
                   var channelPos = visible.indexOf(e),
@@ -4336,9 +4343,9 @@
                     previousRow = previousChannel >= 0 ? homeRows[previousChannel] : null;
                   if (previousChannel >= 0) {
                     previousRow || (Qt(!!currentFavorites, previousChannel), (previousRow = homeRows[previousChannel]));
-                    return previousRow ? (rt(previousRow), !0) : !0;
+                    return previousRow ? (setFocus(previousRow), !0) : !0;
                   }
-                  return (Ue[0] ? rt(Ue[0]) : !0, !0);
+                  return (Ue[0] ? setFocus(Ue[0]) : !0, !0);
                 }
                 if ("down" === t) {
                   var channelPos = visible.indexOf(e),
@@ -4346,12 +4353,12 @@
                     nextRow = nextChannel >= 0 ? homeRows[nextChannel] : null;
                   if (nextChannel >= 0) {
                     nextRow || (Qt(!!currentFavorites, nextChannel), (nextRow = homeRows[nextChannel]));
-                    return nextRow ? (rt(nextRow), !0) : !0;
+                    return nextRow ? (setFocus(nextRow), !0) : !0;
                   }
                   var fastBtn = document.querySelector(".live-fast .fast-btn");
-                  return fastBtn ? (rt(fastBtn), !0) : !0;
+                  return fastBtn ? (setFocus(fastBtn), !0) : !0;
                 }
-                if ("right" === t) return (rt(starButton), !0);
+                if ("right" === t) return (setFocus(starButton), !0);
                 return !1;
               };
             })(i, star)),
@@ -4362,12 +4369,12 @@
                   (t = Fe.filter(function (e) {
                     return e._channel === channelIndex;
                   })[0]),
-                  t && rt(t.querySelector(".channel-star")));
+                  t && setFocus(t.querySelector(".channel-star")));
               };
             })(i, star)),
             (star._onMove = (function (e, t) {
               return function (a) {
-                if ("left" === a) return (rt(t), !0);
+                if ("left" === a) return (setFocus(t), !0);
                 if ("up" === a || "down" === a) {
                   var i = visible.indexOf(e),
                     n = "up" === a ? i - 1 : i + 1,
@@ -4376,11 +4383,11 @@
                     s = o && o.querySelector(".channel-star");
                   if (r >= 0) {
                     s || (Qt(currentFavorites, r), (o = homeRows[r]), (s = o && o.querySelector(".channel-star")));
-                    return s ? (rt(s), !0) : !0;
+                    return s ? (setFocus(s), !0) : !0;
                   }
                   if ("up" === a) {
                     var l = document.querySelector(".live-fast .f-srch");
-                    return l ? (rt(l), !0) : !0;
+                    return l ? (setFocus(l), !0) : !0;
                   }
                   return !0;
                 }
@@ -4413,7 +4420,7 @@
             return row._channel === previousChannel;
           })[0];
           if (restoredRow)
-            rt(
+            setFocus(
               previousWasStar
                 ? restoredRow.querySelector(".channel-star") || restoredRow
                 : restoredRow
@@ -4478,7 +4485,7 @@
     if ("home" === X.screen && 0 === X.tab) {
       var row = Fe.filter(function (e) { return e._channel === target; })[0];
       if (row) {
-        rt(row);
+        setFocus(row);
         Jt();
       }
     }
@@ -4601,7 +4608,7 @@
                           ea();
                         }),
                           s.appendChild(l),
-                          rt(l));
+                          setFocus(l));
                       }
                     },
                   });
@@ -4625,7 +4632,7 @@
                   ea();
                 }),
                   s.appendChild(d),
-                  rt(d));
+                  setFocus(d));
               }
             })();
           }));
@@ -4661,7 +4668,7 @@
             }
           });
         } else {
-          rt(c);
+          setFocus(c);
         }
       }
     }
@@ -4677,17 +4684,17 @@
     if (!skipFocus) {
       if ("home" === X.screen) {
         var a = document.querySelector(".home-tab.is-selected");
-        if (a) rt(a);
+        if (a) setFocus(a);
         else {
           var i = firstFocusable();
-          i && rt(i);
+          i && setFocus(i);
         }
       } else if ("settings" === X.screen) {
         var n = document.querySelector(".settings-item.is-selected");
-        if (n) rt(n);
+        if (n) setFocus(n);
         else {
           var r = firstFocusable();
-          r && rt(r);
+          r && setFocus(r);
         }
       }
     }
@@ -4834,7 +4841,7 @@
           }
         });
       } else {
-        a && rt(a);
+        a && setFocus(a);
       }
     }
   }
@@ -4847,7 +4854,7 @@
     var e = t("dialog-addons");
     if (e && (e.classList.remove("is-active"), X.channelsOpen)) {
       var a = Se ? Se.querySelector("#pc-btn-addons") : null;
-      rt(a || Ce);
+      setFocus(a || Ce);
     }
   }
   window.openAddonsDialog = sa;
@@ -4967,7 +4974,7 @@
           }
         });
       } else {
-        firstKey && rt(firstKey);
+        firstKey && setFocus(firstKey);
       }
     }
   }
@@ -4981,7 +4988,7 @@
     } else if (urlKbDialogEl) {
       urlKbDialogEl.classList.remove("is-active");
       var daInp = t("da-custom-url");
-      if (daInp) rt(daInp);
+      if (daInp) setFocus(daInp);
     }
   }
   window.openUrlKeyboard = openUrlKeyboard;
@@ -5066,7 +5073,7 @@
       openUrlKeyboard(inpUrl ? (inpUrl.value || "") : "", function (newUrl) {
         if (inpUrl) inpUrl.value = newUrl;
         var btnAdd = t("da-btn-add-custom");
-        if (btnAdd) rt(btnAdd);
+        if (btnAdd) setFocus(btnAdd);
       });
     };
     if (inpUrl) {
@@ -5208,7 +5215,7 @@
       (l._activate = function () {
         ba(t);
       }),
-      wt(),
+      schedulePosterLoad(),
       l
     );
   }
@@ -5461,9 +5468,9 @@
     /* El camino alterno usaba hasta 120 pósteres a la vez. En TVs con poca
        RAM eso acumulaba imágenes y nodos aunque los rieles principales ya
        fueran ligeros. Usa exactamente el mismo riel de 10 + "Ver más". */
-    return ga(t, a, n, r || "Catálogo");
+    return buildCatalogRail(t, a, n, r || "Catálogo");
   }
-  function ga(t, a, n, r, sectionInfo, sectionContext, categoryKey) {
+  function buildCatalogRail(t, a, n, r, sectionInfo, sectionContext, categoryKey) {
     if (!a || !a.length) return n;
     var o = n || 772,
       s = e("div", "kids-subtitle", r || "Catálogo");
@@ -5508,7 +5515,7 @@
       },
       focusRailCard = function (rail, card) {
         revealRailCard(rail, card);
-        rt(card);
+        setFocus(card);
       },
       railMove = function (rail, idx) {
         return function (dir) {
@@ -5529,7 +5536,7 @@
               return !0;
             }
             if (Ue && Ue[X.tab]) {
-              rt(Ue[X.tab]);
+              setFocus(Ue[X.tab]);
               return !0;
             }
           }
@@ -5623,7 +5630,7 @@
     };
     var focusRailCard = function (rail, card) {
       revealRailCard(rail, card);
-      rt(card);
+      setFocus(card);
     };
     var railMove = function (rail, idx) {
       return function (dir) {
@@ -5644,7 +5651,7 @@
             return !0;
           }
           if (Ue && Ue[X.tab]) {
-            rt(Ue[X.tab]);
+            setFocus(Ue[X.tab]);
             return !0;
           }
         }
@@ -6109,24 +6116,24 @@
 
     // 4. Navegación remota completa entre sidebar, grid y botones
     searchBtn._onMove = function (dir) {
-      if ("down" === dir) { rt(filterBtn); return !0; }
+      if ("down" === dir) { setFocus(filterBtn); return !0; }
       if ("right" === dir) {
-        if (cardElements[0]) { rt(cardElements[0]); return !0; }
-        if (backBtn) { rt(backBtn); return !0; }
+        if (cardElements[0]) { setFocus(cardElements[0]); return !0; }
+        if (backBtn) { setFocus(backBtn); return !0; }
       }
       return !1;
     };
 
     filterBtn._onMove = function (dir) {
-      if ("up" === dir) { rt(searchBtn); return !0; }
+      if ("up" === dir) { setFocus(searchBtn); return !0; }
       if ("down" === dir && catElements[0]) {
-        rt(catElements[0]);
+        setFocus(catElements[0]);
         scrollCatIntoView(catElements[0]);
         return !0;
       }
       if ("right" === dir) {
-        if (cardElements[0]) { rt(cardElements[0]); return !0; }
-        if (backBtn) { rt(backBtn); return !0; }
+        if (cardElements[0]) { setFocus(cardElements[0]); return !0; }
+        if (backBtn) { setFocus(backBtn); return !0; }
       }
       return !1;
     };
@@ -6141,16 +6148,16 @@
         el._onMove = function (dir) {
           if ("up" === dir) {
             if (idx > 0 && catElements[idx - 1]) {
-              rt(catElements[idx - 1]);
+              setFocus(catElements[idx - 1]);
               scrollCatIntoView(catElements[idx - 1]);
               return !0;
             }
-            rt(filterBtn);
+            setFocus(filterBtn);
             return !0;
           }
           if ("down" === dir) {
             if (idx < catElements.length - 1 && catElements[idx + 1]) {
-              rt(catElements[idx + 1]);
+              setFocus(catElements[idx + 1]);
               scrollCatIntoView(catElements[idx + 1]);
               return !0;
             }
@@ -6158,10 +6165,10 @@
           }
           if ("right" === dir) {
             if (cardElements[0]) {
-              rt(cardElements[0]);
+              setFocus(cardElements[0]);
               return !0;
             }
-            rt(backBtn);
+            setFocus(backBtn);
             return !0;
           }
           return !1;
@@ -6176,43 +6183,43 @@
           var row = cardEl._row;
           if ("left" === dir) {
             if (col > 0 && cardElements[idx - 1]) {
-              rt(cardElements[idx - 1]);
+              setFocus(cardElements[idx - 1]);
               return !0;
             }
             var targetCat = catElements[activeCatIndex] || catElements[0];
             if (targetCat) {
-              rt(targetCat);
+              setFocus(targetCat);
               scrollCatIntoView(targetCat);
               return !0;
             }
-            rt(searchBtn);
+            setFocus(searchBtn);
             return !0;
           }
           if ("right" === dir) {
             if (col < 4 && idx + 1 < cardElements.length) {
-              rt(cardElements[idx + 1]);
+              setFocus(cardElements[idx + 1]);
               return !0;
             }
             return !0;
           }
           if ("up" === dir) {
             if (row > 0 && cardElements[idx - 5]) {
-              rt(cardElements[idx - 5]);
+              setFocus(cardElements[idx - 5]);
               return !0;
             }
             if (col >= 3) {
-              if (nextBtn) { rt(nextBtn); return !0; }
-              rt(backBtn);
+              if (nextBtn) { setFocus(nextBtn); return !0; }
+              setFocus(backBtn);
               return !0;
             }
-            if (prevBtn) { rt(prevBtn); return !0; }
-            if (nextBtn) { rt(nextBtn); return !0; }
-            rt(backBtn);
+            if (prevBtn) { setFocus(prevBtn); return !0; }
+            if (nextBtn) { setFocus(nextBtn); return !0; }
+            setFocus(backBtn);
             return !0;
           }
           if ("down" === dir) {
             if (row === 0 && cardElements[idx + 5]) {
-              rt(cardElements[idx + 5]);
+              setFocus(cardElements[idx + 5]);
               return !0;
             }
             return !0;
@@ -6225,14 +6232,14 @@
     backBtn._onMove = function (dir) {
       if ("down" === dir) {
         var cardTarget = cardElements[4] || cardElements[cardElements.length - 1] || cardElements[0];
-        if (cardTarget) { rt(cardTarget); return !0; }
-        rt(searchBtn);
+        if (cardTarget) { setFocus(cardTarget); return !0; }
+        setFocus(searchBtn);
         return !0;
       }
       if ("left" === dir) {
-        if (nextBtn) { rt(nextBtn); return !0; }
-        if (prevBtn) { rt(prevBtn); return !0; }
-        rt(searchBtn);
+        if (nextBtn) { setFocus(nextBtn); return !0; }
+        if (prevBtn) { setFocus(prevBtn); return !0; }
+        setFocus(searchBtn);
         return !0;
       }
       return !1;
@@ -6242,10 +6249,10 @@
       prevBtn._onMove = function (dir) {
         if ("down" === dir) {
           var cardTarget = cardElements[2] || cardElements[0];
-          if (cardTarget) { rt(cardTarget); return !0; }
+          if (cardTarget) { setFocus(cardTarget); return !0; }
         }
-        if ("right" === dir) { if (nextBtn) { rt(nextBtn); return !0; } rt(backBtn); return !0; }
-        if ("left" === dir) { rt(searchBtn); return !0; }
+        if ("right" === dir) { if (nextBtn) { setFocus(nextBtn); return !0; } setFocus(backBtn); return !0; }
+        if ("left" === dir) { setFocus(searchBtn); return !0; }
         return !1;
       };
     }
@@ -6253,10 +6260,10 @@
       nextBtn._onMove = function (dir) {
         if ("down" === dir) {
           var cardTarget = cardElements[3] || cardElements[0];
-          if (cardTarget) { rt(cardTarget); return !0; }
+          if (cardTarget) { setFocus(cardTarget); return !0; }
         }
-        if ("right" === dir) { rt(backBtn); return !0; }
-        if ("left" === dir) { if (prevBtn) { rt(prevBtn); return !0; } rt(searchBtn); return !0; }
+        if ("right" === dir) { setFocus(backBtn); return !0; }
+        if ("left" === dir) { if (prevBtn) { setFocus(prevBtn); return !0; } setFocus(searchBtn); return !0; }
         return !1;
       };
     }
@@ -6268,16 +6275,16 @@
     }
 
     lt("section");
-    rt(cardElements[0] || catElements[activeCatIndex] || backBtn);
-    wt();
+    setFocus(cardElements[0] || catElements[activeCatIndex] || backBtn);
+    schedulePosterLoad();
   }
 
   function closeSection() {
     sectionRequestId++;
     lt("home");
     var r = X.sectionReturn;
-    if (r && at(r)) rt(r);
-    else Ue[X.tab] && rt(Ue[X.tab]);
+    if (r && at(r)) setFocus(r);
+    else Ue[X.tab] && setFocus(Ue[X.tab]);
   }
 
   function ya(e, t, a, i) {
@@ -6410,7 +6417,7 @@
     }
 
     if (popItems.length) {
-      u = ga(e, popItems, u, i.popularTitle, sectionInfoFor(i.popularTitle, ""), sectionCtx, i.popularTitle);
+      u = buildCatalogRail(e, popItems, u, i.popularTitle, sectionInfoFor(i.popularTitle, ""), sectionCtx, i.popularTitle);
     }
 
     var maxRails = 12;
@@ -6424,7 +6431,7 @@
           for (d = 0; d < T.length; d++) fallbackList.push(T[d]);
         } else {
           if (T.length) {
-            u = ga(e, T, u, w[x] || x, sectionInfoFor(w[x] || x, x), sectionCtx, x);
+            u = buildCatalogRail(e, T, u, w[x] || x, sectionInfoFor(w[x] || x, x), sectionCtx, x);
             S = !0;
             railsCount++;
           }
@@ -6437,7 +6444,7 @@
         fallbackRail.push(fallbackList[d]);
       }
       if (fallbackRail.length) {
-        u = ga(e, fallbackRail, u, i.fallbackRow || "Más títulos del catálogo", null, sectionCtx, i.fallbackRow || "Más títulos");
+        u = buildCatalogRail(e, fallbackRail, u, i.fallbackRow || "Más títulos del catálogo", null, sectionCtx, i.fallbackRow || "Más títulos");
         S = !0;
       }
     }
@@ -6466,7 +6473,7 @@
       _n(),
       xn(e),
       Mn(e),
-      Ca(e),
+      renderDetailScreen(e),
       lt("detail"),
       Ce || lr());
     zr();
@@ -6474,14 +6481,14 @@
     screenPlayer && (screenPlayer.classList.remove("is-mini"), screenPlayer.classList.remove("is-active"));
     var n = le ? le.querySelector(".focusable") : null;
     if (!n && de) n = de.querySelector(".focusable");
-    (n && rt(n),
+    (n && setFocus(n),
       e._detailsLoaded
         ? void 0
         : U(e, function (item) {
           item &&
             "detail" === X.screen &&
             X.detail === item &&
-            (dn(item), Ca(item));
+            (dn(item), renderDetailScreen(item));
         }));
   }
   window.openMovieDetail = ba;
@@ -6602,9 +6609,9 @@
        primera vez a una serie. Se devuelve el foco al primer botón. */
     var target = (le && le.querySelector(".focusable")) || null;
     if (!target && de) target = de.querySelector(".focusable");
-    target && rt(target);
+    target && setFocus(target);
   }
-  function Ca(n) {
+  function renderDetailScreen(n) {
     if (X.channelsOpen || (Se && Se.classList.contains("is-active"))) {
       ro();
     }
@@ -6744,11 +6751,11 @@
       se._onMove = function (dir) {
         if ("left" === dir) {
           var targetBtn = le ? (le.querySelector(".focusable.is-focused") || le.querySelector(".focusable:last-child") || le.querySelector(".focusable")) : null;
-          return targetBtn ? (rt(targetBtn), !0) : !1;
+          return targetBtn ? (setFocus(targetBtn), !0) : !1;
         }
         if ("down" === dir) {
-          var target = de ? (de.querySelector(".detail-season-btn.is-selected") || de.querySelector(".detail-season-btn") || de.querySelector(".detail-episode.is-playing") || de.querySelector(".detail-episode") || de.querySelector(".poster") || ot(de)) : null;
-          return target ? (rt(target), !0) : !1;
+          var target = de ? (de.querySelector(".detail-season-btn.is-selected") || de.querySelector(".detail-season-btn") || de.querySelector(".detail-episode.is-playing") || de.querySelector(".detail-episode") || de.querySelector(".poster") || findFirstFocusable(de)) : null;
+          return target ? (setFocus(target), !0) : !1;
         }
         return !1;
       };
@@ -6816,24 +6823,24 @@
       })(T[_].kind, n),
         (k._onMove = function (dir) {
           if ("down" === dir) {
-            var target = de ? (de.querySelector(".detail-season-btn.is-selected") || de.querySelector(".detail-season-btn") || de.querySelector(".detail-episode.is-playing") || de.querySelector(".detail-episode") || de.querySelector(".poster") || ot(de)) : null;
-            return target ? (rt(target), !0) : !1;
+            var target = de ? (de.querySelector(".detail-season-btn.is-selected") || de.querySelector(".detail-season-btn") || de.querySelector(".detail-episode.is-playing") || de.querySelector(".detail-episode") || de.querySelector(".poster") || findFirstFocusable(de)) : null;
+            return target ? (setFocus(target), !0) : !1;
           }
           if ("right" === dir) {
             var nextBtn = this.nextElementSibling;
             if (nextBtn && nextBtn.classList.contains("focusable")) {
-              rt(nextBtn);
+              setFocus(nextBtn);
               return !0;
             }
             if (se && se.classList.contains("focusable")) {
-              rt(se);
+              setFocus(se);
               return !0;
             }
           }
           if ("left" === dir) {
             var prevBtn = this.previousElementSibling;
             if (prevBtn && prevBtn.classList.contains("focusable")) {
-              rt(prevBtn);
+              setFocus(prevBtn);
               return !0;
             }
           }
@@ -6858,16 +6865,16 @@
       }),
       (M._onMove = function (dir) {
         if ("down" === dir) {
-          var target = de ? (de.querySelector(".detail-season-btn.is-selected") || de.querySelector(".detail-season-btn") || de.querySelector(".detail-episode.is-playing") || de.querySelector(".detail-episode") || de.querySelector(".poster") || ot(de)) : null;
-          return target ? (rt(target), !0) : !1;
+          var target = de ? (de.querySelector(".detail-season-btn.is-selected") || de.querySelector(".detail-season-btn") || de.querySelector(".detail-episode.is-playing") || de.querySelector(".detail-episode") || de.querySelector(".poster") || findFirstFocusable(de)) : null;
+          return target ? (setFocus(target), !0) : !1;
         }
         if ("right" === dir) {
-          return se && se.classList.contains("focusable") ? (rt(se), !0) : !1;
+          return se && se.classList.contains("focusable") ? (setFocus(se), !0) : !1;
         }
         if ("left" === dir) {
           var prevBtn = this.previousElementSibling;
           if (prevBtn && prevBtn.classList.contains("focusable")) {
-            rt(prevBtn);
+            setFocus(prevBtn);
             return !0;
           }
         }
@@ -6936,35 +6943,35 @@
                       sItem._episodes = t.episodes;
                       X.detailEpisode = t.episodes[0] || null;
                     }
-                    Ca(t);
+                    renderDetailScreen(t);
                     var newRail = de ? de.querySelector(".detail-seasons-rail") : null;
                     var newBtn = newRail ? newRail.children[sNum] : null;
-                    newBtn && rt(newBtn);
+                    newBtn && setFocus(newBtn);
                   });
                 }
               };
               sBtn._onMove = function (dir) {
                 if ("left" === dir) {
                   if (sNum > 0 && seasonsRail.children[sNum - 1]) {
-                    rt(seasonsRail.children[sNum - 1]);
+                    setFocus(seasonsRail.children[sNum - 1]);
                     return !0;
                   }
                   return !0;
                 }
                 if ("right" === dir) {
                   if (sNum < t.seasons.length - 1 && seasonsRail.children[sNum + 1]) {
-                    rt(seasonsRail.children[sNum + 1]);
+                    setFocus(seasonsRail.children[sNum + 1]);
                     return !0;
                   }
                   return !0;
                 }
                 if ("down" === dir) {
                   var ep = de ? (de.querySelector(".detail-episode.is-playing") || de.querySelector(".detail-episode")) : null;
-                  return ep ? (rt(ep), !0) : !0;
+                  return ep ? (setFocus(ep), !0) : !0;
                 }
                 if ("up" === dir) {
                   var dBtn = le ? le.querySelector(".detail-btn") : null;
-                  return dBtn ? (rt(dBtn), !0) : !0;
+                  return dBtn ? (setFocus(dBtn), !0) : !0;
                 }
                 return !1;
               };
@@ -7002,26 +7009,26 @@
               rangeBtn._onMove = function (dir) {
                 if ("left" === dir) {
                   if (rangeIdx > 0 && rangesCont.children[rangeIdx - 1]) {
-                    rt(rangesCont.children[rangeIdx - 1]);
+                    setFocus(rangesCont.children[rangeIdx - 1]);
                     return !0;
                   }
                   return !0;
                 }
                 if ("right" === dir) {
                   if (rangeIdx < r.length - 1 && rangesCont.children[rangeIdx + 1]) {
-                    rt(rangesCont.children[rangeIdx + 1]);
+                    setFocus(rangesCont.children[rangeIdx + 1]);
                     return !0;
                   }
                   return !0;
                 }
                 if ("up" === dir) {
                   var dBtn = le ? (le.querySelector(".detail-btn.is-focused") || le.querySelector(".detail-btn")) : null;
-                  return dBtn ? (rt(dBtn), !0) : !0;
+                  return dBtn ? (setFocus(dBtn), !0) : !0;
                 }
                 if ("down" === dir) {
                   var epCont = de ? de.querySelector(".detail-episodes") : null;
                   var ep = epCont ? (epCont.querySelector(".detail-episode.is-playing") || epCont.children[0]) : null;
-                  return ep ? (rt(ep), !0) : !0;
+                  return ep ? (setFocus(ep), !0) : !0;
                 }
                 return !1;
               };
@@ -7064,28 +7071,28 @@
               epTile._onMove = function (dir) {
                 if ("left" === dir) {
                   if (epRelIdx > 0 && u.children[epRelIdx - 1]) {
-                    rt(u.children[epRelIdx - 1]);
+                    setFocus(u.children[epRelIdx - 1]);
                     return !0;
                   }
                   if (showRanges && X.detailRange > 0) {
                     Sa(X.detailRange - 1, t);
                     var prevU = de ? de.querySelector(".detail-episodes") : null;
                     var lastChild = prevU ? prevU.children[prevU.children.length - 1] : null;
-                    if (lastChild) rt(lastChild);
+                    if (lastChild) setFocus(lastChild);
                     return !0;
                   }
                   return !0;
                 }
                 if ("right" === dir) {
                   if (epRelIdx < (p.end - p.start - 1) && u.children[epRelIdx + 1]) {
-                    rt(u.children[epRelIdx + 1]);
+                    setFocus(u.children[epRelIdx + 1]);
                     return !0;
                   }
                   if (showRanges && X.detailRange + 1 < r.length) {
                     Sa(X.detailRange + 1, t);
                     var nextU = de ? de.querySelector(".detail-episodes") : null;
                     var firstChild = nextU ? nextU.children[0] : null;
-                    if (firstChild) rt(firstChild);
+                    if (firstChild) setFocus(firstChild);
                     return !0;
                   }
                   return !0;
@@ -7094,17 +7101,17 @@
                   if (showRanges) {
                     var rCont = de ? de.querySelector(".detail-ranges") : null;
                     var curRange = rCont ? (rCont.querySelector(".detail-range.is-selected") || rCont.children[X.detailRange] || rCont.children[0]) : null;
-                    if (curRange) return (rt(curRange), !0);
+                    if (curRange) return (setFocus(curRange), !0);
                   }
                   var seasonBtn = de ? (de.querySelector(".detail-season-btn.is-selected") || de.querySelector(".detail-season-btn") || de.querySelector(".detail-range.is-selected") || de.querySelector(".detail-range") || de.querySelector(".detail-season")) : null;
-                  if (seasonBtn) return (rt(seasonBtn), !0);
+                  if (seasonBtn) return (setFocus(seasonBtn), !0);
                   var dBtn = le ? (le.querySelector(".detail-btn.is-focused") || le.querySelector(".detail-btn")) : null;
-                  return dBtn ? (rt(dBtn), !0) : !0;
+                  return dBtn ? (setFocus(dBtn), !0) : !0;
                 }
                 if ("down" === dir) {
                   var relGrid = de ? de.querySelector(".detail-grid") : null;
-                  var firstRel = relGrid ? (relGrid.querySelector(".poster") || ot(relGrid)) : null;
-                  return firstRel ? (rt(firstRel), !0) : !0;
+                  var firstRel = relGrid ? (relGrid.querySelector(".poster") || findFirstFocusable(relGrid)) : null;
+                  return firstRel ? (setFocus(firstRel), !0) : !0;
                 }
                 return !1;
               };
@@ -7160,10 +7167,10 @@
                 if ("up" === dir) {
                   if (n) {
                     var ep = de ? (de.querySelector(".detail-episode.is-playing") || de.querySelector(".detail-episode")) : null;
-                    if (ep) return (rt(ep), !0);
+                    if (ep) return (setFocus(ep), !0);
                   } else {
                     var dBtn = le ? (le.querySelector(".detail-btn.is-focused") || le.querySelector(".detail-btn")) : null;
-                    if (dBtn) return (rt(dBtn), !0);
+                    if (dBtn) return (setFocus(dBtn), !0);
                   }
                   return !0;
                 }
@@ -7173,14 +7180,14 @@
                 if ("left" === dir) {
                   if (relIdx > 0 && g.children[relIdx - 1]) {
                     var prevP = g.children[relIdx - 1].querySelector(".poster");
-                    if (prevP) return (rt(prevP), !0);
+                    if (prevP) return (setFocus(prevP), !0);
                   }
                   return !0;
                 }
                 if ("right" === dir) {
                   if (relIdx < relList.length - 1 && g.children[relIdx + 1]) {
                     var nextP = g.children[relIdx + 1].querySelector(".poster");
-                    if (nextP) return (rt(nextP), !0);
+                    if (nextP) return (setFocus(nextP), !0);
                   }
                   return !0;
                 }
@@ -7206,9 +7213,9 @@
     return t;
   }
   function Sa(e, t) {
-    ((X.detailRange = e), Ca(t));
+    ((X.detailRange = e), renderDetailScreen(t));
     var a = de.querySelector(".detail-range.is-selected");
-    a && rt(a);
+    a && setFocus(a);
   }
   var xa = null;
   function Ta() {
@@ -7292,7 +7299,7 @@
                 sData._episodes = item.episodes;
                 X.detailEpisode = item.episodes[0] || null;
               }
-              Ca(item);
+              renderDetailScreen(item);
             });
           }
         };
@@ -7300,14 +7307,14 @@
         pItem._onMove = function (dir) {
           if ("up" === dir) {
             if (sIndex > 0 && xa.children[sIndex - 1]) {
-              rt(xa.children[sIndex - 1]);
+              setFocus(xa.children[sIndex - 1]);
               return !0;
             }
             return !0;
           }
           if ("down" === dir) {
             if (sIndex < item.seasons.length - 1 && xa.children[sIndex + 1]) {
-              rt(xa.children[sIndex + 1]);
+              setFocus(xa.children[sIndex + 1]);
               return !0;
             }
             return !0;
@@ -7372,20 +7379,20 @@
       if (13 === k) {
         try { me.blur(); } catch (err) { }
         Pa();
-        var res = ot(he) || (t("search-suggestions") && ot(t("search-suggestions")));
-        if (res) rt(res);
+        var res = findFirstFocusable(he) || (t("search-suggestions") && findFirstFocusable(t("search-suggestions")));
+        if (res) setFocus(res);
         e.preventDefault && e.preventDefault();
       }
     };
     me._activate = function () {
-      rt(me);
+      setFocus(me);
       if (X.searchQuery && X.searchQuery.trim().length > 0) {
         Pa();
-        var res = ot(he) || (t("search-suggestions") && ot(t("search-suggestions")));
-        if (res) rt(res);
+        var res = findFirstFocusable(he) || (t("search-suggestions") && findFirstFocusable(t("search-suggestions")));
+        if (res) setFocus(res);
       } else {
         var firstKey = (Be && Be[0]) || (ce && ce.querySelector(".kb-action.focusable"));
-        if (firstKey) rt(firstKey);
+        if (firstKey) setFocus(firstKey);
       }
     };
     me.onclick = function () {
@@ -7395,16 +7402,16 @@
       if ("down" === dir) {
         var act = ce ? (ce.querySelector(".kb-action.focusable") || (Be && Be[0])) : null;
         if (act) {
-          rt(act);
+          setFocus(act);
           return !0;
         }
       }
       if ("right" === dir) {
         var rightTarget = (pe && pe.querySelector(".search-hot-refresh")) ||
-          (ue && ot(ue)) ||
-          (pe && ot(pe));
+          (ue && findFirstFocusable(ue)) ||
+          (pe && findFirstFocusable(pe));
         if (rightTarget) {
-          rt(rightTarget);
+          setFocus(rightTarget);
           return !0;
         }
       }
@@ -7528,12 +7535,12 @@
     catalogFilterReturn = null;
     if (!skipFocus) {
       if (ret && at(ret)) {
-        rt(ret);
+        setFocus(ret);
       } else if (ret) {
-        rt(ret);
+        setFocus(ret);
       } else if ("section" === X.screen) {
         var scr = t("screen-section");
-        if (scr) rt(scr.querySelector(".section-sidebar-btn") || scr);
+        if (scr) setFocus(scr.querySelector(".section-sidebar-btn") || scr);
       }
     }
   }
@@ -7654,11 +7661,11 @@
           applyCatalogFilter(def.id);
         };
         btn._onMove = function (dir) {
-          if ("left" === dir && idx > 0) return rt(typeBtns[idx - 1]), !0;
+          if ("left" === dir && idx > 0) return setFocus(typeBtns[idx - 1]), !0;
           if ("right" === dir && idx < typeBtns.length - 1)
-            return rt(typeBtns[idx + 1]), !0;
+            return setFocus(typeBtns[idx + 1]), !0;
           if ("down" === dir) {
-            if (genreBtns[0]) return rt(genreBtns[0]), !0;
+            if (genreBtns[0]) return setFocus(genreBtns[0]), !0;
             return !1;
           }
           return "up" === dir || "down" === dir ? !0 : !1;
@@ -7693,15 +7700,15 @@
         };
         btn._onMove = function (dir) {
           if ("left" === dir && idx % cols > 0)
-            return rt(genreBtns[idx - 1]), !0;
+            return setFocus(genreBtns[idx - 1]), !0;
           if ("right" === dir && idx % cols < cols - 1 && genreBtns[idx + 1])
-            return rt(genreBtns[idx + 1]), !0;
+            return setFocus(genreBtns[idx + 1]), !0;
           if ("up" === dir) {
-            if (idx - cols >= 0) return rt(genreBtns[idx - cols]), !0;
-            return typeBtns[0] ? (rt(typeBtns[0]), !0) : !0;
+            if (idx - cols >= 0) return setFocus(genreBtns[idx - cols]), !0;
+            return typeBtns[0] ? (setFocus(typeBtns[0]), !0) : !0;
           }
           if ("down" === dir && idx + cols < genreBtns.length)
-            return rt(genreBtns[idx + cols]), !0;
+            return setFocus(genreBtns[idx + cols]), !0;
           return !1;
         };
         genreRow.appendChild(btn);
@@ -7734,11 +7741,11 @@
         }
       });
     } else {
-      typeBtns[0] && rt(typeBtns[0]);
+      typeBtns[0] && setFocus(typeBtns[0]);
     }
   }
   function La() {
-    (ce || _a(), lt("search"), X.searchQuery || Ia(), rt(me));
+    (ce || _a(), lt("search"), X.searchQuery || Ia(), setFocus(me));
   }
   function updateSearchSuggestions(query) {
     var sugContainer = t("search-suggestions");
@@ -7825,7 +7832,7 @@
     if (fe && !X.searchQuery) {
       a(fe);
       for (var e = Ma(), t = 0; t < e.length; t++) fe.appendChild(ka(e[t], t));
-      wt();
+      schedulePosterLoad();
     }
   }
   function Ea() {
@@ -7986,13 +7993,13 @@
     }
     if (((he.style.height = "874px"), t >= 0)) {
       var v = he.querySelectorAll(".poster.focusable")[t];
-      (v || (v = ot(he)), v && rt(v));
+      (v || (v = findFirstFocusable(he)), v && setFocus(v));
     } else if (
       "search" === X.screen &&
       (n(X.focus, ".search-hot") || n(X.focus, ".search-results"))
     ) {
-      var f = ot(he);
-      f && rt(f);
+      var f = findFirstFocusable(he);
+      f && setFocus(f);
     }
   }
   function Ra() {
@@ -8042,7 +8049,7 @@
         u[v].classList.add("hidden");
     }
   }
-  function Va() {
+  function renderSettingsScreen() {
     ((ye = t("settings-menu")),
       (be = t("settings-right")),
       a(ye),
@@ -8069,8 +8076,8 @@
         })(r)),
         (l._onMove = function (e) {
           if ("right" === e) {
-            var t = ot(be.querySelector(".settings-panel.is-active"));
-            return (t && rt(t), !0);
+            var t = findFirstFocusable(be.querySelector(".settings-panel.is-active"));
+            return (t && setFocus(t), !0);
           }
           return !1;
         }),
@@ -8200,7 +8207,7 @@
               (a.className =
                 "sp-switch focusable " + (X.playback.subtitle ? "on" : "off")),
               Y(),
-              rt(a));
+              setFocus(a));
           }),
           t.appendChild(a),
           Ba(
@@ -8420,7 +8427,7 @@
                 (l.appendChild(box),
                   (o.className = "dg-summary ok"),
                   (o.textContent = "Log listo. Toma una foto de esta pantalla."),
-                  rt(q));
+                  setFocus(q));
               },
               8e3
             );
@@ -8443,7 +8450,7 @@
                       "Identidad restablecida con éxito. Nueva sesión activa.");
                   Yt("Nueva identidad asignada");
                 }
-                rt(btnReset);
+                setFocus(btnReset);
               },
               15e3
             );
@@ -8720,7 +8727,7 @@
               Qt(liveFavoritesOnly),
               hr(X.channel),
               Yt(X.adultEnabled ? "Contenido +18 habilitado" : "Contenido +18 oculto"),
-              rt(a));
+              setFocus(a));
           }),
           t.appendChild(a),
           t.appendChild(i),
@@ -8761,7 +8768,7 @@
               (r._activate = function () {
                 ((Q.uiScaleMode = a.id),
                   K($, Q),
-                  oo(),
+                  applyViewportScale(),
                   Yt(
                     "hd" === a.id
                       ? "Compatibilidad HD activada"
@@ -8769,7 +8776,7 @@
                   ));
                 for (var e = i.querySelectorAll(".pb-opt"), t = 0; t < e.length; t++)
                   e[t].classList.toggle("is-checked", e[t] === r);
-                rt(r);
+                setFocus(r);
               }),
               i.appendChild(r));
           })({ id: n[r].id, label: n[r].label, index: r });
@@ -8873,7 +8880,7 @@
       ze.hasOwnProperty(p) && be.appendChild(ze[p]);
   }
   function Ha() {
-    (ye || Va(), lt("settings"), Ua(0, !1), rt(je[0]));
+    (ye || renderSettingsScreen(), lt("settings"), Ua(0, !1), setFocus(je[0]));
   }
   function Ua(e, a) {
     if ("string" == typeof e)
@@ -8906,7 +8913,7 @@
       je[d].classList.toggle("is-selected", d === e);
     for (var c in ze)
       ze.hasOwnProperty(c) && ze[c].classList.toggle("is-active", c === n);
-    a && rt(ot(ze[n]) || je[e]);
+    a && setFocus(findFirstFocusable(ze[n]) || je[e]);
   }
   window.openSettingsCategory = Ua;
   function Fa(t) {
@@ -8988,17 +8995,17 @@
 
     r._activate = function () { Ua("history", !0); };
     r._onMove = function (e) {
-      return "left" === e ? (rt(je[0]), !0) : "right" === e && (rt(o), !0);
+      return "left" === e ? (setFocus(je[0]), !0) : "right" === e && (setFocus(o), !0);
     };
 
     o._activate = function () { sa(); };
     o._onMove = function (e) {
-      return "left" === e ? (rt(r), !0) : "right" === e && (rt(s), !0);
+      return "left" === e ? (setFocus(r), !0) : "right" === e && (setFocus(s), !0);
     };
 
     s._activate = function () { Ua("share", !0); };
     s._onMove = function (e) {
-      return "left" === e && (rt(o), !0);
+      return "left" === e && (setFocus(o), !0);
     };
 
     n.appendChild(r);
@@ -9125,7 +9132,7 @@
             t = a;
             break;
           }
-        if (je[t]) return (rt(je[t]), !0);
+        if (je[t]) return (setFocus(je[t]), !0);
       }
       return !1;
     };
@@ -9487,7 +9494,7 @@
               (t.textContent = "Analizar de nuevo"),
               t.parentNode &&
               -1 !== t.parentNode.className.indexOf("is-active") &&
-              rt(t),
+              setFocus(t),
               !e && a)
           )
             ((Xa.report = a), Ja(i, n, a));
@@ -10176,7 +10183,7 @@
           }
         });
       } else {
-        initFocus && rt(initFocus);
+        initFocus && setFocus(initFocus);
       }
     }
   }
@@ -10189,7 +10196,7 @@
       (zi = !1),
       hi && (hi.classList.remove("is-active"), (hi.style.display = "")),
       Bi && Bi.classList.remove("shift-up"),
-      !skipFocus && ("player" !== X.screen || ji || rt(Ce)));
+      !skipFocus && ("player" !== X.screen || ji || setFocus(Ce)));
   }
   function qn() {
     var e = X.focus ? n(X.focus, ".psv-row") : null,
@@ -10217,8 +10224,8 @@
               s = o[l];
               break;
             }
-          var d = s || ot(i[r]);
-          d && rt(d, !0);
+          var d = s || findFirstFocusable(i[r]);
+          d && setFocus(d, !0);
           break;
         }
   }
@@ -10282,8 +10289,8 @@
                     /* Baja a REPRODUCCIÓN (Normal / Modo Fluido). */
                     if ("down" !== dir) return !1;
                     var row = document.getElementById("psv-player-row"),
-                      first = row ? row.querySelector(".psv-btn") || ot(row) : null;
-                    return first ? (rt(first), !0) : !1;
+                      first = row ? row.querySelector(".psv-btn") || findFirstFocusable(row) : null;
+                    return first ? (setFocus(first), !0) : !1;
                   }),
                   c.appendChild(n));
               })(r[p], p);
@@ -10303,7 +10310,7 @@
                 ((i._activate = function () {
                   ((X.playerEpisodeRange = t), Rn());
                   var e = yi.querySelector(".psv-ep-btn");
-                  e && rt(e);
+                  e && setFocus(e);
                 }),
                   (i._onFocus = function () {
                     vr(u, i);
@@ -10312,24 +10319,24 @@
                     return function (direction) {
                       if ("left" === direction) {
                         if (rangeIndex > 0 && u.children[rangeIndex - 1])
-                          return (rt(u.children[rangeIndex - 1]), !0);
+                          return (setFocus(u.children[rangeIndex - 1]), !0);
                         return !0;
                       }
                       if ("right" === direction) {
                         if (rangeIndex + 1 < u.children.length && u.children[rangeIndex + 1])
-                          return (rt(u.children[rangeIndex + 1]), !0);
+                          return (setFocus(u.children[rangeIndex + 1]), !0);
                         return !0;
                       }
                       if ("up" === direction) {
                         var episodeButton = yi.querySelector(".psv-ep-btn.is-selected") || yi.querySelector(".psv-ep-btn");
-                        return episodeButton ? (rt(episodeButton), !0) : !0;
+                        return episodeButton ? (setFocus(episodeButton), !0) : !0;
                       }
                       if ("down" === direction) {
                         var playerRow = document.getElementById("psv-player-row"),
                           firstMode = playerRow
-                            ? playerRow.querySelector(".psv-btn") || ot(playerRow)
+                            ? playerRow.querySelector(".psv-btn") || findFirstFocusable(playerRow)
                             : null;
-                        return firstMode ? (rt(firstMode), !0) : !1;
+                        return firstMode ? (setFocus(firstMode), !0) : !1;
                       }
                       return !1;
                     };
@@ -10471,14 +10478,14 @@
                   (a._onMove = function (e) {
                     if ("left" === e) {
                       if (t > 0 && Ii && Ii.children[t - 1]) {
-                        rt(Ii.children[t - 1]);
+                        setFocus(Ii.children[t - 1]);
                         return !0;
                       }
                       return !0;
                     }
                     if ("right" === e) {
                       if (t < i.length - 1 && Ii && Ii.children[t + 1]) {
-                        rt(Ii.children[t + 1]);
+                        setFocus(Ii.children[t + 1]);
                         return !0;
                       }
                       return !0;
@@ -10486,8 +10493,8 @@
                     if ("down" === e) {
                       var tEp =
                         (Ai && Ai.querySelector(".pe-ep.is-current")) ||
-                        (Ai && ot(Ai));
-                      return tEp ? (rt(tEp), !0) : !0;
+                        (Ai && findFirstFocusable(Ai));
+                      return tEp ? (setFocus(tEp), !0) : !0;
                     }
                     return !1;
                   }),
@@ -10501,8 +10508,8 @@
         })());
       var i =
         (Ai ? Ai.querySelector(".pe-ep.is-current") : null) ||
-        (Ai ? ot(Ai) : null) ||
-        (Ei && "none" !== Ei.style.display ? ot(Ii) : null);
+        (Ai ? findFirstFocusable(Ai) : null) ||
+        (Ei && "none" !== Ei.style.display ? findFirstFocusable(Ii) : null);
       if (window.DialogManager) {
         window.DialogManager.open("playerEpisodes", ki, {
           returnFocus: Ce,
@@ -10517,7 +10524,7 @@
           }
         });
       } else {
-        i && rt(i);
+        i && setFocus(i);
       }
     }
   }
@@ -10530,7 +10537,7 @@
       X.episodeBrowserOpen &&
       ((X.episodeBrowserOpen = !1),
         ki.classList.remove("is-active"),
-        !skipFocus && "player" === X.screen && Ce && rt(Ce));
+        !skipFocus && "player" === X.screen && Ce && setFocus(Ce));
   }
   function changeEpisodePage(e, t) {
     var a = X.playerItem;
@@ -10545,8 +10552,8 @@
       : ((X.episodeBrowserPage = o),
         jn(a, i),
         setTimeout(function () {
-          var e = Ai && (Ai.querySelectorAll(".pe-ep")[t || 0] || ot(Ai));
-          e && rt(e);
+          var e = Ai && (Ai.querySelectorAll(".pe-ep")[t || 0] || findFirstFocusable(Ai));
+          e && setFocus(e);
         }, 0),
         !0);
   }
@@ -10566,8 +10573,8 @@
               Vn(t)[X.browserSeason] === i &&
               (jn(t, i), n(X.focus, "#pe-episodes"))
             ) {
-              var a = Ai.querySelector(".pe-ep.is-current") || ot(Ai);
-              a && rt(a);
+              var a = Ai.querySelector(".pe-ep.is-current") || findFirstFocusable(Ai);
+              a && setFocus(a);
             }
           })
         );
@@ -10606,7 +10613,7 @@
                 a = 0;
               for (a = 0; a < t.length; a++) if (t[a] === n) break;
               return "left" === e
-                ? (Ii && rt(Ii.children[X.browserSeason] || ot(Ii)), !0)
+                ? (Ii && setFocus(Ii.children[X.browserSeason] || findFirstFocusable(Ii)), !0)
                 : ("right" === e || "down" === e) &&
                   a === t.length - 1 &&
                   s + 1 < Math.ceil(r.length / o)
@@ -10645,8 +10652,8 @@
         jn(a, i[e]),
         t)
     ) {
-      var n = Ai ? Ai.querySelector(".pe-ep.is-current") || ot(Ai) : null;
-      n && rt(n);
+      var n = Ai ? Ai.querySelector(".pe-ep.is-current") || findFirstFocusable(Ai) : null;
+      n && setFocus(n);
     }
   }
   function Xn(e) {
@@ -10891,14 +10898,14 @@
             if (mi) mi.classList.remove("is-active");
             if (zi) {
               if (hi) hi.style.display = "";
-              if (bi) rt(bi);
+              if (bi) setFocus(bi);
               Dn();
             }
             fn = null;
           }
         });
       } else {
-        a && rt(a);
+        a && setFocus(a);
       }
     }
   }
@@ -10910,10 +10917,10 @@
     ((ji = !1),
       mi && mi.classList.remove("is-active"),
       zi
-        ? (hi && (hi.style.display = ""), bi && rt(bi), Dn())
+        ? (hi && (hi.style.display = ""), bi && setFocus(bi), Dn())
         : fn && at(fn)
-          ? rt(fn)
-          : "player" === X.screen && rt(Ce),
+          ? setFocus(fn)
+          : "player" === X.screen && setFocus(Ce),
       (fn = null));
   }
   function ar() {
@@ -11308,7 +11315,7 @@
       oi(targetTime, total);
     }
     pi();
-    rt(Pe, !0);
+    setFocus(Pe, !0);
   }
   function lr() {
     if (
@@ -11609,7 +11616,7 @@
         syncLiveFavoriteButtons();
         hr(X.channel);
         Yt(liveFavoritesOnly ? "Mostrando canales favoritos" : "Mostrando todos los canales");
-        rt(channelFavorites);
+        setFocus(channelFavorites);
       }),
       (channelAll._activate = function () {
         selectAllLiveChannels(channelAll);
@@ -11618,24 +11625,24 @@
         pr(channelCategory);
       }),
       (channelSearch._onMove = function (e) {
-        if ("right" === e) return rt(channelFavorites), !0;
+        if ("right" === e) return setFocus(channelFavorites), !0;
         if ("down" === e) return (F.length && fr(X.channel), !0);
         return !1;
       }),
       (channelFavorites._onMove = function (e) {
-        if ("left" === e) return rt(channelSearch), !0;
-        if ("right" === e) return rt(channelAll), !0;
+        if ("left" === e) return setFocus(channelSearch), !0;
+        if ("right" === e) return setFocus(channelAll), !0;
         if ("down" === e) return (F.length && fr(X.channel), !0);
         return !1;
       }),
       (channelAll._onMove = function (e) {
-        if ("left" === e) return rt(channelFavorites), !0;
-        if ("right" === e) return rt(channelCategory), !0;
+        if ("left" === e) return setFocus(channelFavorites), !0;
+        if ("right" === e) return setFocus(channelCategory), !0;
         if ("down" === e) return (F.length && fr(X.channel), !0);
         return !1;
       }),
       (channelCategory._onMove = function (e) {
-        if ("left" === e) return rt(channelAll), !0;
+        if ("left" === e) return setFocus(channelAll), !0;
         if ("right" === e || "up" === e) return !0;
         if ("down" === e) return (F.length && fr(X.channel), !0);
         return !1;
@@ -11666,7 +11673,7 @@
       (liveSearchInput = null),
       e && e.parentNode && e.parentNode.removeChild(e),
       hr(X.channel),
-      returnFocus && rt(returnFocus));
+      returnFocus && setFocus(returnFocus));
   }
   function openLiveChannelSearch(returnFocus) {
     if (!Se) return;
@@ -11697,10 +11704,10 @@
         ((liveSearchText = input.value || ""), hr(X.channel));
       }),
       (clear._activate = function () {
-        ((input.value = ""), (liveSearchText = ""), hr(X.channel), rt(input));
+        ((input.value = ""), (liveSearchText = ""), hr(X.channel), setFocus(input));
       }),
       (clear._onMove = function (e) {
-        if ("left" === e) return (rt(input), !0);
+        if ("left" === e) return (setFocus(input), !0);
         if ("down" === e) {
           var t = visibleLiveIndexes(),
             a = t.indexOf(X.channel) >= 0 ? X.channel : t[0];
@@ -11715,7 +11722,7 @@
       Se.classList.add("pc-searching"),
       (liveSearchInput = input),
       hr(X.channel),
-      rt(input),
+      setFocus(input),
       setTimeout(function () {
         try {
           input.focus();
@@ -11779,14 +11786,14 @@
                 return function (a) {
                   if ("left" === a)
                     return (
-                      e > 0 && s[e - 1] && (rt(s[e - 1]), vr(t, s[e - 1])),
+                      e > 0 && s[e - 1] && (setFocus(s[e - 1]), vr(t, s[e - 1])),
                       !0
                     );
                   if ("right" === a)
                     return (
                       e < s.length - 1 && s[e + 1]
-                        ? (rt(s[e + 1]), vr(t, s[e + 1]))
-                        : rt(Ce),
+                        ? (setFocus(s[e + 1]), vr(t, s[e + 1]))
+                        : setFocus(Ce),
                       !0
                     );
                   /* Las categorías se abren únicamente con el botón Filtrar;
@@ -11794,7 +11801,7 @@
                   if ("up" === a) return !0;
                   if ("down" === a) {
                     var i = Se.querySelector(".pc-row-addon-promo");
-                    if (i) return (rt(i), !0);
+                    if (i) return (setFocus(i), !0);
                     if (F.length) return (fr(X.channel), !0);
                   }
                   return !1;
@@ -11817,7 +11824,7 @@
               h = u[m];
               break;
             }
-          h && (X.focus !== h && rt(h), vr(t, h));
+          h && (X.focus !== h && setFocus(h), vr(t, h));
         }
       }
     }
@@ -11851,7 +11858,7 @@
         pClose._onMove = function (dir) {
           if ("down" === dir) {
             var firstTile = Ge ? Ge.querySelector(".pcat-tile.focusable") : null;
-            return firstTile ? (rt(firstTile), !0) : !0;
+            return firstTile ? (setFocus(firstTile), !0) : !0;
           }
           return !1;
         };
@@ -11880,7 +11887,7 @@
               var chosenCategory = catObj;
               ur(!0);
               Yt("Categoría: " + chosenCategory.name);
-              if ("player" === X.screen && Ce) rt(Ce);
+              if ("player" === X.screen && Ce) setFocus(Ce);
               Xt(chosenCategory, function () {
                 X.channel = 0;
                 if ("player" === X.screen) {
@@ -11891,11 +11898,11 @@
                 } else if ("home" === X.screen) {
                   Qt(liveFavoritesOnly);
                   if (Fe[0] && at(Fe[0])) {
-                    rt(Fe[0]);
+                    setFocus(Fe[0]);
                     Wt(F[0]);
                   } else {
                     var homeFastCat = document.querySelector(".live-fast .f-cat");
-                    if (homeFastCat && at(homeFastCat)) rt(homeFastCat);
+                    if (homeFastCat && at(homeFastCat)) setFocus(homeFastCat);
                   }
                 }
               });
@@ -11903,19 +11910,19 @@
             tile._onMove = function (dir) {
               var cols = 4;
               if ("left" === dir && idx % cols > 0) {
-                if (catTiles[idx - 1]) return rt(catTiles[idx - 1]), !0;
+                if (catTiles[idx - 1]) return setFocus(catTiles[idx - 1]), !0;
               }
               if ("right" === dir && idx % cols < cols - 1) {
-                if (catTiles[idx + 1]) return rt(catTiles[idx + 1]), !0;
+                if (catTiles[idx + 1]) return setFocus(catTiles[idx + 1]), !0;
               }
               if ("up" === dir) {
-                if (idx - cols >= 0 && catTiles[idx - cols]) return rt(catTiles[idx - cols]), !0;
+                if (idx - cols >= 0 && catTiles[idx - cols]) return setFocus(catTiles[idx - cols]), !0;
                 var pCloseBtn = t("pcat-close");
-                if (pCloseBtn && at(pCloseBtn)) return rt(pCloseBtn), !0;
+                if (pCloseBtn && at(pCloseBtn)) return setFocus(pCloseBtn), !0;
                 return !0;
               }
               if ("down" === dir) {
-                if (idx + cols < catTiles.length && catTiles[idx + cols]) return rt(catTiles[idx + cols]), !0;
+                if (idx + cols < catTiles.length && catTiles[idx + cols]) return setFocus(catTiles[idx + cols]), !0;
                 return !0;
               }
               return !1;
@@ -11925,7 +11932,7 @@
           })(cats[i], i);
         }
       })();
-      var selTile = Ge.querySelector(".pcat-tile.is-selected") || ot(Ge);
+      var selTile = Ge.querySelector(".pcat-tile.is-selected") || findFirstFocusable(Ge);
       if (window.DialogManager) {
         window.DialogManager.open("playerCategories", $e, {
           returnFocus: categoryPickerReturnFocus,
@@ -11958,7 +11965,7 @@
           }
         });
       } else {
-        selTile && rt(selTile);
+        selTile && setFocus(selTile);
       }
     }
   }
@@ -11980,24 +11987,24 @@
     }
     if (!skipFocus) {
       if (categoryPickerReturnFocus && at(categoryPickerReturnFocus)) {
-        rt(categoryPickerReturnFocus);
+        setFocus(categoryPickerReturnFocus);
       } else if ("home" === X.screen) {
         var homeCat = document.querySelector(".live-fast .f-cat") || document.querySelector(".live-fast .f-all");
         if (homeCat && at(homeCat)) {
-          rt(homeCat);
+          setFocus(homeCat);
         } else if (Fe[0] && at(Fe[0])) {
-          rt(Fe[0]);
+          setFocus(Fe[0]);
         } else if (Ue[0]) {
-          rt(Ue[0]);
+          setFocus(Ue[0]);
         }
       } else if ("player" === X.screen) {
         var pFilter = Se ? (Se.querySelector(".pc-btn-filter") || Se.querySelector(".pc-filter")) : null;
         if (pFilter && at(pFilter)) {
-          rt(pFilter);
+          setFocus(pFilter);
         } else if (Xe && Xe[X.channel] && at(Xe[X.channel])) {
-          rt(Xe[X.channel]);
+          setFocus(Xe[X.channel]);
         } else if (Ce && at(Ce)) {
-          rt(Ce);
+          setFocus(Ce);
         }
       }
     }
@@ -12020,7 +12027,7 @@
       /* Si Favoritos acaba de ocultar el canal reproducido, ↓ debe entrar al
          primer favorito visible, nunca conservar un foco en una fila ausente. */
       if (visible.indexOf(e) < 0) e = visible[0];
-      (Xe[e] || hr(e), Xe[e] && rt(Xe[e]));
+      (Xe[e] || hr(e), Xe[e] && setFocus(Xe[e]));
     }
   }
   function closeLiveFavoriteConfirm(returnFocus) {
@@ -12031,7 +12038,7 @@
     var e = liveFavoritePrompt;
     ((liveFavoritePrompt = null),
       e && e.parentNode && e.parentNode.removeChild(e),
-      returnFocus && at(returnFocus) && rt(returnFocus));
+      returnFocus && at(returnFocus) && setFocus(returnFocus));
   }
   function hr(t) {
     var previousFocus = X.focus,
@@ -12071,11 +12078,11 @@
                 var t =
                   Se.querySelector(".pc-cat-pill.is-selected") ||
                   Se.querySelector(".pc-cat-pill");
-                return (t && rt(t), !0);
+                return (t && setFocus(t), !0);
               }
               return "down" === e
                 ? (F.length && fr(0), !0)
-                : "right" === e && (rt(Ce), !0);
+                : "right" === e && (setFocus(Ce), !0);
             }),
             i.appendChild(n));
         }
@@ -12150,24 +12157,24 @@
                   fr(e);
                   return;
                 }
-                (Kt(e, !0), rt(this));
+                (Kt(e, !0), setFocus(this));
               };
             })(channelIndex)),
             (p._onMove = (function (e, favoriteButton) {
               return function (t) {
                 if ("left" === t) {
                   var a = Se.querySelector(".pc-btn-search");
-                  return (a && rt(a), !0);
+                  return (a && setFocus(a), !0);
                 }
-                if ("right" === t) return (rt(favoriteButton), !0);
+                if ("right" === t) return (setFocus(favoriteButton), !0);
                 if ("up" === t) {
                   if (e > 0) fr(visible[e - 1]);
                   else if (0 === e) {
                     var a = Se.querySelector(".pc-row-addon-promo");
-                    if (a) rt(a);
+                    if (a) setFocus(a);
                     else {
                       var i = Se.querySelector(".pc-btn-all");
-                      i && rt(i);
+                      i && setFocus(i);
                     }
                   }
                   return !0;
@@ -12181,13 +12188,13 @@
               return function () {
                 (toggleChannelFavoriteDirect(e, null),
                   (t = Xe[e] && Xe[e].querySelector(".pc-channel-fav")),
-                  t && rt(t));
+                  t && setFocus(t));
               };
             })(channelIndex, m)),
             (m._onMove = (function (e, t) {
               return function (a) {
-                if ("left" === a) return (rt(t), !0);
-                if ("right" === a) return (rt(Ce), !0);
+                if ("left" === a) return (setFocus(t), !0);
+                if ("right" === a) return (setFocus(Ce), !0);
                 if ("up" === a || "down" === a) {
                   var i = visible.indexOf(e),
                     n = "up" === a ? i - 1 : i + 1,
@@ -12196,7 +12203,7 @@
                   r ||
                     (n >= 0 && n < visible.length &&
                       (hr(visible[n]), (r = Xe[visible[n]]), (o = r && r.querySelector(".pc-channel-fav"))));
-                  return o && rt(o), !0;
+                  return o && setFocus(o), !0;
                 }
                 return !1;
               };
@@ -12213,7 +12220,7 @@
           !at(previousFocus) &&
           Xe[previousChannel]
         )
-          rt(
+          setFocus(
             previousWasFavorite
               ? Xe[previousChannel].querySelector(".pc-channel-fav") ||
               Xe[previousChannel]
@@ -12409,7 +12416,7 @@
            reinicia su currentTime en 0 y Vr() volvería a sumar la posición
            vieja hasta que arranca el relay. */
         oi(e ? t : Vr(), Hr()),
-        rt(Ce),
+        setFocus(Ce),
         ci());
     }
   }
@@ -12422,7 +12429,7 @@
         pi(),
         X.infoTimer && (clearTimeout(X.infoTimer), (X.infoTimer = null)),
         oi(Ze, e),
-        rt(Pe))
+        setFocus(Pe))
       : pi();
   }
   function Br(e) {
@@ -13215,7 +13222,7 @@
       (X.screen = "player"),
       Ce.classList.add("is-vod"),
       ao(),
-      rt(Ce),
+      setFocus(Ce),
       vi(),
       n
         ? X.streamError || (Dr(), jr(""), $r())
@@ -13242,7 +13249,7 @@
         Ce.classList.toggle("is-vod", "vod" === e),
         ao(),
         lt("player"),
-        rt(Ce),
+        setFocus(Ce),
         ao(),
         "vod" === e
           ? (vi(), showLoadingBackdrop(X.playerItem, "Cargando " + ((X.playerItem && X.playerItem.title) || "") + "…"), Jr(X.playerItem, X.playerEpisode))
@@ -13568,7 +13575,7 @@
         cr());
       var e = Xe[X.channel];
       if (e) {
-        rt(e);
+        setFocus(e);
         var t = e.parentNode,
           a = 111 * X.channel;
         (a < t.scrollTop || a + 109.5 > t.scrollTop + t.clientHeight) &&
@@ -13583,9 +13590,9 @@
     liveSearchText = "";
     ((X.channelsOpen = !1),
       Se && Se.classList.remove("is-active"),
-      "player" === X.screen && (ao(), pi(), rt(Ce)));
+      "player" === X.screen && (ao(), pi(), setFocus(Ce)));
   }
-  function oo() {
+  function applyViewportScale() {
     var e = t("app");
     if (e) {
       var a = (function () {
@@ -13635,14 +13642,14 @@
     var welcomeVersion = t("screen-welcome");
     welcomeVersion = welcomeVersion && welcomeVersion.querySelector(".welcome-version");
     welcomeVersion && (welcomeVersion.textContent = "v" + APP_VERSION);
-    oo();
-    window.addEventListener("resize", oo, !1);
-    window.addEventListener("orientationchange", oo, !1);
-    document.addEventListener("visibilitychange", oo, !1);
-    setTimeout(oo, 250);
-    setTimeout(oo, 1200);
-    setTimeout(oo, 3e3);
-    document.addEventListener("keydown", ut, !1);
+    applyViewportScale();
+    window.addEventListener("resize", applyViewportScale, !1);
+    window.addEventListener("orientationchange", applyViewportScale, !1);
+    document.addEventListener("visibilitychange", applyViewportScale, !1);
+    setTimeout(applyViewportScale, 250);
+    setTimeout(applyViewportScale, 1200);
+    setTimeout(applyViewportScale, 3e3);
+    document.addEventListener("keydown", handleKeyDown, !1);
     document.addEventListener(
       "keyup",
       function (e) {
@@ -13653,7 +13660,7 @@
             e.stopPropagation && e.stopPropagation();
             return;
           }
-          ut(e);
+          handleKeyDown(e);
         }
       },
       !1
@@ -13662,7 +13669,7 @@
       "popstate",
       function () {
         if (Date.now() - lastBackKeyDown < 450) return;
-        ct();
+        handleBackKey();
       },
       !1
     );
@@ -13677,13 +13684,13 @@
       lastHoverAt = now;
       var tElem = n(e.target, ".focusable");
       if (tElem && at(tElem) && X.focus !== tElem) {
-        rt(tElem, !0);
+        setFocus(tElem, !0);
       }
     }, !1);
     document.addEventListener("click", function (e) {
       var t = n(e.target, ".focusable");
       if (t) {
-        rt(t, !0);
+        setFocus(t, !0);
         if (t._activate) {
           t._activate(e);
         } else if (t.click && t !== e.target) {
@@ -13860,10 +13867,10 @@
         },
         focus: function (e) {
           var t = "string" == typeof e ? document.querySelector(e) : e;
-          t && rt(t);
+          t && setFocus(t);
         },
         key: function (e) {
-          ut({ keyCode: e, preventDefault: function () { } });
+          handleKeyDown({ keyCode: e, preventDefault: function () { } });
         },
         search: function (e) {
           (La(), Aa(e));
@@ -13891,7 +13898,7 @@
         (vt(),
           void 0 !== t.tab
             ? bt(parseInt(t.tab, 10) || 0, !0)
-            : (bt(0, !1), (typeof Ue !== "undefined" && Ue && Ue[0] ? rt(Ue[0]) : (ne && rt(ne)))));
+            : (bt(0, !1), (typeof Ue !== "undefined" && Ue && Ue[0] ? setFocus(Ue[0]) : (ne && setFocus(ne)))));
         "detail" === o
           ? ba(l[parseInt(t.vod, 10) || 0])
           : "search" === o
@@ -13906,7 +13913,7 @@
                 "1" === t.channels && no());
         if (t.focus) {
           var s = document.querySelector(t.focus);
-          s && rt(s);
+          s && setFocus(s);
         }
       })());
   }

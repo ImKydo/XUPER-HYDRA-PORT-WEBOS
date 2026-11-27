@@ -27,6 +27,9 @@ jobs:
       - name: Scripts inline del HTML
         run: node tools/check/inline-scripts.mjs
 
+      - name: Llamadas a funciones inexistentes
+        run: node tools/check/undefined-calls.mjs
+
       - name: Artefacto generado sincronizado
         run: node tools/build.mjs --check
 
