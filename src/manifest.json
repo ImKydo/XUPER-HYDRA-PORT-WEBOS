@@ -1,0 +1,4 @@
+{
+  "modules": ["legacy/app.legacy.js"],
+  "noWrap": ["legacy/app.legacy.js"]
+}
