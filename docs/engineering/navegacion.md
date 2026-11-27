@@ -1,0 +1,71 @@
+# Navegación y marca
+
+## Estructura principal
+
+```
+ZEPHYRTV   Cine, series y TV en vivo
+INICIO · TV · PELÍCULAS · SERIES · CATEGORÍAS        [buscar] [cuenta]
+```
+
+Cinco pestañas, una sola fila, sin etiquetas de grupo ni iconos duplicados.
+
+| Pestaña | Qué muestra | Origen |
+|---|---|---|
+| INICIO | Seguir viendo, destacados, rieles por categoría | sección `Destacados` del portal |
+| TV | Canales en vivo con su panel de acciones | lista de canales |
+| PELÍCULAS | Catálogo de películas | raíz `movies` |
+| SERIES | Catálogo de series | raíz `series` |
+| CATEGORÍAS | Panel de filtros: tipo y género | `openCatalogFilter()` |
+
+**Por qué desaparecieron Kids, Anime, Novelas e Historial.** Cada pestaña extra
+costaba una pulsación del mando y ensanchaba la barra hasta chocar con el
+reloj. Kids, Anime y Novelas son filtros del mismo catálogo: viven dentro de
+Categorías, que abre el panel de tipos y géneros y pinta el resultado en la
+pantalla de sección. Historial es un dato de la cuenta: vive en
+Ajustes → Mi lista, junto a favoritos.
+
+**Seguir viendo** es el primer riel de Inicio y sólo aparece si hay progreso
+real (`position >= 5` o `duration > 0`), no con sólo abrir un título.
+
+## Cabecera
+
+- Marca a la izquierda: icono, `ZEPHYRTV` y lema.
+- A la derecha, dos acciones: buscar y cuenta.
+- **Sin reloj y sin indicador de wifi**: el televisor ya los dibuja en su
+  propia barra y aquí sólo competían por el espacio.
+
+La búsqueda es la primera acción de la cabecera. Desde el último elemento de
+una fila, `arriba` lleva a la barra y `derecha` al grupo de acciones; desde la
+primera pestaña, `izquierda` también llega a buscar.
+
+## Marca
+
+| Pieza | Valor |
+|---|---|
+| Nombre visible | ZephyrTV |
+| Lema | Cine, series y TV en vivo |
+| Icono | `images/zephyr-icon.png` (256), `zephyr-icon-large.png` (512) |
+| Marca de la barra y del arranque | `images/logo-mark.png` (144) |
+| Color de marca | `#e11d2e` |
+| `appinfo.json` `title` | ZephyrTV |
+
+El identificador del paquete (`com.webosflux.xuptertv.fidelity`) **no cambia**:
+si cambiara, el televisor instalaría otra aplicación en paralelo y se perderían
+la sesión del portal, los favoritos y el historial de quien ya la tiene.
+
+## Créditos
+
+En Ajustes → Sobre nosotros:
+
+> Basado en el código base de XuperTV (cristianco7), reutilizado como punto de
+> partida con su licencia. Interfaz, mantenimiento y evolución: ZephyrTV.
+
+El nombre del autor original no aparece como autor de esta aplicación ni en la
+cabecera, ni en el arranque, ni en el panel de compartir. Se conserva el crédito
+al código base, que es lo que corresponde.
+
+## Qué NO se tocó
+
+La zona protegida de reproducción sigue intacta (`streamMode`, `forceRelay`,
+`resolveSmooth`, `playUrl`, seek, cambio de episodio y el relay FFmpeg). Este
+trabajo es de navegación, cabecera y marca.

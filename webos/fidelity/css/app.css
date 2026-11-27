@@ -1000,3 +1000,36 @@ body {
   border-color: transparent;
   box-shadow: 0 0 0 3px #ffffff, 0 12px 32px rgba(0, 0, 0, 0.7);
 }
+
+/* El indicador de carga era una imagen con estética de videojuego y no
+   encajaba con la marca. Una barra fina y sobria comunica lo mismo. */
+.welcome-loading img {
+  display: none;
+}
+
+.welcome-loading {
+  width: 200px;
+  height: 5px;
+  border-radius: 999px;
+  background: #2a2a3a;
+  overflow: hidden;
+  position: relative;
+}
+
+.welcome-loading::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -40%;
+  width: 45%;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(239, 43, 61, 0), #ff3b4e, rgba(239, 43, 61, 0));
+  box-shadow: 0 0 12px rgba(239, 43, 61, 0.55);
+  animation: zephyr-load 1.4s ease-in-out infinite;
+}
+
+@keyframes zephyr-load {
+  0% { left: -40%; }
+  100% { left: 100%; }
+}

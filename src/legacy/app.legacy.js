@@ -662,7 +662,7 @@
     );
   }
   var E =
-    "La TV tiene bloqueado el servicio de XuperTV. Desenchufa la TV 10 segundos y vuelve a abrir la app; si sigue igual, reinstala con el instalador.";
+    "La TV tiene bloqueado el servicio de ZephyrTV. Desenchufa la TV 10 segundos y vuelve a abrir la app; si sigue igual, reinstala con el instalador.";
   /* Puerto de la API local del servicio. Se usa solo como respaldo cuando
      Luna deniega la llamada (webOS 3.x con comandos "public": false). */
   var SERVICE_HTTP_PORT = 8910;
@@ -781,7 +781,7 @@
             l(null, res);
           },
           onFailure: function (err) {
-            var msg = (err && err.errorText) || "Error del servicio XuperTV";
+            var msg = (err && err.errorText) || "Error del servicio ZephyrTV";
             if (!busTried && /denied|not permitted|unknown method/i.test(msg)) {
               busTried = !0;
               try {
@@ -827,7 +827,7 @@
         null
       ),
         !0)
-      : (l("El servicio XuperTV no está disponible", null), !1);
+      : (l("El servicio ZephyrTV no está disponible", null), !1);
   }
   function indexCatalogById(e) {
     var t = {},
@@ -898,9 +898,9 @@
               a ||
               f.retryTimer ||
               ((f.error =
-                f.error || "El portal de XuperTV no respondió desde tu red"),
+                f.error || "El portal no respondió desde tu red"),
                 Yt(
-                  "El portal de XuperTV no respondió. Reintentando en 20 segundos…"
+                  "El portal no respondió. Reintentando en 20 segundos…"
                 ),
                 (f.retryTimer = setTimeout(function () {
                   ((f.retryTimer = null), refreshCatalog());
@@ -970,7 +970,7 @@
                 ? fallbackToBundledCatalog("bundled", null)
                 : (v.error = "Falta baseUrl/catalogUrl del catálogo autorizado")
             : (v.error =
-              "Falta la sesión XuperTV (userId, userToken y portalCode)");
+              "Falta la sesión del portal (userId, userToken y portalCode)");
         } else fallbackToBundledCatalog("bundled", null);
       else loadPortalSnapshot();
   }
@@ -1101,16 +1101,19 @@
         '<svg viewBox="0 0 33 33"><path d="M5 6.5h9.5c2.2 0 3.7 1 4.5 2.3.8-1.3 2.3-2.3 4.5-2.3H28v20h-5.5c-2.1 0-3.4.6-4.5 1.8-1.1-1.2-2.4-1.8-4.5-1.8H5z" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M18 9v19" stroke="currentColor" stroke-width="2.2"/></svg>',
       history:
         '<svg viewBox="0 0 33 33"><circle cx="16.5" cy="17" r="10.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M16.5 10.5V17l5 3" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M8 7v6h6" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>',
+      grid:
+        '<svg viewBox="0 0 33 33"><rect x="5" y="5" width="9" height="9" rx="2.4" fill="none" stroke="currentColor" stroke-width="2.3"/><rect x="19" y="5" width="9" height="9" rx="2.4" fill="none" stroke="currentColor" stroke-width="2.3"/><rect x="5" y="19" width="9" height="9" rx="2.4" fill="none" stroke="currentColor" stroke-width="2.3"/><rect x="19" y="19" width="9" height="9" rx="2.4" fill="none" stroke="currentColor" stroke-width="2.3"/></svg>',
     },
+    /* Cinco entradas: Inicio, TV, Películas, Series y Categorías. Kids, Anime
+       y Novelas dejaron de ser pestañas: se llega a ellas desde Categorías,
+       que abre el mismo panel de filtros del catálogo. Historial vive en
+       Ajustes. */
     z = [
+      { label: "INICIO", page: 1, icon: "thumb" },
       { label: "TV", page: 0, icon: "tv" },
-      { label: "DESTACADOS", page: 1, icon: "thumb" },
-      { label: "PELICULA", page: 2, icon: "film" },
+      { label: "PELÍCULAS", page: 2, icon: "film" },
       { label: "SERIES", page: 3, icon: "strip" },
-      { label: "KIDS", page: 4, icon: "kids" },
-      { label: "ANIME", page: 5, icon: "anime" },
-      { label: "NOVELAS", page: 6, icon: "novel" },
-      { label: "HISTORIAL", page: -1, icon: "history", action: "history" },
+      { label: "CATEGORÍAS", page: -1, icon: "grid", action: "categories" },
     ],
     j = [
       {
@@ -3177,18 +3180,14 @@
           markImg = createEl("img", "tabs-mark-img"),
           railText = createEl("div", "tabs-brand-text");
         markImg.src = "images/logo-mark.png";
-        markImg.alt = "Xuper";
+        markImg.alt = "ZephyrTV";
         railMark.appendChild(markImg);
-        (railText.appendChild(createEl("div", "tabs-word", "XUPER PORT WEBOS")),
-          railText.appendChild(createEl("div", "tabs-tag", "Por CristiancoDEV")),
+        (railText.appendChild(createEl("div", "tabs-word", "ZEPHYRTV")),
+          railText.appendChild(createEl("div", "tabs-tag", "Cine, series y TV en vivo")),
           railBrand.appendChild(railMark),
           railBrand.appendChild(railText),
           i.appendChild(railBrand));
         for (var n = 0; n < z.length; n++) {
-          (0 === n && i.appendChild(createEl("div", "tabs-group", "En vivo")),
-            1 === n && i.appendChild(createEl("div", "tabs-group", "Explorar")),
-            "history" === z[n].action &&
-            i.appendChild(createEl("div", "tabs-group", "Tu biblioteca")));
           var r = createEl("div", "tab-item focusable");
           r.appendChild(createEl("div", "tab-pill"));
           var o = createEl("div", "tab-icon");
@@ -3198,8 +3197,7 @@
             (r._tab = n),
             (r._activate = (function (e) {
               return function () {
-                if ("history" === z[e].action)
-                  return ((We = "history"), Ha(), void Ua(1, !0));
+                if ("categories" === z[e].action) return void openCatalogFilter();
                 if (X.tab !== e) {
                   selectHomeTab(e, !1);
                 }
@@ -3235,8 +3233,7 @@
                   return !0;
                 }
                 if ("down" === t) {
-                  if ("history" === z[e].action)
-                    return ((We = "history"), Ha(), Ua(1, !0), !0);
+                  if ("categories" === z[e].action) return (openCatalogFilter(), !0);
                   if (X.tab !== e) {
                     selectHomeTab(e, !1);
                   }
@@ -3270,11 +3267,6 @@
                  escalar. El trazo hereda currentColor. */
               svg: '<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="14" cy="14" r="8.5" fill="none" stroke="currentColor" stroke-width="2.8"/><path d="M20.5 20.5L28 28" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
               label: "Buscar",
-            },
-            {
-              cls: "filter",
-              svg: '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 9h22M5 16h22M5 23h22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><circle cx="11" cy="9" r="3.2" fill="currentColor"/><circle cx="22" cy="16" r="3.2" fill="currentColor"/><circle cx="15" cy="23" r="3.2" fill="currentColor"/></svg>',
-              label: "Filtrar catálogo",
             },
             {
               cls: "personal",
@@ -3342,31 +3334,11 @@
             })(i)),
             te.appendChild(r));
         }
-        var s = createEl("div", "notify-divider");
-        te.appendChild(s);
-        var l = createEl("div", "notify-wifi");
-        ((l.innerHTML =
-          '<svg viewBox="0 0 30 22"><path d="M15 19.5a2.1 2.1 0 1 1 0-4.2 2.1 2.1 0 0 1 0 4.2z" fill="currentColor"/><path d="M8.4 12.2a9.6 9.6 0 0 1 13.2 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M4.2 7.6a15.6 15.6 0 0 1 21.6 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>'),
-          te.appendChild(l));
-        var d = createEl("div", "notify-time");
-        d.id = "notify-time";
-        te.appendChild(d);
-        yt();
-        if (homeClockTimer) clearInterval(homeClockTimer);
-        homeClockTimer = setInterval(yt, 3e4);
       })());
   }
-  function yt() {
-    var e = byId("notify-time");
-    if (e) {
-      var a = new Date(),
-        i = a.getHours(),
-        n = i >= 12 ? "PM" : "AM";
-      0 === (i %= 12) && (i = 12);
-      var o = a.getMinutes();
-      e.textContent = i + ":" + pad2(o) + " " + n;
-    }
-  }
+  // La cabecera ya no lleva reloj ni indicador de wifi: el televisor los
+  // muestra en su propia barra y aquí sólo añadían ruido.
+  function yt() {}
   window.switchTab = selectHomeTab;
   function selectHomeTab(e, t) {
     if (X.channelsOpen || (Se && Se.classList.contains("is-active"))) {
@@ -4621,7 +4593,7 @@
                           "success" === e.state &&
                           (r &&
                             (r.textContent =
-                              "¡Actualización completada! Reiniciando XuperTV..."),
+                              "¡Actualización completada! Reiniciando ZephyrTV..."),
                             n && (n.style.width = "100%"),
                             setTimeout(function () {
                               try {
@@ -4639,7 +4611,7 @@
                           String(i)
                         ) &&
                           (n =
-                            "El instalador de la TV está desactualizado. Desenchufa la TV 30 segundos, vuelve a abrir XuperTV y busca la actualización de nuevo."),
+                            "El instalador de la TV está desactualizado. Desenchufa la TV 30 segundos, vuelve a abrir ZephyrTV y busca la actualización de nuevo."),
                           r && (r.textContent = "Error: " + n),
                           o &&
                           (o.textContent =
@@ -5626,7 +5598,7 @@
     }
     if (!valid.length) return startY;
     var o = startY || 772,
-      s = createEl("div", "kids-subtitle", "Continuar viendo");
+      s = createEl("div", "kids-subtitle", "Seguir viendo");
     placeAbsolute(s, 48, o, 1824, 40);
     t.appendChild(s);
     o += 54;
@@ -7592,11 +7564,13 @@
         ? !s
         : "series" === filter
           ? s
-          : "anime" === filter
-            ? -1 !== r.indexOf("anime") || -1 !== r.indexOf("animacion")
-            : "novels" === filter
-              ? -1 !== r.indexOf("novela") || -1 !== r.indexOf("telenovela")
-              : !0) && t.push(n);
+          : "kids" === filter
+            ? -1 !== r.indexOf("infantil") || -1 !== r.indexOf("kids") || -1 !== r.indexOf("ninos")
+            : "anime" === filter
+              ? -1 !== r.indexOf("anime") || -1 !== r.indexOf("animacion")
+              : "novels" === filter
+                ? -1 !== r.indexOf("novela") || -1 !== r.indexOf("telenovela")
+                : !0) && t.push(n);
     }
     if (genre) {
       a = "Género: " + genre;
@@ -7605,9 +7579,11 @@
         ? (a = "Películas")
         : "series" === filter
           ? (a = "Series")
-          : "anime" === filter
-            ? (a = "Anime")
-            : "novels" === filter && (a = "Novelas");
+          : "kids" === filter
+            ? (a = "Kids")
+            : "anime" === filter
+              ? (a = "Anime")
+              : "novels" === filter && (a = "Novelas");
     }
 
     closeCatalogFilter(!0);
@@ -7630,7 +7606,7 @@
     if (catalogFilterDialog) return void closeCatalogFilter();
     var a = createEl("div", "catalog-filter-dialog"),
       i = createEl("div", "catalog-filter-card"),
-      n = createEl("div", "catalog-filter-title", "Filtrar catálogo"),
+      n = createEl("div", "catalog-filter-title", "Categorías"),
       r = createEl("div", "catalog-filter-sub", "Elige un tipo o un género"),
       typeLabel = createEl("div", "catalog-filter-section-label", "Tipo"),
       typeRow = createEl("div", "catalog-filter-options"),
@@ -7642,6 +7618,7 @@
         { id: "all", label: "Todo" },
         { id: "movies", label: "Películas" },
         { id: "series", label: "Series" },
+        { id: "kids", label: "Kids" },
         { id: "anime", label: "Anime" },
         { id: "novels", label: "Novelas" },
       ],
@@ -8109,12 +8086,12 @@
       (ze.addons = renderAddonsPanel()),
       (ze.share = (function () {
         var t = createEl("div", "settings-panel share-panel");
-        (t.appendChild(createEl("div", "share-head", "Compartir XuperTV")),
+        (t.appendChild(createEl("div", "share-head", "Compartir ZephyrTV")),
           t.appendChild(
             createEl(
               "div",
               "share-sub",
-              "Instala XuperTV en cualquier otro televisor LG webOS de tu hogar o de tus amigos directamente desde el instalador IPK."
+              "Instala ZephyrTV en cualquier otro televisor LG webOS de tu hogar o de tus amigos directamente desde el instalador IPK."
             )
           ));
         var a = createEl("div", "share-free");
@@ -8160,7 +8137,6 @@
               "Únete a nuestro canal para descargar las versiones más recientes, reportar incidencias y conocer nuevas funciones."
             )
           ),
-          o.appendChild(createEl("div", "share-qr-handle", "@CristiancoDEV")),
           o.appendChild(
             createEl(
               "div",
@@ -8301,7 +8277,7 @@
           createEl(
             "div",
             "dg-note",
-            "Comprueba si tu operador de internet está bloqueando los servidores de XuperTV. La app ya usa un DNS seguro (DNS-over-HTTPS) para evitarlo; esta prueba solo lo muestra."
+            "Comprueba si tu operador de internet está bloqueando los servidores del portal. La app ya usa un DNS seguro (DNS-over-HTTPS) para evitarlo; esta prueba solo lo muestra."
           )
         ),
           t.appendChild(placeAbsolute(createEl("div", "sp-hr"), 0, 168, 1478, 1)));
@@ -8837,25 +8813,18 @@
             createEl(
               "div",
               "sp-about-body",
-              "Xuper TV se dedica a ofrecer a los usuarios una amplia variedad de recursos de alta calidad. Aquí encontrarás miles de películas, series, animes y canales en vivo, todo reunido en un solo lugar. Brindamos una experiencia estable, diversa y siempre actualizada, además de contenidos gratuitos para disfrutar."
+              "ZephyrTV reúne películas, series y canales en vivo en un solo lugar, con una interfaz pensada para recorrerse con el mando del televisor."
             )
           ));
         var a = createEl(
           "div",
           "sp-about-port",
-          "Port para LG webOS realizado por CristiancoDEV"
+          "Basado en el código base de XuperTV (cristianco7), reutilizado como punto de partida con su licencia. Interfaz, mantenimiento y evolución: ZephyrTV."
         );
         ((a.style.top = "380px"), t.appendChild(a));
-        var n = createEl("div", "sp-about-mail"),
-          r = createEl("img");
-        ((r.src = "assets/original/settings/vod_email_icon.png"),
-          (r.alt = ""),
-          n.appendChild(r),
-          n.appendChild(createEl("span", null, "escuchamos-tv@outlook.com")),
-          t.appendChild(n));
         var o = createEl("div", "sp-about-update-box");
         (o.appendChild(
-          createEl("div", "sp-about-update-title", "Actualizaciones de XuperTV")
+          createEl("div", "sp-about-update-title", "Actualizaciones de ZephyrTV")
         ),
           o.appendChild(
             createEl(
