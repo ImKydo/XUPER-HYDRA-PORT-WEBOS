@@ -9250,6 +9250,25 @@
     })(n.verdict);
     ((t.textContent = r.text),
       (t.className = "dg-summary" + (r.cls ? " " + r.cls : "")));
+    /* Fila de pantalla: los cuatro números del issue #18 sin abrir la consola.
+       En un TV webOS 3.4 la app ocupa 2/3; con esto el usuario puede reportar
+       si el problema es la superficie que da webOS, la escala o el panel. */
+    var vp = window.__xuperViewport || {},
+      vpRow = createEl("div", "dg-row");
+    (vpRow.appendChild(createEl("span", "dg-host", "Pantalla")),
+      vpRow.appendChild(
+        createEl(
+          "span",
+          "dg-local",
+          (vp.w || "?") + "x" + (vp.h || "?") +
+            " · panel " + (vp.panelW || "?") + "x" + (vp.panelH || "?")
+        )
+      ),
+      vpRow.appendChild(
+        createEl("span", "dg-state", "escala " + (vp.scale != null ? vp.scale : "?"))
+      ),
+      vpRow.appendChild(createEl("span", "dg-ip", "modo " + (vp.uiScaleMode || "auto"))),
+      i.appendChild(vpRow));
     for (var o = n.hosts || [], s = 0; s < o.length; s++) {
       var l = o[s],
         d = createEl("div", "dg-row " + isLayerOk(l)),
