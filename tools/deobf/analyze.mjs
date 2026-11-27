@@ -18,7 +18,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 // artefacto generado: si no, `build --check` fallaría en el siguiente commit.
 const TARGET = (process.argv.find((a) => a.startsWith("--target=")) || "").split("=")[1]
   || "src/legacy/app.legacy.js";
-const APP = path.join(ROOT, TARGET);
+const APP = path.resolve(ROOT, TARGET); // resolve, no join: TARGET puede ser absoluto
 const TOP = (process.argv.find((a) => a.startsWith("--top=")) || "").split("=")[1];
 
 const src = readFileSync(APP, "utf8");

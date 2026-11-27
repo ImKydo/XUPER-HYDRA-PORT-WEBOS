@@ -25,7 +25,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 // artefacto generado: si no, `build --check` fallaría en el siguiente commit.
 const TARGET = (process.argv.find((a) => a.startsWith("--target=")) || "").split("=")[1]
   || "src/legacy/app.legacy.js";
-const APP = path.join(ROOT, TARGET);
+const APP = path.resolve(ROOT, TARGET); // resolve, no join: TARGET puede ser absoluto
 const MAP = (process.argv.find((a) => a.startsWith("--map=")) || "").split("=")[1];
 const WRITE = process.argv.includes("--write");
 const CHECK = process.argv.includes("--check");
@@ -63,7 +63,13 @@ const RESERVED = new Set(
 );
 const problems = [];
 const targets = new Set();
+// Nombres de la zona protegida de reproducción (AGENTS.md): el renombrador no
+// puede tocarlos ni aunque alguien los ponga en el mapeo por error.
+const PROTECTED = new Set(
+  JSON.parse(readFileSync(path.join(ROOT, "tools/deobf/protected-names.json"), "utf8"))
+);
 for (const [oldName, newName] of Object.entries(mapping)) {
+  if (PROTECTED.has(oldName)) problems.push(`"${oldName}" está en la zona protegida (AGENTS.md)`);
   if (!used.has(oldName)) problems.push(`"${oldName}" no aparece en app.js`);
   if (!VALID.test(newName)) problems.push(`"${newName}" no es un identificador ES5 válido`);
   if (RESERVED.has(newName)) problems.push(`"${newName}" es palabra reservada`);
@@ -110,7 +116,11 @@ try {
 }
 
 /* ---------- verificación 2: forma canónica idéntica ---------- */
-function canonical(code) {
+// Asigna un id a cada nombre distinto según orden de aparición. `nameMap`
+// deshace el renombrado en la salida: sin eso, un identificador renombrado
+// obtiene un id nuevo y el chequeo falla aunque el cambio sea correcto (p. ej.
+// cuando el nombre viejo también aparece como clave de objeto, que no se toca).
+function canonical(code, nameMap = {}) {
   const tree = acorn.parse(code, { ecmaVersion: 5 });
   const seen = new Map();
   let next = 0;
@@ -118,13 +128,16 @@ function canonical(code) {
     // start/end/loc/range cambian con la longitud de los nombres: fuera.
     if (k === "loc" || k === "range" || k === "start" || k === "end") return undefined;
     if (v && typeof v === "object" && v.type === "Identifier") {
-      if (!seen.has(v.name)) seen.set(v.name, next++);
-      return { type: "Identifier", id: seen.get(v.name) };
+      const name = Object.prototype.hasOwnProperty.call(nameMap, v.name) ? nameMap[v.name] : v.name;
+      if (!seen.has(name)) seen.set(name, next++);
+      return { type: "Identifier", id: seen.get(name) };
     }
     return v;
   });
 }
-if (canonical(src) !== canonical(out)) {
+const reverse = {};
+for (const [oldName, newName] of Object.entries(mapping)) reverse[newName] = oldName;
+if (canonical(src) !== canonical(out, reverse)) {
   console.error("La forma canónica cambió: el renombrado NO es equivalente.");
   process.exit(1);
 }
