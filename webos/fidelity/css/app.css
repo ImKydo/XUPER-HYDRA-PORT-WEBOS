@@ -1033,3 +1033,214 @@ body {
   0% { left: -40%; }
   100% { left: 100%; }
 }
+
+/* ------------------------------------------------------------------
+   Portada (hero)
+   Imagen a sangre, degradado a la izquierda para el texto y otro abajo para
+   fundir con el catalogo. Todo en coordenadas del lienzo de 1920 porque la
+   app posiciona en absoluto.
+   ------------------------------------------------------------------ */
+.hero {
+  overflow: hidden;
+  border-radius: 0 0 34px 34px;
+  background: #0b0b12;
+}
+
+.hero-media {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 690px;
+  object-fit: cover;
+  opacity: 0;
+  -webkit-transition: opacity .5s ease;
+  transition: opacity .5s ease;
+}
+
+.hero.is-ready .hero-media {
+  opacity: 1;
+}
+
+.hero-scrim {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 690px;
+}
+
+.hero-scrim-l {
+  background: linear-gradient(90deg, #07070b 6%, rgba(7, 7, 11, .88) 30%, rgba(7, 7, 11, .28) 56%, rgba(7, 7, 11, 0) 76%);
+}
+
+.hero-scrim-b {
+  background: linear-gradient(0deg, #07070b 1%, rgba(7, 7, 11, .62) 24%, rgba(7, 7, 11, 0) 58%);
+}
+
+.hero-body {
+  position: absolute;
+  left: 96px;
+  top: 236px;
+  width: 800px;
+}
+
+.hero-kicker {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #ff5a68;
+}
+
+.hero-kicker::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e11d2e;
+  margin-right: 10px;
+  vertical-align: 2px;
+}
+
+.hero-title {
+  margin-top: 14px;
+  font-size: 68px;
+  line-height: 1.04;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  color: #ffffff;
+  max-height: 148px;
+  overflow: hidden;
+}
+
+.hero-meta {
+  margin-top: 18px;
+  font-size: 21px;
+  font-weight: 600;
+  color: #b9c0cc;
+}
+
+.hero-desc {
+  margin-top: 16px;
+  font-size: 23px;
+  line-height: 1.44;
+  color: #cfd4dd;
+  max-height: 100px;
+  overflow: hidden;
+}
+
+.hero-actions {
+  margin-top: 28px;
+  height: 62px;
+}
+
+.hero-btn {
+  height: 62px;
+  border: 0;
+  border-radius: 999px;
+  font-size: 23px;
+  font-weight: 700;
+  font-family: inherit;
+  vertical-align: top;
+}
+
+.hero-play {
+  background: #f4f5f8;
+  color: #07070b;
+  padding: 0 32px 0 26px;
+}
+
+.hero-play svg {
+  width: 26px;
+  height: 26px;
+  vertical-align: -6px;
+  margin-right: 12px;
+}
+
+.hero-info {
+  margin-left: 16px;
+  padding: 0 30px;
+  background: rgba(255, 255, 255, .14);
+  color: #f4f5f8;
+}
+
+.hero-info.is-on {
+  background: rgba(225, 29, 46, .22);
+  color: #ffd7db;
+}
+
+.hero-arrow {
+  position: absolute;
+  top: 300px;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, .18);
+  background: rgba(10, 10, 16, .62);
+  color: #ffffff;
+  font-size: 34px;
+  line-height: 50px;
+  font-family: inherit;
+}
+
+.hero-prev {
+  left: 28px;
+}
+
+.hero-next {
+  left: 1836px;
+}
+
+.hero-dots {
+  position: absolute;
+  left: 96px;
+  top: 620px;
+}
+
+.hero-dot {
+  display: inline-block;
+  width: 34px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, .24);
+  margin-right: 10px;
+  vertical-align: top;
+}
+
+.hero-dot.is-active {
+  background: #ffffff;
+}
+
+/* El boton claro quedaba con texto blanco por una regla de foco heredada mas
+   especifica. Se fija el color en el propio estado enfocado. */
+.hero-play,
+.hero-play.is-focused,
+.hero-play.is-focused span {
+  color: #07070b;
+}
+
+.hero-play.is-focused svg,
+.hero-play svg {
+  fill: #07070b;
+}
+
+.hero-info,
+.hero-info.is-focused,
+.hero-info.is-focused span {
+  color: #f4f5f8;
+}
+
+.hero-info.is-on,
+.hero-info.is-on.is-focused,
+.hero-info.is-on.is-focused span {
+  color: #ffd7db;
+}
+
+/* Sin imagen disponible, un degradado con algo de profundidad: negro plano
+   parece un fallo de carga. */
+.hero {
+  background: radial-gradient(120% 140% at 72% 18%, #1c2436 0%, #0d0f17 55%, #08080d 100%);
+}

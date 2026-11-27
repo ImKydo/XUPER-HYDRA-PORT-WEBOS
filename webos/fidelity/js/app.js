@@ -3022,15 +3022,14 @@
     function (e) {
       var t = filterByCategory("destacado"),
         heroPool = selectHeroItems(t, 10),
-        a = heroPool.slice(0, 6),
-        i = !(!a[0] || !a[0]._portal);
-      renderBentoCard(e, a, { titles: i, dots: i ? 4 : 0, shade: i, pool: heroPool });
+        a = heroPool.slice(0, 6);
+      renderHero(e, a, { pool: heroPool, dots: 5 });
       var n = t.filter(function (it) {
         for (var k = 0; k < a.length; k++) if (a[k] && a[k].id === it.id) return false;
         return true;
       });
       n.length &&
-        renderSectionRows(e, n, 860, {
+        renderSectionRows(e, n, 740, {
           sectionTitle: "Destacados",
           popularTitle: "Títulos más vistos",
           bentoItems: a,
@@ -3040,15 +3039,14 @@
     function (e) {
       var t = filterByCategory("pelicula"),
         heroPool = selectHeroItems(t, 10),
-        a = heroPool.slice(0, 6),
-        i = !(!a[0] || !a[0]._portal);
-      renderBentoCard(e, a, { titles: i, dots: i ? 4 : 0, shade: i, pool: heroPool });
+        a = heroPool.slice(0, 6);
+      renderHero(e, a, { pool: heroPool, dots: 5 });
       var n = t.filter(function (it) {
         for (var k = 0; k < a.length; k++) if (a[k] && a[k].id === it.id) return false;
         return true;
       });
       n.length &&
-        renderSectionRows(e, n, 860, {
+        renderSectionRows(e, n, 740, {
           sectionTitle: "Películas",
           popularTitle: "Películas más populares",
           bentoItems: a,
@@ -3058,15 +3056,14 @@
     function (e) {
       var t = filterByCategory("serie"),
         heroPool = selectHeroItems(t, 10),
-        a = heroPool.slice(0, 6),
-        i = !(!a[0] || !a[0]._portal);
-      renderBentoCard(e, a, { titles: i, dots: i ? 3 : 2, shade: i, pool: heroPool });
+        a = heroPool.slice(0, 6);
+      renderHero(e, a, { pool: heroPool, dots: 5 });
       var n = t.filter(function (it) {
         for (var k = 0; k < a.length; k++) if (a[k] && a[k].id === it.id) return false;
         return true;
       });
       n.length &&
-        renderSectionRows(e, n, 860, {
+        renderSectionRows(e, n, 740, {
           sectionTitle: "Series",
           popularTitle: "Series más populares",
           bentoItems: a,
@@ -3076,15 +3073,14 @@
     function (e) {
       var t = filterByCategory("infantil"),
         heroPool = selectHeroItems(t, 10),
-        a = heroPool.slice(0, 6),
-        i = !(!a[0] || !a[0]._portal);
-      renderBentoCard(e, a, { titles: i, dots: i ? 3 : 2, shade: i, pool: heroPool });
+        a = heroPool.slice(0, 6);
+      renderHero(e, a, { pool: heroPool, dots: 5 });
       var n = t.filter(function (it) {
         for (var k = 0; k < a.length; k++) if (a[k] && a[k].id === it.id) return false;
         return true;
       });
       n.length &&
-        renderSectionRows(e, n, 860, {
+        renderSectionRows(e, n, 740, {
           sectionTitle: "Infantil",
           popularTitle: "Contenido infantil popular",
           bentoItems: a,
@@ -3094,15 +3090,14 @@
     function (e) {
       var t = filterByCategory("anime"),
         heroPool = selectHeroItems(t, 10),
-        a = heroPool.slice(0, 6),
-        i = !(!a[0] || !a[0]._portal);
-      renderBentoCard(e, a, { titles: i, dots: i ? 3 : 2, shade: i, pool: heroPool });
+        a = heroPool.slice(0, 6);
+      renderHero(e, a, { pool: heroPool, dots: 5 });
       var n = t.filter(function (it) {
         for (var k = 0; k < a.length; k++) if (a[k] && a[k].id === it.id) return false;
         return true;
       });
       n.length &&
-        renderSectionRows(e, n, 860, {
+        renderSectionRows(e, n, 740, {
           sectionTitle: "Anime",
           popularTitle: "Anime más popular",
           bentoItems: a,
@@ -5236,6 +5231,192 @@
     for (var s = 0; s < n; s++)
       o.appendChild(createEl("span", "bento-dot" + (s === r ? " is-active" : "")));
     return o;
+  }
+  /* Portada del inicio: imagen a sangre, degradados a la izquierda y abajo, y
+     el bloque de texto abajo a la izquierda, como en las referencias. Sustituye
+     a la rejilla de seis paneles, que repartía la atención y dejaba el título
+     sin sitio. */
+  /* La sinopsis del portal llega muy larga y el hero la cortaba a media frase.
+     Se recorta en el último espacio antes del límite y se cierra con puntos
+     suspensivos. */
+  function clipSynopsis(text, limit) {
+    var s = String(text || "").replace(/\s+/g, " ").trim();
+    if (s.length <= limit) return s;
+    var cut = s.slice(0, limit),
+      space = cut.lastIndexOf(" ");
+    return (space > 40 ? cut.slice(0, space) : cut).replace(/[\s,;:.\-]+$/, "") + "\u2026";
+  }
+  function renderHero(pageEl, items, opts) {
+    opts = opts || {};
+    var pool = (opts.pool && opts.pool.length ? opts.pool : items) || [];
+    if (!pool.length) return;
+    var total = Math.min(opts.dots || 5, pool.length),
+      index = 0,
+      timer = null;
+
+    var hero = createEl("div", "hero");
+    placeAbsolute(hero, 0, 0, 1920, 690);
+    var media = createEl("img", "hero-media");
+    media.alt = "";
+    var body = createEl("div", "hero-body"),
+      kicker = createEl("div", "hero-kicker", opts.kicker || "DESTACADO"),
+      title = createEl("div", "hero-title"),
+      meta = createEl("div", "hero-meta"),
+      desc = createEl("div", "hero-desc"),
+      actions = createEl("div", "hero-actions"),
+      play = createEl("button", "hero-btn hero-play focusable"),
+      info = createEl("button", "hero-btn hero-info focusable", "Mi lista"),
+      dots = createEl("div", "hero-dots"),
+      dotEls = [],
+      prev = createEl("button", "hero-arrow hero-prev focusable", "\u2039"),
+      next = createEl("button", "hero-arrow hero-next focusable", "\u203A");
+
+    play.innerHTML =
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.2v13.6L19 12z" fill="currentColor"/></svg>';
+    play.appendChild(createEl("span", null, "Ver ahora"));
+
+    (actions.appendChild(play), actions.appendChild(info),
+      body.appendChild(kicker), body.appendChild(title), body.appendChild(meta),
+      body.appendChild(desc), body.appendChild(actions),
+      hero.appendChild(media),
+      hero.appendChild(createEl("div", "hero-scrim hero-scrim-l")),
+      hero.appendChild(createEl("div", "hero-scrim hero-scrim-b")),
+      hero.appendChild(body), hero.appendChild(prev), hero.appendChild(next),
+      hero.appendChild(dots), pageEl.appendChild(hero));
+
+    for (var d = 0; d < total; d++) {
+      var dot = createEl("div", "hero-dot" + (0 === d ? " is-active" : ""));
+      (dots.appendChild(dot), dotEls.push(dot));
+    }
+
+    var firstRail = function () {
+      return pageEl.querySelector(".catalog-rail .focusable");
+    };
+    var show = function (idx) {
+      index = ((idx % total) + total) % total;
+      var item = pool[index % pool.length];
+      if (!item) return;
+      title.textContent = item.title || "";
+      var bits = [];
+      if (item.genres && item.genres.length) bits.push(item.genres.slice(0, 3).join(" \u00B7 "));
+      var year = item.year || (item.releaseDate ? String(item.releaseDate).substring(0, 4) : "");
+      if (year && "\u2014" !== year) bits.push(year);
+      if (item.duration && "\u2014" !== item.duration) bits.push(item.duration);
+      meta.textContent = bits.join("  \u00B7  ");
+      meta.style.display = bits.length ? "" : "none";
+      desc.textContent = clipSynopsis(item.synopsis || item.overview || item.description || "", 210);
+      var fav = !!(X.favs && X.favs[String(item.id)]);
+      info.textContent = fav ? "En mi lista" : "Mi lista";
+      info.classList.toggle("is-on", fav);
+      play._item = item;
+      info._item = item;
+      /* Algunos títulos no traen backdrop y otros lo tienen en un host que el
+         operador bloquea: se prueban los tres campos en orden y sólo se pinta
+         cuando uno carga. Si fallan los tres queda el degradado de fondo. */
+      var candidates = [item.backdrop, item.landscape, item.poster],
+        tryIndex = 0;
+      var tryNext = function () {
+        while (tryIndex < candidates.length && !candidates[tryIndex]) tryIndex++;
+        if (tryIndex >= candidates.length) return;
+        var url = candidates[tryIndex++];
+        var probe = new Image();
+        probe.onload = function () {
+          media.src = url;
+          hero.classList.add("is-ready");
+        };
+        probe.onerror = tryNext;
+        probe.src = url;
+      };
+      tryNext();
+      for (var k = 0; k < dotEls.length; k++)
+        dotEls[k].classList.toggle("is-active", k === index);
+    };
+
+    play._activate = function () {
+      play._item && ba(play._item);
+    };
+    info._activate = function () {
+      var it = info._item;
+      if (!it) return;
+      var on = toggleFavorite(it);
+      info.textContent = on ? "En mi lista" : "Mi lista";
+      info.classList.toggle("is-on", on);
+      Yt(on ? "Añadido a mi lista" : "Quitado de mi lista");
+    };
+    prev._activate = function () {
+      show(index - 1);
+    };
+    next._activate = function () {
+      show(index + 1);
+    };
+
+    var toTabs = function () {
+      return Ue[X.tab] ? (setFocus(Ue[X.tab]), !0) : !0;
+    };
+    var toRail = function () {
+      var r = firstRail();
+      return r ? (setFocus(r), !0) : !0;
+    };
+
+    play._onMove = function (dir) {
+      if ("up" === dir) return toTabs();
+      if ("down" === dir) return toRail();
+      if ("right" === dir) return (setFocus(info), !0);
+      if ("left" === dir) return (setFocus(prev), !0);
+      return !1;
+    };
+    info._onMove = function (dir) {
+      if ("up" === dir) return toTabs();
+      if ("down" === dir) return toRail();
+      if ("left" === dir) return (setFocus(play), !0);
+      if ("right" === dir) return (setFocus(next), !0);
+      return !1;
+    };
+    prev._onMove = function (dir) {
+      if ("right" === dir) return (setFocus(play), !0);
+      if ("up" === dir) return toTabs();
+      if ("down" === dir) return toRail();
+      return !1;
+    };
+    next._onMove = function (dir) {
+      if ("left" === dir) return (setFocus(info), !0);
+      if ("up" === dir) return toTabs();
+      if ("down" === dir) return toRail();
+      return !1;
+    };
+
+    show(0);
+
+    /* La primera fila de rieles se construye justo después de la portada. Sin
+       esto, subir desde la primera tarjeta se quedaba atrapado en la fila: en
+       las referencias, arriba de la primera fila está la portada. */
+    setTimeout(function () {
+      var row = pageEl.querySelector(".catalog-rail");
+      if (!row) return;
+      var cards = row.querySelectorAll(".focusable");
+      for (var i = 0; i < cards.length; i++)
+        (function (card) {
+          var prev = card._onMove;
+          card._onMove = function (dir) {
+            if ("up" === dir) return (setFocus(play), !0);
+            return prev ? prev.call(card, dir) : !1;
+          };
+        })(cards[i]);
+    }, 0);
+
+    /* Rotación sólo cuando nadie está usando la portada: si el foco está en el
+       hero, cambiaría la ficha bajo los dedos. */
+    if (total > 1) {
+      timer = setInterval(function () {
+        if (!document.body.contains(hero)) {
+          clearInterval(timer);
+          return;
+        }
+        if (!pageEl.classList.contains("is-current")) return;
+        if (hero.querySelector(".is-focused")) return;
+        show(index + 1);
+      }, 9000);
+    }
   }
   function renderBentoCard(e, t, a) {
     a = a || {};

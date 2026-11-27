@@ -27,6 +27,30 @@ Ajustes → Mi lista, junto a favoritos.
 **Seguir viendo** es el primer riel de Inicio y sólo aparece si hay progreso
 real (`position >= 5` o `duration > 0`), no con sólo abrir un título.
 
+## Portada (hero)
+
+Inicio, Películas y Series abren con una portada a sangre: imagen del título
+(690 px de alto dentro del lienzo), degradado a la izquierda para el texto y
+otro abajo para fundir con el catálogo.
+
+- Etiqueta, título, géneros · año · duración, sinopsis recortada en palabra
+  completa y dos acciones: **Ver ahora** (abre la ficha, donde el foco queda en
+  Reproducir) y **Mi lista** (añade o quita el título y lo confirma con un
+  aviso).
+- Flechas circulares a los lados y barras de posición abajo a la izquierda.
+- Rotación cada 9 s sólo si la portada no tiene el foco y su pestaña está
+  visible: nunca cambia la ficha bajo los dedos.
+- Si el título no tiene backdrop, se prueban `landscape` y `poster` en orden;
+  si los tres fallan queda un degradado, no un hueco negro.
+
+**Foco:** desde la barra, `abajo` entra en la portada; `abajo` otra vez va a la
+primera fila; `arriba` desde la primera fila vuelve a la portada; `derecha` e
+`izquierda` recorren Ver ahora / Mi lista y las flechas.
+
+La rejilla anterior de seis paneles (2 grandes + 4 pequeños con puntos) sigue
+existiendo para Infantil/Anime/Novelas, pero Inicio, Películas y Series ya no la
+usan.
+
 ## Cabecera
 
 - Marca a la izquierda: icono, `ZEPHYRTV` y lema.
