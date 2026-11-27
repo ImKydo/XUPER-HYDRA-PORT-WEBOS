@@ -1,0 +1,12 @@
+{
+  "rt": "setFocus",
+  "ot": "findFirstFocusable",
+  "ut": "handleKeyDown",
+  "oo": "applyViewportScale",
+  "wt": "schedulePosterLoad",
+  "Ph": "serviceCallHttp",
+  "ct": "handleBackKey",
+  "ga": "buildCatalogRail",
+  "Va": "renderSettingsScreen",
+  "Ca": "renderDetailScreen"
+}

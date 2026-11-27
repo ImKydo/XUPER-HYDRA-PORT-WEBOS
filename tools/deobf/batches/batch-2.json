@@ -1,0 +1,9 @@
+{
+  "so": "bootstrapApp",
+  "gt": "renderHomeScreen",
+  "ya": "renderSectionRows",
+  "Ja": "renderNetworkDiagnostics",
+  "Za": "runDiagnostics",
+  "Zt": "openUpdateDialog",
+  "da": "renderAddonPresets"
+}

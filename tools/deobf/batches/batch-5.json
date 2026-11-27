@@ -1,0 +1,21 @@
+{
+  "L": "mergeCatalogItems",
+  "T": "normalizeCatalogItem",
+  "U": "ensureDetailLoaded",
+  "P": "serviceCall",
+  "O": "indexCatalogById",
+  "q": "refreshCatalog",
+  "V": "loadCatalog",
+  "I": "hasServiceBridge",
+  "c": "seedDemoCatalog",
+  "H": "mergeItemFields",
+  "k": "parseSeasonFromTitle",
+  "Z": "toggleFavorite",
+  "D": "rememberLastStream",
+  "N": "loadPortalSnapshot",
+  "J": "readJsonStorage",
+  "R": "fallbackToBundledCatalog",
+  "K": "writeJsonStorage",
+  "M": "bundledCatalog",
+  "Y": "savePlaybackState"
+}

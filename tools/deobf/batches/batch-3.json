@@ -1,0 +1,10 @@
+{
+  "Qt": "renderLiveChannelRow",
+  "hr": "renderLiveChannelList",
+  "Gt": "loadLiveCategory",
+  "pr": "openPlayerCategoryPicker",
+  "dr": "renderPlayerCategories",
+  "Rn": "renderPlayerEpisodes",
+  "Ga": "layerVerdictLabel",
+  "Qa": "isLayerOk"
+}

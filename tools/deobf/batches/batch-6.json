@@ -1,0 +1,17 @@
+{
+  "Wt": "scheduleHomePreview",
+  "Pa": "runSearch",
+  "jn": "loadEpisodesPanel",
+  "za": "renderAccountPanel",
+  "ha": "filterByCategory",
+  "ja": "renderHistoryPanel",
+  "st": "ensureValidFocus",
+  "fa": "renderBentoCard",
+  "ir": "renderCodecToggle",
+  "ca": "loadAddonChannels",
+  "ao": "renderPlayerInfoBar",
+  "Na": "renderSearchResults",
+  "Wa": "renderAddonsPanel",
+  "Rr": "scheduleSearch",
+  "bt": "selectHomeTab"
+}

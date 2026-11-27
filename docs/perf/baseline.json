@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-27T03:16:57.877Z",
+  "generatedAt": "2026-11-27T03:41:18.434Z",
   "target": {
     "url": "?screen=home&tab=1",
     "throttle": 4,
@@ -8,85 +8,81 @@
   "scenes": {
     "boot": {
       "nav": {
-        "dcl": 1012,
-        "load": 1170,
-        "fcp": 332,
-        "domNodes": 705,
-        "imgs": 118,
-        "imgsLoaded": 23,
-        "heapMB": 6.5,
+        "dcl": 842,
+        "load": 983,
+        "fcp": 232,
+        "domNodes": 740,
+        "imgs": 119,
+        "imgsLoaded": 9,
+        "heapMB": 4,
         "cssRules": 1539,
-        "scriptKB": 1011,
-        "posters": 109,
-        "rails": 11,
+        "scriptKB": 1025,
+        "posters": 110,
+        "rails": 10,
         "screen": "screen-home"
       },
-      "settleMs": 897,
+      "settleMs": 3053,
       "longTasks": [
-        181,
-        502,
-        178
+        167,
+        456
       ]
     },
     "focus": {
       "nav": {
-        "dcl": 986,
-        "load": 1693,
+        "dcl": 871,
+        "load": 991,
         "fcp": 276,
-        "domNodes": 705,
-        "imgs": 118,
-        "imgsLoaded": 23,
-        "heapMB": 6.2,
+        "domNodes": 740,
+        "imgs": 119,
+        "imgsLoaded": 9,
+        "heapMB": 3.8,
         "cssRules": 1539,
-        "scriptKB": 1011,
-        "posters": 109,
-        "rails": 11,
+        "scriptKB": 1025,
+        "posters": 110,
+        "rails": 10,
         "screen": "screen-home"
       },
-      "settleMs": 5269,
+      "settleMs": 3074,
       "focus": {
         "moves": 24,
-        "avgMs": 8,
-        "medianMs": 7,
-        "p95Ms": 15.3,
+        "avgMs": 7.28,
+        "medianMs": 6.5,
+        "p95Ms": 11.2,
         "maxMs": 17.6,
         "over33": 0
       },
       "longTasks": [
-        73,
-        231,
-        496,
-        171
+        75,
+        179,
+        428
       ]
     },
     "leak": {
       "nav": {
-        "dcl": 873,
-        "load": 1024,
-        "fcp": 268,
-        "domNodes": 705,
-        "imgs": 118,
-        "imgsLoaded": 23,
-        "heapMB": 6.4,
+        "dcl": 850,
+        "load": 970,
+        "fcp": 272,
+        "domNodes": 740,
+        "imgs": 119,
+        "imgsLoaded": 9,
+        "heapMB": 3.8,
         "cssRules": 1539,
-        "scriptKB": 1011,
-        "posters": 109,
-        "rails": 11,
+        "scriptKB": 1025,
+        "posters": 110,
+        "rails": 10,
         "screen": "screen-home"
       },
-      "settleMs": 850,
+      "settleMs": 3071,
       "leak": {
-        "heapBeforeMB": 6.4,
-        "heapAfterMB": 7,
-        "growthMB": 0.5,
-        "domNodes": 705
+        "heapBeforeMB": 3.9,
+        "heapAfterMB": 4.4,
+        "growthMB": 0.6,
+        "domNodes": 740
       },
       "longTasks": [
         70,
-        187,
-        433,
-        178,
-        53
+        175,
+        420
       ]
     }
   }
