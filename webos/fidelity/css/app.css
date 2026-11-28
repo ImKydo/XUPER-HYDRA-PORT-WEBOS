@@ -2003,11 +2003,9 @@ body {
    manchas, asi que se fija fill:none en el svg y en cada figura.
    ------------------------------------------------------------------ */
 .home-tabs .tab-item .tab-icon svg,
-.home-tabs .tab-item .tab-icon svg *,
-.home-tabs .home-notify .n-normal svg,
-.home-tabs .home-notify .n-normal svg * {
-  width: 24px;
-  height: 24px;
+.home-tabs .home-notify .n-normal svg {
+  width: 26px;
+  height: 26px;
   fill: none;
   stroke: currentColor;
   stroke-width: 2;
@@ -2067,7 +2065,7 @@ body {
      menos de 320 y un hijo de 280 desbordaria, lo que hace que el navegador
      desplace el panel en horizontal. */
   width: 100%;
-  padding: 0 14px 0 6px;
+  padding: 0 14px 0 5px;
 }
 
 .home-tabs.is-open .home-notify,
@@ -2179,4 +2177,137 @@ body {
   letter-spacing: .08em;
   color: #5f7280;
   text-align: right;
+}
+
+/* ------------------------------------------------------------------
+   Alineación fina del raíl
+   Todas las cajas de icono miden lo mismo y las acciones comparten la
+   columna de las secciones. El borde transparente va en reposo para que
+   enfocar no desplace nada 1 px.
+   ------------------------------------------------------------------ */
+.home-tabs .tab-item,
+.home-tabs .home-notify .notify-item {
+  border: 1px solid transparent;
+}
+
+.home-tabs .home-notify .notify-item .n-normal,
+.home-tabs.is-open .home-notify .notify-item .n-normal {
+  position: static;
+  left: auto;
+  top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 44px;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  -webkit-transform: none;
+  transform: none;
+}
+
+.home-tabs:not(.is-open) .home-notify .notify-item .n-normal {
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 44px;
+  height: 44px;
+  /* La capa heredada la desplaza con translate(-50%, -50%): aquí estorba. */
+  -webkit-transform: none;
+  transform: none;
+}
+
+.home-tabs.is-open .home-notify .notify-item,
+.home-tabs.is-collapsed.is-open .home-notify .notify-item {
+  padding: 0 14px 0 5px;
+}
+
+/* Marca: sin caja, sin borde y sin sombra; solo el isotipo. */
+.home-tabs .tabs-brand,
+.home-tabs.is-open .tabs-brand {
+  padding: 0 0 26px 5px;
+  margin: 0 0 8px 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.home-tabs .tabs-mark,
+.home-tabs .tabs-mark-img {
+  -webkit-filter: none;
+  filter: none;
+  box-shadow: none;
+  background: none;
+  border: 0;
+  margin: 0;
+}
+
+.home-tabs:not(.is-open) .tabs-brand {
+  padding: 0 0 26px 0;
+}
+
+/* La marca comparte la columna exacta de los iconos: misma caja, mismo borde
+   transparente y sin margen derecho (el aire del wordmark va en el texto). */
+.home-tabs .tabs-brand,
+.home-tabs.is-open .tabs-brand,
+.home-tabs:not(.is-open) .tabs-brand {
+  border: 1px solid transparent;
+}
+
+.home-tabs .tabs-mark,
+.home-tabs .tabs-mark-img {
+  flex: 0 0 44px;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  margin: 0;
+}
+
+.home-tabs.is-open .tabs-mark-img {
+  margin-right: 0;
+}
+
+.home-tabs.is-open .tabs-word {
+  margin-left: 12px;
+}
+
+/* En colapsado el isotipo y las acciones se centran igual que las secciones.
+   Las acciones necesitan posición relativa para que su caja absoluta de 44 px
+   se ancle al botón y no al panel. */
+.home-tabs .home-notify .notify-item {
+  position: relative;
+}
+
+.home-tabs:not(.is-open) .tabs-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Las acciones no llevan chip propio: mismo aspecto que las secciones y el
+   foco se marca igual. */
+.home-tabs .home-notify .n-normal {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Las acciones comparten el aspecto de las secciones: sin chip de fondo y con
+   el mismo estado de foco. */
+.home-tabs .home-notify .notify-item {
+  background: transparent;
+  border-color: transparent;
+}
+
+.home-tabs .home-notify .notify-item.is-focused {
+  background: #eaf3f5;
+  border-color: #eaf3f5;
+}
+
+.home-tabs .home-notify .notify-item.is-focused .n-normal,
+.home-tabs .home-notify .notify-item.is-focused .notify-label {
+  color: #05070d;
 }

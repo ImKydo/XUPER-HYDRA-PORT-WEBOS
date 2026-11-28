@@ -79,6 +79,29 @@ check("el velo oscurece", e.velo > 0.35, String(e.velo));
 await sleep(400);
 const ic1 = await icono();
 check("el icono no se mueve al abrir", Math.abs(ic1.centro - 48) <= 1, JSON.stringify(ic1));
+
+// Todas las cajas de icono deben ser iguales, estar centradas y compartir
+// columna con la marca; si una se descuelga, se ve suelta o cortada.
+const alineacion = JSON.parse(await chrome.browser.eval(sid, `(() => {
+  const cajas = [...document.querySelectorAll('.tab-item, .notify-item')].map((it) => {
+    const ic = it.querySelector('.tab-icon, .n-normal');
+    const svg = it.querySelector('svg');
+    const a = ic.getBoundingClientRect(), b = svg.getBoundingClientRect();
+    return {
+      etiqueta: (it.textContent || '').trim().slice(0, 12),
+      x: Math.round(a.x), w: Math.round(a.width), h: Math.round(a.height),
+      dX: Math.round((b.x + b.width / 2) - (a.x + a.width / 2)),
+      dY: Math.round((b.y + b.height / 2) - (a.y + a.height / 2)),
+    };
+  });
+  const marca = document.querySelector('.tabs-mark-img').getBoundingClientRect();
+  return JSON.stringify({ cajas, marcaCentro: Math.round(marca.x + marca.width / 2) });
+})()`));
+const cajas = alineacion.cajas;
+check("todas las cajas de icono miden 44", cajas.every((c) => c.w === 44 && c.h === 44), JSON.stringify(cajas.map((c) => c.w)));
+check("los iconos van centrados en su caja", cajas.every((c) => c.dX === 0 && c.dY === 0), JSON.stringify(cajas.filter((c) => c.dX || c.dY)));
+check("una sola columna de iconos", new Set(cajas.map((c) => c.x)).size === 1, JSON.stringify([...new Set(cajas.map((c) => c.x))]));
+check("la marca comparte la columna", alineacion.marcaCentro === cajas[0].x + 22, String(alineacion.marcaCentro));
 const contraste = JSON.parse(await chrome.browser.eval(sid, `(() => {
   const it = document.querySelector('.tab-item.is-focused');
   const path = it.querySelector('.tab-icon svg path, .tab-icon svg circle, .tab-icon svg rect');
