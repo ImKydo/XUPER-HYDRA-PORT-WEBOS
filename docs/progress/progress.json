@@ -471,6 +471,15 @@
       "date": "2026-11-27"
     },
     {
+      "id": "T6.15",
+      "phase": "F6",
+      "title": "Menú lateral deslizante con foco exclusivo",
+      "status": "done",
+      "commit": "7913b58",
+      "evidence": "cajón 320 px oculto (x=-320) que abre con izquierda; 9/9 e2e; foco atrapado; derecha y Back devuelven el foco a la tarjeta",
+      "date": "2026-11-27"
+    },
+    {
       "id": "T7.1",
       "phase": "F7",
       "title": "Geometría pura + pruebas",
