@@ -2311,3 +2311,21 @@ body {
 .home-tabs .home-notify .notify-item.is-focused .notify-label {
   color: #05070d;
 }
+
+/* Ritmo vertical: las acciones siguen el mismo paso que las secciones y el
+   grupo se separa 16 px del contenido, para leerse como cabecera. */
+.home-tabs .home-notify,
+.home-tabs.is-open .home-notify {
+  margin-bottom: 16px;
+  gap: 0;
+}
+
+.home-tabs .home-notify .notify-item {
+  margin: 0 0 6px 0;
+}
+
+/* Misma altura que las secciones: las acciones venían a 64 px y rompían el paso. */
+.home-tabs .home-notify .notify-item {
+  height: 52px;
+  min-height: 52px;
+}
