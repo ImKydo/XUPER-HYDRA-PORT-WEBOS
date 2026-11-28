@@ -507,6 +507,51 @@
       "date": "2026-11-27"
     },
     {
+      "id": "T6.19",
+      "phase": "F6",
+      "title": "Iconos Lucide vendorizados",
+      "status": "done",
+      "commit": "0f51506",
+      "evidence": "8 SVG Lucide 0.544.0 en src/assets/icons; tools/icons.mjs genera window.ZEPHYR_ICONS; railIcon con respaldo",
+      "date": "2026-11-28"
+    },
+    {
+      "id": "T6.20",
+      "phase": "F6",
+      "title": "Columna de iconos fija a 48 px",
+      "status": "done",
+      "commit": "b43d67c",
+      "evidence": "icono a 48 px colapsado y 49 abierto; overflow-x hidden y scrollLeft a cero; 15 comprobaciones",
+      "date": "2026-11-28"
+    },
+    {
+      "id": "T6.21",
+      "phase": "F6",
+      "title": "Sin sombras de texto",
+      "status": "done",
+      "commit": "1cd449f",
+      "evidence": "0 declaraciones text-shadow; tools/check/no-text-shadow.mjs en npm run check",
+      "date": "2026-11-28"
+    },
+    {
+      "id": "T6.22",
+      "phase": "F6",
+      "title": "Arranque minimalista con anillo",
+      "status": "done",
+      "commit": "010aada",
+      "evidence": "isotipo 188 px sin caja, anillo 240 girando, version en la esquina; welcome.mjs 6/6",
+      "date": "2026-11-28"
+    },
+    {
+      "id": "T6.23",
+      "phase": "F6",
+      "title": "Icono de app con fondo oscuro",
+      "status": "done",
+      "commit": "72677ae",
+      "evidence": "512/256 con fondo navy a sangre, sin esquinas; tools/app-icon.mjs",
+      "date": "2026-11-28"
+    },
+    {
       "id": "T7.1",
       "phase": "F7",
       "title": "Geometría pura + pruebas",

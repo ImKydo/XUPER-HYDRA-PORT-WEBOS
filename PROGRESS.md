@@ -3,7 +3,7 @@
 Plan: `.hermes/plans/2026-11-26_224922-xupertv-v2-reconstruccion-verificada.md`
 Actualizado: 2026-11-27T06:49:10.518Z
 
-**Avance global: 51/60 tareas (85 %)**
+**Avance global: 56/65 tareas (86 %)**
 
 | Fase | Hechas | Total |
 |---|---|---|
@@ -13,7 +13,7 @@ Actualizado: 2026-11-27T06:49:10.518Z
 | F3 | 3 | 4 |
 | F4 | 4 | 7 |
 | F5 | 6 | 7 |
-| F6 | 18 | 18 |
+| F6 | 23 | 23 |
 | F7 | 0 | 4 |
 
 ## F0
@@ -106,6 +106,11 @@ Actualizado: 2026-11-27T06:49:10.518Z
 | ✔ | T6.16 | El cajón empuja el catálogo con velo | done | `a7f4039` | 12/12 e2e: contenidoX 320 abierto y 0 cerrado; velo 160 ms con degradado .86->.55; will-change temporal 340 ms | 2026-11-27 |
 | ✔ | T6.17 | Raíl colapsable de 96 px y arreglos del menú | done | `d4e3f42` | raíl 96<->320 empujando 96/320; acciones arriba con rótulo; icono enfocado con delta de luminancia 238; sin text-shadow | 2026-11-27 |
 | ✔ | T6.18 | Title Case, iconos, Configuración y marca Zephyr | done | `71d58ee` | 6 opciones; Mi cuenta sobre Buscar; casa/claqueta/episodios/engranaje; isotipo centrado y paleta teal #00D2BE; Configuración al fondo abre Ajustes | 2026-11-27 |
+| ✔ | T6.19 | Iconos Lucide vendorizados | done | `0f51506` | 8 SVG Lucide 0.544.0 en src/assets/icons; tools/icons.mjs genera window.ZEPHYR_ICONS; railIcon con respaldo | 2026-11-28 |
+| ✔ | T6.20 | Columna de iconos fija a 48 px | done | `b43d67c` | icono a 48 px colapsado y 49 abierto; overflow-x hidden y scrollLeft a cero; 15 comprobaciones | 2026-11-28 |
+| ✔ | T6.21 | Sin sombras de texto | done | `1cd449f` | 0 declaraciones text-shadow; tools/check/no-text-shadow.mjs en npm run check | 2026-11-28 |
+| ✔ | T6.22 | Arranque minimalista con anillo | done | `010aada` | isotipo 188 px sin caja, anillo 240 girando, version en la esquina; welcome.mjs 6/6 | 2026-11-28 |
+| ✔ | T6.23 | Icono de app con fondo oscuro | done | `72677ae` | 512/256 con fondo navy a sangre, sin esquinas; tools/app-icon.mjs | 2026-11-28 |
 
 ## F7
 
