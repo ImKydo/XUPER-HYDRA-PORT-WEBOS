@@ -3,7 +3,7 @@
 Plan: `.hermes/plans/2026-11-26_224922-xupertv-v2-reconstruccion-verificada.md`
 Actualizado: 2026-11-27T06:49:10.518Z
 
-**Avance global: 49/58 tareas (84 %)**
+**Avance global: 50/59 tareas (85 %)**
 
 | Fase | Hechas | Total |
 |---|---|---|
@@ -13,7 +13,7 @@ Actualizado: 2026-11-27T06:49:10.518Z
 | F3 | 3 | 4 |
 | F4 | 4 | 7 |
 | F5 | 6 | 7 |
-| F6 | 16 | 16 |
+| F6 | 17 | 17 |
 | F7 | 0 | 4 |
 
 ## F0
@@ -104,6 +104,7 @@ Actualizado: 2026-11-27T06:49:10.518Z
 | ✔ | T6.14 | Instalación y validación en televisor real | done | `e46fd05` | LG 55UT7300PSA webOS 25: arranque 1920x1080 DPR2, dcl 1785 ms; 3 bugs de dispositivo corregidos (down desde Inicio, imagen del hero, versión del servicio) | 2026-11-27 |
 | ✔ | T6.15 | Menú lateral deslizante con foco exclusivo | done | `7913b58` | cajón 320 px oculto (x=-320) que abre con izquierda; 9/9 e2e; foco atrapado; derecha y Back devuelven el foco a la tarjeta | 2026-11-27 |
 | ✔ | T6.16 | El cajón empuja el catálogo con velo | done | `a7f4039` | 12/12 e2e: contenidoX 320 abierto y 0 cerrado; velo 160 ms con degradado .86->.55; will-change temporal 340 ms | 2026-11-27 |
+| ✔ | T6.17 | Raíl colapsable de 96 px y arreglos del menú | done | `d4e3f42` | raíl 96<->320 empujando 96/320; acciones arriba con rótulo; icono enfocado con delta de luminancia 238; sin text-shadow | 2026-11-27 |
 
 ## F7
 

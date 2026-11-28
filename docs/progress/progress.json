@@ -489,6 +489,15 @@
       "date": "2026-11-27"
     },
     {
+      "id": "T6.17",
+      "phase": "F6",
+      "title": "Raíl colapsable de 96 px y arreglos del menú",
+      "status": "done",
+      "commit": "d4e3f42",
+      "evidence": "raíl 96<->320 empujando 96/320; acciones arriba con rótulo; icono enfocado con delta de luminancia 238; sin text-shadow",
+      "date": "2026-11-27"
+    },
+    {
       "id": "T7.1",
       "phase": "F7",
       "title": "Geometría pura + pruebas",
