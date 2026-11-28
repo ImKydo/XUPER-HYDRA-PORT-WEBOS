@@ -1638,3 +1638,296 @@ body {
   border-right-color: #262633;
   box-shadow: 18px 0 48px rgba(0, 0, 0, .55);
 }
+
+/* ------------------------------------------------------------------
+   Raíl colapsable (estilo YouTube TV)
+   Siempre visible: 96 px con solo iconos. Al entrar en él se expande a 320 y
+   empuja el catálogo. El contenido arranca desplazado 96 px, no 0.
+   ------------------------------------------------------------------ */
+.home-tabs,
+.home-tabs.is-collapsed,
+.home-tabs.is-expanded {
+  width: 96px;
+  padding: 22px 0 18px 0;
+  align-items: center;
+  -webkit-transform: none;
+  transform: none;
+  border-right: 1px solid #1c1c27;
+  border-bottom: 0;
+  overflow: hidden;
+  -webkit-transition: width .24s cubic-bezier(.22, .61, .36, 1);
+  transition: width .24s cubic-bezier(.22, .61, .36, 1);
+}
+
+.home-tabs.is-open,
+.home-tabs.is-collapsed.is-open,
+.home-tabs.is-expanded.is-open {
+  width: 320px;
+  padding: 22px 20px 18px 20px;
+  align-items: stretch;
+  -webkit-transform: none;
+  transform: none;
+}
+
+/* Marca: sola la Z cuando está colapsado. */
+.home-tabs .tabs-brand {
+  padding: 0 0 16px 0;
+  text-align: center;
+}
+
+.home-tabs .tabs-mark,
+.home-tabs .tabs-mark-img {
+  width: 44px;
+  height: 44px;
+  margin: 0 auto;
+}
+
+.home-tabs .tabs-word,
+.home-tabs .tabs-tag {
+  display: none;
+}
+
+.home-tabs.is-open .tabs-brand {
+  padding: 0 6px 20px 6px;
+  text-align: left;
+}
+
+.home-tabs.is-open .tabs-mark,
+.home-tabs.is-open .tabs-mark-img {
+  margin: 0;
+}
+
+.home-tabs.is-open .tabs-word,
+.home-tabs.is-open .tabs-tag {
+  display: block;
+}
+
+/* Item: 64 px centrado en colapsado, 280 con rótulo al abrir. */
+.home-tabs .tab-item,
+.home-tabs.is-collapsed .tab-item,
+.home-tabs.is-expanded .tab-item {
+  width: 64px;
+  height: 52px;
+  margin: 0 0 6px 0;
+  padding: 0;
+  justify-content: center;
+  border-radius: 14px;
+}
+
+.home-tabs .tab-item .tab-icon,
+.home-tabs.is-collapsed .tab-item .tab-icon,
+.home-tabs.is-expanded .tab-item .tab-icon {
+  margin-right: 0;
+}
+
+.home-tabs .tab-item .tab-title,
+.home-tabs.is-collapsed .tab-item .tab-title,
+.home-tabs.is-expanded .tab-item .tab-title {
+  display: none;
+}
+
+.home-tabs.is-open .tab-item,
+.home-tabs.is-collapsed.is-open .tab-item,
+.home-tabs.is-expanded.is-open .tab-item {
+  width: 280px;
+  padding: 0 14px;
+  justify-content: flex-start;
+}
+
+.home-tabs.is-open .tab-item .tab-icon,
+.home-tabs.is-collapsed.is-open .tab-item .tab-icon,
+.home-tabs.is-expanded.is-open .tab-item .tab-icon {
+  margin-right: 14px;
+}
+
+.home-tabs.is-open .tab-item .tab-title,
+.home-tabs.is-collapsed.is-open .tab-item .tab-title,
+.home-tabs.is-expanded.is-open .tab-item .tab-title {
+  display: block;
+}
+
+/* Acciones dentro del raíl, arriba de Inicio. */
+.home-notify {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0 0 10px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 1;
+  visibility: visible;
+  z-index: auto;
+}
+
+.home-notify .notify-item {
+  width: 52px;
+  height: 52px;
+  margin: 0 0 8px 0;
+}
+
+/* El catálogo parte desplazado por el raíl y se empuja al expandirlo. */
+.home-pages {
+  -webkit-transform: translateX(96px);
+  transform: translateX(96px);
+}
+
+.home-pages.is-pushed {
+  -webkit-transform: translateX(320px);
+  transform: translateX(320px);
+}
+
+/* La página de TV conserva su encuadre: el raíl se le monta encima 96 px. */
+.home-page:first-child {
+  left: -96px;
+  width: 1920px;
+}
+
+/* Alinear el texto de la portada con los títulos de fila. */
+.hero-body {
+  left: 48px;
+}
+
+.hero-dots {
+  left: 48px;
+}
+
+/* El icono enfocado se pintaba blanco sobre fondo blanco: legacy forzaba
+   fill y stroke blancos en el svg, no en el contenedor. */
+.tab-item.is-focused .tab-icon svg,
+.tab-item:hover .tab-icon svg {
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.tab-item.is-focused .tab-icon {
+  -webkit-filter: none;
+  filter: none;
+}
+
+/* Sin sombras de texto: ensucian el borde de las letras en un panel. */
+.kids-subtitle,
+.hero-title,
+.hero-meta,
+.hero-desc,
+.hero-kicker,
+.p-title,
+.bento-title,
+.detail-title,
+.history-card-title,
+.home-tabs .tab-title,
+.home-tabs .tabs-word,
+.home-tabs .tabs-tag {
+  text-shadow: none;
+}
+
+/* El icono enfocado quedaba blanco sobre fondo blanco: la capa heredada pinta
+   fill y stroke en el svg Y en sus trazos (.tab-item.is-focused .tab-icon svg).
+   Se fija el color en el contenedor y se fuerza el trazo a currentColor; el
+   fill se deja al svg para no rellenar los iconos que usan fill="none". */
+.home-tabs .tab-item.is-focused .tab-icon,
+.home-tabs .tab-item.is-focused .tab-icon svg {
+  color: #07070b;
+}
+
+.home-tabs .tab-item.is-focused .tab-icon svg {
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.home-tabs .tab-item.is-focused .tab-icon svg * {
+  stroke: currentColor;
+}
+
+/* La capa heredada trae '.tab-item.is-focused * { color: #ffffff }', que pinta
+   de blanco hasta el path del SVG. Se revierte en el subárbol enfocado. */
+.home-tabs .tab-item.is-focused,
+.home-tabs .tab-item.is-focused * {
+  color: #07070b;
+}
+
+.home-tabs .tab-item.is-focused .tab-icon svg {
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.home-tabs .tab-item.is-focused .tab-icon svg * {
+  stroke: currentColor;
+}
+
+/* Acciones con rótulo cuando el raíl está abierto, igual que las secciones. */
+.home-notify .notify-label {
+  display: none;
+}
+
+.home-tabs.is-open .home-notify {
+  width: auto;
+  align-items: stretch;
+}
+
+.home-tabs.is-open .home-notify .notify-item {
+  width: 280px;
+  height: 52px;
+  padding: 0 14px;
+  justify-content: flex-start;
+  border-radius: 12px;
+}
+
+.home-tabs.is-open .home-notify .notify-label {
+  display: block;
+  margin-left: 14px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #d6dae2;
+}
+
+.home-tabs.is-open .home-notify .notify-item.is-focused .notify-label {
+  color: #07070b;
+}
+
+/* Las flechas del carrusel se apartan del texto: a la derecha del todo. */
+/* 1760 + los 96 px que el raíl desplaza el catálogo = 1856; 1856 + 56 = 1912. */
+.hero-prev {
+  left: 1760px;
+  top: 276px;
+}
+
+.hero-next {
+  left: 1760px;
+  top: 348px;
+}
+
+/* El icono de la accion estaba centrado en absoluto: al añadir rótulo, el texto
+   quedaba antes que el icono. En abierto se pasa a flujo normal en fila. */
+.home-tabs.is-open .home-notify .notify-item {
+  display: flex;
+  align-items: center;
+}
+
+.home-tabs.is-open .home-notify .notify-item .n-normal {
+  position: static;
+  left: auto;
+  top: auto;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  -webkit-transform: none;
+  transform: none;
+  order: 0;
+}
+
+.home-tabs.is-open .home-notify .notify-label {
+  margin-left: 14px;
+  order: 1;
+}
+
+/* Cuando el raíl está colapsado, el icono vuelve a centrarse. */
+.home-tabs:not(.is-open) .home-notify .notify-item .n-normal {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 24px;
+  height: 24px;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}

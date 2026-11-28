@@ -51,34 +51,30 @@ La rejilla anterior de seis paneles (2 grandes + 4 pequeños con puntos) sigue
 existiendo para Infantil/Anime/Novelas, pero Inicio, Películas y Series ya no la
 usan.
 
-## Menú lateral (cajón)
+## Menú lateral (raíl colapsable)
 
-No hay barra de navegación permanente. El menú vive fuera de pantalla y entra
-solo cuando se pulsa `izquierda` con el foco en el borde izquierdo del
-catálogo: la primera tarjeta de una fila o la portada.
+El raíl está **siempre visible** con 96 px y solo iconos. Al entrar en él se
+expande a 320 px y empuja el catálogo, como YouTube TV.
 
-- Panel de 320 px, oculto con `translateX(-100%)`; `.is-open` lo trae a 0 en
-  260 ms. **El catálogo se empuja**: `#home-pages` pasa a `+320px` con la misma
-  curva (`.is-pushed`), así que el panel no tapa, desplaza. Se animan solo
-  `transform` y `opacity`; `will-change` se pone durante 340 ms y se retira.
-- El velo (`.home-sidebar-bg`) sube en 160 ms, antes que el desplazamiento, con
-  un degradado más denso junto al menú (0,72 → 0,34).
-- **El foco es exclusivo.** Mientras está abierto, todos los `_onMove` del
-  cajón devuelven `true`: el manejador global no recurre a la búsqueda
-  geométrica y el foco no puede escaparse al contenido. Es el equivalente al
-  foco atrapado de un drawer de Android.
-- `derecha` cierra y devuelve el foco al elemento que abrió el cajón
-  (`X.navReturn`). `Back` hace lo mismo y se evalúa antes que cualquier otra
-  capa.
-- `Enter` en una sección cierra el cajón y enfoca la portada de esa sección.
-- Las acciones (buscar y cuenta) están al pie del cajón, y solo son visibles
-  mientras está abierto.
+Orden de arriba abajo: marca, **Buscar**, **Mi cuenta**, y después INICIO, TV,
+PELÍCULAS, SERIES y CATEGORÍAS. El foco por defecto es **INICIO**; las acciones
+viven arriba pero no son el punto de entrada.
 
-Sin barra, el catálogo ocupa la pantalla completa: `#home-pages` pasa a
-`top:0; height:1080`. La página de TV en vivo conserva su encuadre original con
-`.home-page:first-child { top:86px; height:994px }`.
+- Ancho 96 ↔ 320 con `transition: width .24s`. Los rótulos y la marca completa
+  se muestran solo con `.is-open`.
+- El contenido va desplazado con `transform`: `translateX(96px)` en reposo y
+  `translateX(320px)` con `.is-pushed`. Nunca se anima `width` del contenido.
+- El velo (`.home-sidebar-bg`) sube en 160 ms, antes que el desplazamiento
+  (260 ms), con degradado de 0,86 a 0,55.
+- **Foco exclusivo**: todos los `_onMove` del raíl devuelven `true`, así el
+  manejador global no recurre a la búsqueda geométrica y el foco no se escapa.
+  `derecha` cierra y devuelve el foco al elemento que abrió el raíl.
+- `Enter` en una sección cierra el raíl y enfoca la portada de esa sección.
+- La página de TV conserva su encuadre: se compensa con
+  `.home-page:first-child { left:-96px; width:1920px }`.
 
-Prueba: `node tests/e2e/nav-drawer.mjs` (o `npm run test:e2e:drawer`).
+Prueba: `node tests/e2e/nav-drawer.mjs` (o `npm run test:e2e:drawer`), 13
+comprobaciones con teclas reales.
 
 ## Cabecera
 

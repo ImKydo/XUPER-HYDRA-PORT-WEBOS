@@ -49,7 +49,8 @@ const check = (n, ok, det) => {
 };
 
 let e = await estado();
-check("arranca cerrado", !e.abierto && e.x <= -300, JSON.stringify(e));
+check("raíl colapsado visible", !e.abierto && e.x === 0 && e.ancho === 96, JSON.stringify(e));
+check("contenido desplazado por el raíl", Math.abs(e.contenidoX - 96) <= 2, String(e.contenidoX));
 check("foco inicial en contenido", e.foco.indexOf("hero-") !== -1, e.foco);
 
 await key("ArrowDown", 40);
@@ -62,6 +63,16 @@ check("izquierda abre el cajón", e.abierto && e.x === 0, JSON.stringify(e));
 check("el foco entra al cajón", e.foco.startsWith("tab-item"), e.foco);
 check("el catálogo se empuja", Math.abs(e.contenidoX - 320) <= 4, String(e.contenidoX));
 check("el velo oscurece", e.velo > 0.35, String(e.velo));
+const contraste = JSON.parse(await chrome.browser.eval(sid, `(() => {
+  const it = document.querySelector('.tab-item.is-focused');
+  const path = it.querySelector('.tab-icon svg path, .tab-icon svg circle, .tab-icon svg rect');
+  const rgb = (v) => String(v).split('(')[1].split(')')[0].split(',').map(Number).slice(0, 3);
+  const lum = (c) => 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  const f = rgb(getComputedStyle(it).backgroundColor);
+  const t = path ? rgb(getComputedStyle(path).stroke) : [0, 0, 0];
+  return JSON.stringify({ fondo: f, trazo: t, delta: Math.round(Math.abs(lum(f) - lum(t))) });
+})()`));
+check("el icono no se camufla", contraste.delta > 120, JSON.stringify(contraste));
 
 await key("ArrowDown", 40);
 e = await estado();
@@ -70,7 +81,7 @@ check("abajo dentro del cajón", e.abierto && e.foco.startsWith("tab-item"), e.f
 await key("ArrowRight", 39);
 e = await estado();
 check("derecha cierra", !e.abierto, JSON.stringify(e));
-check("el catálogo vuelve", Math.abs(e.contenidoX) <= 4, String(e.contenidoX));
+check("el catálogo vuelve al raíl", Math.abs(e.contenidoX - 96) <= 4, String(e.contenidoX));
 check("el foco vuelve a la tarjeta", e.foco.indexOf("poster") !== -1, e.foco);
 
 await key("ArrowLeft", 37);

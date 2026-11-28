@@ -3270,12 +3270,15 @@
                     setFocus(Ue[e + 1]);
                     return !0;
                   }
-                  var act = te ? te.querySelector(".notify-item") : null;
-                  act && setFocus(act);
                   return !0;
                 }
                 if ("up" === t) {
-                  if (e > 0 && Ue[e - 1]) setFocus(Ue[e - 1]);
+                  if (e > 0 && Ue[e - 1]) {
+                    setFocus(Ue[e - 1]);
+                    return !0;
+                  }
+                  var actsUp = te ? te.querySelectorAll(".notify-item") : [];
+                  if (actsUp.length) setFocus(actsUp[actsUp.length - 1]);
                   return !0;
                 }
                 if ("right" === t) return closeNavDrawer();
@@ -3317,6 +3320,7 @@
           ((o.innerHTML = n.svg || ""),
             n.label && r.setAttribute("aria-label", n.label),
             r.appendChild(o),
+            n.label && r.appendChild(createEl("span", "notify-label", n.label)),
             "personal" === n.cls
               ? (r._activate = function () {
                 Ha();
@@ -3333,12 +3337,14 @@
                 /* Columna del cajon: arriba vuelve a la ultima seccion,
                    izquierda recorre las acciones, derecha cierra. */
                 if ("right" === t) return closeNavDrawer();
-                if ("left" === t) {
-                  if (e > 0) setFocus(te.querySelectorAll(".notify-item")[e - 1]);
+                var acts = te.querySelectorAll(".notify-item");
+                if ("down" === t) {
+                  if (e < acts.length - 1) setFocus(acts[e + 1]);
+                  else if (Ue && Ue[0]) setFocus(Ue[0]);
                   return !0;
                 }
                 if ("up" === t) {
-                  if (Ue && Ue.length) setFocus(Ue[Ue.length - 1]);
+                  if (e > 0 && acts[e - 1]) setFocus(acts[e - 1]);
                   return !0;
                 }
                 return !0;
@@ -3346,6 +3352,10 @@
             })(i)),
             te.appendChild(r));
         }
+        /* Buscar y cuenta viven dentro del rail, arriba de Inicio. */
+        var tabsBox = byId("home-tabs"),
+          brandBox = tabsBox ? tabsBox.querySelector(".tabs-brand") : null;
+        tabsBox && brandBox && tabsBox.insertBefore(te, brandBox.nextSibling);
       })());
   }
   // La cabecera ya no lleva reloj ni indicador de wifi: el televisor los
