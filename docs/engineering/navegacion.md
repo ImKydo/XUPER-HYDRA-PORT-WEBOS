@@ -58,7 +58,11 @@ solo cuando se pulsa `izquierda` con el foco en el borde izquierdo del
 catálogo: la primera tarjeta de una fila o la portada.
 
 - Panel de 320 px, oculto con `translateX(-100%)`; `.is-open` lo trae a 0 en
-  240 ms. El velo es `.home-sidebar-bg` (ya existía en el HTML).
+  260 ms. **El catálogo se empuja**: `#home-pages` pasa a `+320px` con la misma
+  curva (`.is-pushed`), así que el panel no tapa, desplaza. Se animan solo
+  `transform` y `opacity`; `will-change` se pone durante 340 ms y se retira.
+- El velo (`.home-sidebar-bg`) sube en 160 ms, antes que el desplazamiento, con
+  un degradado más denso junto al menú (0,72 → 0,34).
 - **El foco es exclusivo.** Mientras está abierto, todos los `_onMove` del
   cajón devuelven `true`: el manejador global no recurre a la búsqueda
   geométrica y el foco no puede escaparse al contenido. Es el equivalente al

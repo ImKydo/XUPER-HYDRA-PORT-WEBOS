@@ -1046,6 +1046,19 @@ body {
   width: 1920px;
   height: 1080px;
   overflow: hidden;
+  -webkit-transition: -webkit-transform .26s cubic-bezier(.22, .61, .36, 1);
+  transition: transform .26s cubic-bezier(.22, .61, .36, 1);
+}
+
+/* Empujon: el catalogo se corre a la derecha en vez de quedar debajo. */
+.home-pages.is-pushed {
+  -webkit-transform: translateX(320px);
+  transform: translateX(320px);
+}
+
+/* Solo mientras dura la animacion: capa GPU temporal, no permanente. */
+.home-pages.is-animating {
+  will-change: transform;
 }
 
 /* La pagina de TV en vivo conserva su encuadre original (top 86, alto 994). */
@@ -1498,11 +1511,11 @@ body {
   top: 0;
   width: 1920px;
   height: 1080px;
-  background: rgba(0, 0, 0, .55);
+  background: linear-gradient(90deg, rgba(0, 0, 0, .86) 0%, rgba(0, 0, 0, .70) 38%, rgba(0, 0, 0, .55) 100%);
   opacity: 0;
   pointer-events: none;
-  -webkit-transition: opacity .2s ease;
-  transition: opacity .2s ease;
+  -webkit-transition: opacity .16s ease-out;
+  transition: opacity .16s ease-out;
   z-index: 55;
 }
 
@@ -1608,4 +1621,20 @@ body {
   -webkit-transform: translateX(0);
   transform: translateX(0);
   box-shadow: 24px 0 70px rgba(0, 0, 0, .7);
+}
+
+/* Los items no cambian de golpe al moverse el foco. */
+.home-tabs.is-collapsed .tab-item,
+.home-tabs.is-expanded .tab-item,
+.home-tabs .tab-item {
+  -webkit-transition: background-color .12s ease-out, color .12s ease-out;
+  transition: background-color .12s ease-out, color .12s ease-out;
+}
+
+/* Borde y sombra solo cuando esta abierto: cerrado no cuesta nada. */
+.home-tabs.is-open,
+.home-tabs.is-collapsed.is-open,
+.home-tabs.is-expanded.is-open {
+  border-right-color: #262633;
+  box-shadow: 18px 0 48px rgba(0, 0, 0, .55);
 }

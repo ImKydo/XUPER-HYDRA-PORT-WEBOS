@@ -3369,12 +3369,33 @@
   function navScrim() {
     return document.querySelector(".home-sidebar-bg");
   }
+  function navPages() {
+    return byId("home-pages");
+  }
+  /* will-change solo durante la animacion: una capa GPU permanente en un
+     televisor de 1 GB se paga en fluidez del resto de la app. */
+  var navAnimTimer = null;
+  function markNavAnimating() {
+    var pages = navPages();
+    if (!pages) return;
+    pages.classList.add("is-animating");
+    if (navAnimTimer) clearTimeout(navAnimTimer);
+    navAnimTimer = setTimeout(function () {
+      pages.classList.remove("is-animating");
+      navAnimTimer = null;
+    }, 340);
+  }
   function openNavDrawer(fromEl) {
     if (X.navOpen || !navPanel()) return !1;
     X.navOpen = !0;
     X.navReturn = fromEl || X.focus || null;
     navPanel().classList.add("is-open");
     navScrim() && navScrim().classList.add("is-on");
+    /* El catalogo se corre a la derecha: el panel empuja, no tapa. */
+    if (navPages()) {
+      markNavAnimating();
+      navPages().classList.add("is-pushed");
+    }
     var target = Ue[X.tab] || (Ue && Ue[0]);
     target && setFocus(target);
     return !0;
@@ -3384,6 +3405,10 @@
     X.navOpen = !1;
     navPanel() && navPanel().classList.remove("is-open");
     navScrim() && navScrim().classList.remove("is-on");
+    if (navPages()) {
+      markNavAnimating();
+      navPages().classList.remove("is-pushed");
+    }
     var back = X.navReturn;
     X.navReturn = null;
     if (!skipRestore && back && at(back)) setFocus(back);
