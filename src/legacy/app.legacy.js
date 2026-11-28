@@ -1117,11 +1117,11 @@
        que abre el mismo panel de filtros del catálogo. Historial vive en
        Ajustes. */
     z = [
-      { label: "Inicio", page: 1, icon: "home" },
+      { label: "Inicio", page: 1, icon: "house" },
       { label: "TV", page: 0, icon: "tv" },
-      { label: "Películas", page: 2, icon: "film" },
-      { label: "Series", page: 3, icon: "series" },
-      { label: "Categorías", page: -1, icon: "grid", action: "categories" },
+      { label: "Películas", page: 2, icon: "clapperboard" },
+      { label: "Series", page: 3, icon: "layers" },
+      { label: "Categorías", page: -1, icon: "layout-grid", action: "categories" },
       { label: "Configuración", page: -1, icon: "settings", action: "settings", bottom: !0 },
     ],
     j = [
@@ -3246,7 +3246,7 @@
           var r = createEl("div", "tab-item focusable" + (z[n].bottom ? " is-bottom" : ""));
           r.appendChild(createEl("div", "tab-pill"));
           var o = createEl("div", "tab-icon");
-          ((o.innerHTML = B[z[n].icon] || ""), r.appendChild(o));
+          ((o.innerHTML = railIcon(z[n].icon)), r.appendChild(o));
           var s = createEl("div", "tab-title", z[n].label);
           (r.appendChild(s),
             (r._tab = n),
@@ -3308,7 +3308,7 @@
           var t = [
             {
               cls: "personal",
-              svg: '<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="11" r="5.2" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M6 27c.8-5.8 4.6-8.8 10-8.8S25.2 21.2 26 27" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>',
+              svg: railIcon("user"),
               label: "Mi cuenta",
             },
             {
@@ -3316,7 +3316,7 @@
               /* SVG en lugar de PNG: los iconos de mapa de bits del APK
                  quedaban casi invisibles en paneles de TV y se perdían al
                  escalar. El trazo hereda currentColor. */
-              svg: '<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="14" cy="14" r="8.5" fill="none" stroke="currentColor" stroke-width="2.8"/><path d="M20.5 20.5L28 28" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
+              svg: railIcon("search"),
               label: "Buscar",
             },
           ],
@@ -9221,6 +9221,12 @@
       ze))
       ze.hasOwnProperty(p) && be.appendChild(ze[p]);
   }
+  /* Iconos del rail: Lucide (generado) con el mapa heredado como respaldo. */
+  function railIcon(name) {
+    var lib = window.ZEPHYR_ICONS || {};
+    return lib[name] || B[name] || B.thumb || "";
+  }
+
   function Ha() {
     (ye || renderSettingsScreen(), lt("settings"), Ua(0, !1), setFocus(je[0]));
   }

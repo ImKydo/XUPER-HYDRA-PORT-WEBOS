@@ -1,3 +1,24 @@
+/* ---- src/generated/icons.js ---- */
+;(function () {
+"use strict";
+/* GENERADO por tools/icons.mjs — no editar a mano.
+   Lucide v0.544.0 (ISC). Ver src/assets/icons/LICENSE. */
+;(function () {
+  "use strict";
+  window.ZEPHYR_ICONS = {
+    "house": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8\" />\n  <path d=\"M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\" /></svg>",
+    "tv": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m17 2-5 5-5-5\" />\n  <rect width=\"20\" height=\"15\" x=\"2\" y=\"7\" rx=\"2\" /></svg>",
+    "clapperboard": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3Z\" />\n  <path d=\"m6.2 5.3 3.1 3.9\" />\n  <path d=\"m12.4 3.4 3.1 4\" />\n  <path d=\"M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z\" /></svg>",
+    "layers": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z\" />\n  <path d=\"M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12\" />\n  <path d=\"M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17\" /></svg>",
+    "layout-grid": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect width=\"7\" height=\"7\" x=\"3\" y=\"3\" rx=\"1\" />\n  <rect width=\"7\" height=\"7\" x=\"14\" y=\"3\" rx=\"1\" />\n  <rect width=\"7\" height=\"7\" x=\"14\" y=\"14\" rx=\"1\" />\n  <rect width=\"7\" height=\"7\" x=\"3\" y=\"14\" rx=\"1\" /></svg>",
+    "search": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m21 21-4.34-4.34\" />\n  <circle cx=\"11\" cy=\"11\" r=\"8\" /></svg>",
+    "user": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\" />\n  <circle cx=\"12\" cy=\"7\" r=\"4\" /></svg>",
+    "settings": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915\" />\n  <circle cx=\"12\" cy=\"12\" r=\"3\" /></svg>"
+  };
+})();
+
+})();
+
 !(function () {
   "use strict";
   var APP_VERSION = "3.2.0";
@@ -1117,11 +1138,11 @@
        que abre el mismo panel de filtros del catálogo. Historial vive en
        Ajustes. */
     z = [
-      { label: "Inicio", page: 1, icon: "home" },
+      { label: "Inicio", page: 1, icon: "house" },
       { label: "TV", page: 0, icon: "tv" },
-      { label: "Películas", page: 2, icon: "film" },
-      { label: "Series", page: 3, icon: "series" },
-      { label: "Categorías", page: -1, icon: "grid", action: "categories" },
+      { label: "Películas", page: 2, icon: "clapperboard" },
+      { label: "Series", page: 3, icon: "layers" },
+      { label: "Categorías", page: -1, icon: "layout-grid", action: "categories" },
       { label: "Configuración", page: -1, icon: "settings", action: "settings", bottom: !0 },
     ],
     j = [
@@ -3246,7 +3267,7 @@
           var r = createEl("div", "tab-item focusable" + (z[n].bottom ? " is-bottom" : ""));
           r.appendChild(createEl("div", "tab-pill"));
           var o = createEl("div", "tab-icon");
-          ((o.innerHTML = B[z[n].icon] || ""), r.appendChild(o));
+          ((o.innerHTML = railIcon(z[n].icon)), r.appendChild(o));
           var s = createEl("div", "tab-title", z[n].label);
           (r.appendChild(s),
             (r._tab = n),
@@ -3308,7 +3329,7 @@
           var t = [
             {
               cls: "personal",
-              svg: '<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="11" r="5.2" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M6 27c.8-5.8 4.6-8.8 10-8.8S25.2 21.2 26 27" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>',
+              svg: railIcon("user"),
               label: "Mi cuenta",
             },
             {
@@ -3316,7 +3337,7 @@
               /* SVG en lugar de PNG: los iconos de mapa de bits del APK
                  quedaban casi invisibles en paneles de TV y se perdían al
                  escalar. El trazo hereda currentColor. */
-              svg: '<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="14" cy="14" r="8.5" fill="none" stroke="currentColor" stroke-width="2.8"/><path d="M20.5 20.5L28 28" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
+              svg: railIcon("search"),
               label: "Buscar",
             },
           ],
@@ -9221,6 +9242,12 @@
       ze))
       ze.hasOwnProperty(p) && be.appendChild(ze[p]);
   }
+  /* Iconos del rail: Lucide (generado) con el mapa heredado como respaldo. */
+  function railIcon(name) {
+    var lib = window.ZEPHYR_ICONS || {};
+    return lib[name] || B[name] || B.thumb || "";
+  }
+
   function Ha() {
     (ye || renderSettingsScreen(), lt("settings"), Ua(0, !1), setFocus(je[0]));
   }

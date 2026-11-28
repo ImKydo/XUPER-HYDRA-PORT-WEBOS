@@ -1,4 +1,4 @@
 {
-  "modules": ["legacy/app.legacy.js"],
+  "modules": ["generated/icons.js", "legacy/app.legacy.js"],
   "noWrap": ["legacy/app.legacy.js"]
 }
