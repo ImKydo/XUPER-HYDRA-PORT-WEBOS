@@ -3,7 +3,7 @@
 Plan: `.hermes/plans/2026-11-26_224922-xupertv-v2-reconstruccion-verificada.md`
 Actualizado: 2026-11-27T06:49:10.518Z
 
-**Avance global: 56/65 tareas (86 %)**
+**Avance global: 57/66 tareas (86 %)**
 
 | Fase | Hechas | Total |
 |---|---|---|
@@ -13,7 +13,7 @@ Actualizado: 2026-11-27T06:49:10.518Z
 | F3 | 3 | 4 |
 | F4 | 4 | 7 |
 | F5 | 6 | 7 |
-| F6 | 23 | 23 |
+| F6 | 24 | 24 |
 | F7 | 0 | 4 |
 
 ## F0
@@ -111,6 +111,7 @@ Actualizado: 2026-11-27T06:49:10.518Z
 | ✔ | T6.21 | Sin sombras de texto | done | `1cd449f` | 0 declaraciones text-shadow; tools/check/no-text-shadow.mjs en npm run check | 2026-11-28 |
 | ✔ | T6.22 | Arranque minimalista con anillo | done | `010aada` | isotipo 188 px sin caja, anillo 240 girando, version en la esquina; welcome.mjs 6/6 | 2026-11-28 |
 | ✔ | T6.23 | Icono de app con fondo oscuro | done | `72677ae` | 512/256 con fondo navy a sangre, sin esquinas; tools/app-icon.mjs | 2026-11-28 |
+| ✔ | T6.24 | Alineación fina de iconos, marca e isotipo | done | `0aad90e` | 8 cajas 44x44 a x=26, svg 26 centrado, marca en la misma columna; isotipo viewBox 10 con centroide +0,1 px; 19 comprobaciones del cajón | 2026-11-28 |
 
 ## F7
 

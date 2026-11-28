@@ -552,6 +552,15 @@
       "date": "2026-11-28"
     },
     {
+      "id": "T6.24",
+      "phase": "F6",
+      "title": "Alineación fina de iconos, marca e isotipo",
+      "status": "done",
+      "commit": "0aad90e",
+      "evidence": "8 cajas 44x44 a x=26, svg 26 centrado, marca en la misma columna; isotipo viewBox 10 con centroide +0,1 px; 19 comprobaciones del cajón",
+      "date": "2026-11-28"
+    },
+    {
       "id": "T7.1",
       "phase": "F7",
       "title": "Geometría pura + pruebas",
