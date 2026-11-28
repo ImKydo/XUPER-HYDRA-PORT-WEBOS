@@ -1036,6 +1036,24 @@ body {
   100% { left: 100%; }
 }
 
+/* Marco de la portada: el lienzo completo. La capa heredada recortaba el
+   pager a 940.5 px bajo la barra; aqui ocupa los 1080 px del lienzo y cada
+   pagina decide su encuadre. */
+.home-pages {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+}
+
+/* La pagina de TV en vivo conserva su encuadre original (top 86, alto 994). */
+.home-page:first-child {
+  top: 86px;
+  height: 994px;
+}
+
 /* ------------------------------------------------------------------
    Portada (hero)
    Imagen a sangre, degradado a la izquierda para el texto y otro abajo para
@@ -1053,7 +1071,7 @@ body {
   left: 0;
   top: 0;
   width: 1920px;
-  height: 690px;
+  height: 790px;
   object-fit: cover;
   opacity: 0;
   -webkit-transition: opacity .5s ease;
@@ -1069,7 +1087,7 @@ body {
   left: 0;
   top: 0;
   width: 1920px;
-  height: 690px;
+  height: 790px;
 }
 
 .hero-scrim-l {
@@ -1199,7 +1217,7 @@ body {
 .hero-dots {
   position: absolute;
   left: 96px;
-  top: 620px;
+  top: 730px;
 }
 
 .hero-dot {
@@ -1411,4 +1429,183 @@ body {
 .kids-subtitle {
   border-left: 0;
   padding-left: 0;
+}
+
+/* ------------------------------------------------------------------
+   Cajon lateral
+   Oculto por defecto; entra al pulsar izquierda en el borde del catalogo.
+   El velo es .home-sidebar-bg, que ya existia en el HTML.
+   ------------------------------------------------------------------ */
+.home-tabs {
+  left: 0;
+  top: 0;
+  width: 320px;
+  height: 1080px;
+  padding: 30px 20px 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  box-sizing: border-box;
+  background: #0b0b12;
+  border-right: 1px solid #1c1c27;
+  -webkit-transform: translateX(-100%);
+  transform: translateX(-100%);
+  -webkit-transition: -webkit-transform .24s cubic-bezier(.2, .8, .2, 1);
+  transition: transform .24s cubic-bezier(.2, .8, .2, 1);
+  z-index: 60;
+}
+
+.home-tabs.is-open {
+  -webkit-transform: translateX(0);
+  transform: translateX(0);
+  box-shadow: 24px 0 70px rgba(0, 0, 0, .7);
+}
+
+.home-tabs .tabs-brand { padding: 0 6px 24px 6px; }
+.home-tabs .tabs-mark, .home-tabs .tabs-mark-img { width: 44px; height: 44px; }
+.home-tabs .tabs-word { margin-top: 10px; font-size: 19px; letter-spacing: .14em; }
+.home-tabs .tabs-tag { margin-top: 4px; font-size: 12px; letter-spacing: .04em; color: #8b93a1; }
+
+.home-tabs .tab-item {
+  width: 280px;
+  height: 56px;
+  margin: 0 0 6px 0;
+  padding: 0 14px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  background: transparent;
+}
+
+.home-tabs .tab-item .tab-icon {
+  width: 22px;
+  height: 22px;
+  margin-right: 14px;
+  flex: 0 0 22px;
+  color: #9ca3af;
+}
+
+.home-tabs .tab-item .tab-title { font-size: 20px; font-weight: 600; color: #d6dae2; }
+.home-tabs .tab-item.is-selected { background: rgba(255, 255, 255, .08); }
+.home-tabs .tab-item.is-focused { background: #f4f5f8; box-shadow: none; }
+.home-tabs .tab-item.is-focused .tab-title,
+.home-tabs .tab-item.is-focused .tab-icon { color: #07070b; }
+
+.home-sidebar-bg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+  background: rgba(0, 0, 0, .55);
+  opacity: 0;
+  pointer-events: none;
+  -webkit-transition: opacity .2s ease;
+  transition: opacity .2s ease;
+  z-index: 55;
+}
+
+.home-sidebar-bg.is-on { opacity: 1; }
+
+.home-notify {
+  left: 20px;
+  right: auto;
+  top: auto;
+  bottom: 28px;
+  width: 280px;
+  height: 56px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  z-index: 61;
+}
+
+.home-tabs.is-open ~ .home-notify { opacity: 1; visibility: visible; }
+
+/* ------------------------------------------------------------------
+   El estado .is-collapsed venia de la barra vieja: forzaba 1478 px de ancho,
+   escondia los rotulos y encogia los items a iconos. En el cajon eso sobra;
+   todas estas reglas tienen la misma especificidad que las heredadas y van
+   despues, asi que ganan por orden.
+   ------------------------------------------------------------------ */
+.home-tabs.is-collapsed,
+.home-tabs.is-expanded {
+  left: 0;
+  top: 0;
+  width: 320px;
+  height: 1080px;
+  padding: 30px 20px 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  box-sizing: border-box;
+  background: #0b0b12;
+  border-right: 1px solid #1c1c27;
+  border-bottom: 0;
+  -webkit-transform: translateX(-100%);
+  transform: translateX(-100%);
+  -webkit-transition: -webkit-transform .24s cubic-bezier(.2, .8, .2, 1);
+  transition: transform .24s cubic-bezier(.2, .8, .2, 1);
+  z-index: 60;
+}
+
+.home-tabs.is-collapsed .tab-item,
+.home-tabs.is-expanded .tab-item {
+  width: 280px;
+  height: 56px;
+  margin: 0 0 6px 0;
+  padding: 0 14px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  background: transparent;
+}
+
+.home-tabs.is-collapsed .tab-item .tab-title,
+.home-tabs.is-expanded .tab-item .tab-title {
+  display: block;
+  font-size: 20px;
+  font-weight: 600;
+  color: #d6dae2;
+}
+
+.home-tabs.is-collapsed .tab-item .tab-icon,
+.home-tabs.is-expanded .tab-item .tab-icon {
+  position: static;
+  width: 22px;
+  height: 22px;
+  margin-right: 14px;
+  flex: 0 0 22px;
+  color: #9ca3af;
+}
+
+.home-tabs.is-collapsed .tab-item.is-selected,
+.home-tabs.is-expanded .tab-item.is-selected {
+  background: rgba(255, 255, 255, .08);
+}
+
+.home-tabs.is-collapsed .tab-item.is-focused,
+.home-tabs.is-expanded .tab-item.is-focused {
+  background: #f4f5f8;
+  box-shadow: none;
+}
+
+.home-tabs.is-collapsed .tab-item.is-focused .tab-title,
+.home-tabs.is-collapsed .tab-item.is-focused .tab-icon,
+.home-tabs.is-expanded .tab-item.is-focused .tab-title,
+.home-tabs.is-expanded .tab-item.is-focused .tab-icon {
+  color: #07070b;
+}
+
+/* Abierto va al final: empata en especificidad y gana por orden. */
+.home-tabs.is-open,
+.home-tabs.is-collapsed.is-open,
+.home-tabs.is-expanded.is-open {
+  -webkit-transform: translateX(0);
+  transform: translateX(0);
+  box-shadow: 24px 0 70px rgba(0, 0, 0, .7);
 }

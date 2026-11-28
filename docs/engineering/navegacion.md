@@ -51,6 +51,31 @@ La rejilla anterior de seis paneles (2 grandes + 4 pequeños con puntos) sigue
 existiendo para Infantil/Anime/Novelas, pero Inicio, Películas y Series ya no la
 usan.
 
+## Menú lateral (cajón)
+
+No hay barra de navegación permanente. El menú vive fuera de pantalla y entra
+solo cuando se pulsa `izquierda` con el foco en el borde izquierdo del
+catálogo: la primera tarjeta de una fila o la portada.
+
+- Panel de 320 px, oculto con `translateX(-100%)`; `.is-open` lo trae a 0 en
+  240 ms. El velo es `.home-sidebar-bg` (ya existía en el HTML).
+- **El foco es exclusivo.** Mientras está abierto, todos los `_onMove` del
+  cajón devuelven `true`: el manejador global no recurre a la búsqueda
+  geométrica y el foco no puede escaparse al contenido. Es el equivalente al
+  foco atrapado de un drawer de Android.
+- `derecha` cierra y devuelve el foco al elemento que abrió el cajón
+  (`X.navReturn`). `Back` hace lo mismo y se evalúa antes que cualquier otra
+  capa.
+- `Enter` en una sección cierra el cajón y enfoca la portada de esa sección.
+- Las acciones (buscar y cuenta) están al pie del cajón, y solo son visibles
+  mientras está abierto.
+
+Sin barra, el catálogo ocupa la pantalla completa: `#home-pages` pasa a
+`top:0; height:1080`. La página de TV en vivo conserva su encuadre original con
+`.home-page:first-child { top:86px; height:994px }`.
+
+Prueba: `node tests/e2e/nav-drawer.mjs` (o `npm run test:e2e:drawer`).
+
 ## Cabecera
 
 - Marca a la izquierda: icono, `ZEPHYRTV` y lema.

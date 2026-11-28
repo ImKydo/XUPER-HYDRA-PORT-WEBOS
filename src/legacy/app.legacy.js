@@ -606,7 +606,12 @@
           if (
             ((He = []), (Ue = []), renderHomeScreen(), selectHomeTab(X.tab, !1), "home" === X.screen)
           ) {
-            if (i && Ue[X.tab]) setFocus(Ue[X.tab], !0);
+            if (i && Ue[X.tab] && X.navOpen) setFocus(Ue[X.tab], !0);
+            else if (i) {
+              var lp = He[z[X.tab].page],
+                lf = lp ? findFirstFocusable(lp) : null;
+              lf && setFocus(lf, !0);
+            }
             else if (r) {
               var s = findFirstFocusable(byId("home-notify"));
               s && setFocus(s, !0);
@@ -1202,6 +1207,8 @@
     X = {
       screen: "welcome",
       tab: 0,
+      navOpen: !1,
+      navReturn: null,
       channel: 0,
       focus: null,
       detail: null,
@@ -2074,7 +2081,8 @@
     var e = Date.now();
     if (!(e - dt < 250))
       if (((dt = e), "welcome" !== X.screen))
-        if (ji) tr();
+        if (X.navOpen) return void closeNavDrawer();
+        else if (ji) tr();
         else {
           if (catalogFilterDialog) return void closeCatalogFilter();
           if (liveFavoritePrompt) return void closeLiveFavoriteConfirm();
@@ -3236,7 +3244,9 @@
             (r._tab = n),
             (r._activate = (function (e) {
               return function () {
-                if ("categories" === z[e].action) return void openCatalogFilter();
+                var destino = z[e];
+                closeNavDrawer(!0); // sin restaurar el foco viejo
+                if ("categories" === destino.action) return void openCatalogFilter();
                 if (X.tab !== e) {
                   selectHomeTab(e, !1);
                 }
@@ -3245,50 +3255,31 @@
                     return e._channel === X.channel;
                   })[0];
                   t ? setFocus(t) : Fe.length ? setFocus(Fe[0]) : ne && setFocus(ne);
-                } else if (z[e].page >= 0) {
-                  var a = findFirstFocusable(He[z[e].page]);
+                } else if (destino.page >= 0) {
+                  var a = findFirstFocusable(He[destino.page]);
                   a && setFocus(a);
                 }
               };
             })(n)),
             (r._onMove = (function (e) {
               return function (t) {
-                if ("left" === t) {
-                  if (e > 0 && Ue[e - 1]) {
-                    setFocus(Ue[e - 1]);
-                    return !0;
-                  }
-                  return !0;
-                }
-                if ("right" === t) {
+                /* Todas las direcciones devuelven true: el foco no puede salir
+                   del cajon por la busqueda geometrica del manejador global. */
+                if ("down" === t) {
                   if (e < Ue.length - 1 && Ue[e + 1]) {
                     setFocus(Ue[e + 1]);
                     return !0;
                   }
-                  var notify = te ? te.querySelector(".notify-item") : null;
-                  if (notify) {
-                    return (setFocus(notify), !0);
-                  }
+                  var act = te ? te.querySelector(".notify-item") : null;
+                  act && setFocus(act);
                   return !0;
                 }
-                if ("down" === t) {
-                  if ("categories" === z[e].action) return (openCatalogFilter(), !0);
-                  if (X.tab !== e) {
-                    selectHomeTab(e, !1);
-                  }
-                  if (isTvTab(e)) {
-                    var a = Fe.filter(function (e) {
-                      return e._channel === X.channel;
-                    })[0];
-                    a ? setFocus(a) : Fe.length ? setFocus(Fe[0]) : ne && setFocus(ne);
-                  } else if (z[e].page >= 0) {
-                    var i = findFirstFocusable(He[z[e].page]);
-                    i && setFocus(i);
-                  }
+                if ("up" === t) {
+                  if (e > 0 && Ue[e - 1]) setFocus(Ue[e - 1]);
                   return !0;
                 }
-                if ("up" === t) return !0;
-                return !1;
+                if ("right" === t) return closeNavDrawer();
+                return !0;
               };
             })(n)),
             i.appendChild(r),
@@ -3339,36 +3330,18 @@
                 }),
             (r._onMove = (function (e) {
               return function (t) {
+                /* Columna del cajon: arriba vuelve a la ultima seccion,
+                   izquierda recorre las acciones, derecha cierra. */
+                if ("right" === t) return closeNavDrawer();
                 if ("left" === t) {
-                  if (e > 0) return (setFocus(te.querySelectorAll(".notify-item")[e - 1]), !0);
-                  if (Ue && Ue.length) {
-                    var lastIdx = Ue.length - 1;
-                    setFocus(Ue[lastIdx]);
-                    if (X.tab !== lastIdx) scheduleTabSwitch(lastIdx);
-                    return !0;
-                  }
+                  if (e > 0) setFocus(te.querySelectorAll(".notify-item")[e - 1]);
                   return !0;
                 }
-                if ("right" === t) {
-                  if (e < 2) return (setFocus(te.querySelectorAll(".notify-item")[e + 1]), !0);
+                if ("up" === t) {
+                  if (Ue && Ue.length) setFocus(Ue[Ue.length - 1]);
                   return !0;
                 }
-                if ("down" === t) {
-                  if (isTvTab(X.tab)) {
-                    var fastSrch = document.querySelector(".live-fast .f-srch");
-                    if (fastSrch) return (setFocus(fastSrch), !0);
-                    var a = Fe.filter(function (e) {
-                      return e._channel === X.channel;
-                    })[0] || Fe[0];
-                    return a ? (setFocus(a), !0) : !0;
-                  }
-                  if (z[X.tab] && z[X.tab].page >= 0) {
-                    var pageElem = findFirstFocusable(He[z[X.tab].page]);
-                    if (pageElem) return (setFocus(pageElem), !0);
-                  }
-                  return !0;
-                }
-                return "up" === t;
+                return !0;
               };
             })(i)),
             te.appendChild(r));
@@ -3385,6 +3358,36 @@
      la portada. */
   function isTvTab(i) {
     return !!(z[i] && 0 === z[i].page);
+  }
+  /* Cajon de navegacion: vive fuera de pantalla y solo se muestra al pulsar
+     izquierda en el borde del catalogo. El foco es exclusivo: mientras esta
+     abierto todos sus elementos devuelven true en _onMove, asi el manejador
+     global nunca busca el enfocable mas cercano y no se escapa al contenido. */
+  function navPanel() {
+    return byId("home-tabs");
+  }
+  function navScrim() {
+    return document.querySelector(".home-sidebar-bg");
+  }
+  function openNavDrawer(fromEl) {
+    if (X.navOpen || !navPanel()) return !1;
+    X.navOpen = !0;
+    X.navReturn = fromEl || X.focus || null;
+    navPanel().classList.add("is-open");
+    navScrim() && navScrim().classList.add("is-on");
+    var target = Ue[X.tab] || (Ue && Ue[0]);
+    target && setFocus(target);
+    return !0;
+  }
+  function closeNavDrawer(skipRestore) {
+    if (!X.navOpen) return !1;
+    X.navOpen = !1;
+    navPanel() && navPanel().classList.remove("is-open");
+    navScrim() && navScrim().classList.remove("is-on");
+    var back = X.navReturn;
+    X.navReturn = null;
+    if (!skipRestore && back && at(back)) setFocus(back);
+    return !0;
   }
   function selectHomeTab(e, t) {
     if (X.channelsOpen || (Se && Se.classList.contains("is-active"))) {
@@ -5304,6 +5307,13 @@
   /* Subir desde la primera fila vuelve a la portada. Se aplica al construir
      cada tarjeta y no con un timeout: la fila "Seguir viendo" se crea en otro
      momento y el parche llegaba tarde. */
+  /* Izquierda en el borde izquierdo abre el cajon en vez de saltar al menu. */
+  function withDrawerLeft(card, move) {
+    return function (dir) {
+      if ("left" === dir) return openNavDrawer(card);
+      return move(dir);
+    };
+  }
   function withHeroUp(pageEl, move) {
     var play = pageEl && pageEl._heroPlay;
     if (!play) return move;
@@ -5328,7 +5338,7 @@
       timer = null;
 
     var hero = createEl("div", "hero");
-    placeAbsolute(hero, 0, 0, 1920, 690);
+    placeAbsolute(hero, 0, 0, 1920, 790);
     var media = createEl("img", "hero-media");
     media.alt = "";
     var body = createEl("div", "hero-body"),
@@ -5439,7 +5449,7 @@
     };
 
     var toTabs = function () {
-      return Ue[X.tab] ? (setFocus(Ue[X.tab]), !0) : !0;
+      return !0; // sin barra visible, arriba no lleva a ningun sitio
     };
     var toRail = function () {
       var r = firstRail();
@@ -5450,7 +5460,7 @@
       if ("up" === dir) return toTabs();
       if ("down" === dir) return toRail();
       if ("right" === dir) return (setFocus(info), !0);
-      if ("left" === dir) return (setFocus(prev), !0);
+      if ("left" === dir) return openNavDrawer(play);
       return !1;
     };
     info._onMove = function (dir) {
@@ -5834,7 +5844,10 @@
     d = Math.min(a.length, MAX_RAIL);
     for (c = 0; c < d; c++) {
       var poster = xt(a[c], RAIL_STEP * c, 0, RAIL_W, RAIL_H, { gold: !0 });
-      poster._onMove = withHeroUp(t, railMove(l, c));
+      poster._onMove = withHeroUp(
+        t,
+        0 === c ? withDrawerLeft(poster, railMove(l, c)) : railMove(l, c)
+      );
       poster._onFocus = (function (rail, card) {
         return function () {
           revealRailCard(rail, card);
@@ -5985,7 +5998,10 @@
         };
       })(itemData);
 
-      card._onMove = withHeroUp(t, railMove(l, c));
+      card._onMove = withHeroUp(
+        t,
+        0 === c ? withDrawerLeft(card, railMove(l, c)) : railMove(l, c)
+      );
       card._onFocus = (function (rail, cEl) {
         return function () {
           revealRailCard(rail, cEl);
@@ -6005,7 +6021,7 @@
         Ha();
         Ua(1, !0);
       };
-      moreCard._onMove = withHeroUp(t, railMove(l, valid.length));
+      moreCard._onMove = withHeroUp(t, withDrawerLeft(moreCard, railMove(l, valid.length)));
       moreCard._onFocus = function () {
         revealRailCard(l, moreCard);
       };

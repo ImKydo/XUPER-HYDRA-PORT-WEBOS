@@ -21,7 +21,8 @@
     "progress": "node tools/progress.mjs",
     "progress:check": "node tools/progress.mjs --check",
     "layout": "node tools/check/visual-layout.mjs",
-    "safe-area": "node tools/check/safe-area.mjs"
+    "safe-area": "node tools/check/safe-area.mjs",
+    "test:e2e:drawer": "node tests/e2e/nav-drawer.mjs"
   },
   "devDependencies": {
     "acorn": "^8.19.0",
