@@ -480,6 +480,15 @@
       "date": "2026-11-27"
     },
     {
+      "id": "T6.16",
+      "phase": "F6",
+      "title": "El cajón empuja el catálogo con velo",
+      "status": "done",
+      "commit": "a7f4039",
+      "evidence": "12/12 e2e: contenidoX 320 abierto y 0 cerrado; velo 160 ms con degradado .86->.55; will-change temporal 340 ms",
+      "date": "2026-11-27"
+    },
+    {
       "id": "T7.1",
       "phase": "F7",
       "title": "Geometría pura + pruebas",
