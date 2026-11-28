@@ -42,6 +42,17 @@ const estado = async () =>
     });
   })()`));
 
+// Centro del icono de Inicio: debe caer a 48 px del borde en ambos estados,
+// para que el icono no salte cuando el raíl se expande.
+const icono = async () =>
+  JSON.parse(await chrome.browser.eval(sid, `(() => {
+    const it = [...document.querySelectorAll('.tab-item')].filter((el) => el.textContent.trim() === 'Inicio')[0];
+    const ic = it.querySelector('.tab-icon');
+    const r = ic.getBoundingClientRect();
+    const b = it.getBoundingClientRect();
+    return JSON.stringify({ centro: Math.round(r.left + r.width / 2), ancho: Math.round(r.width), itemX: Math.round(b.x), itemAncho: Math.round(b.width) });
+  })()`));
+
 const fallos = [];
 const check = (n, ok, det) => {
   console.log(`${ok ? "OK  " : "FALLA"} ${n}${det ? "  " + det : ""}`);
@@ -52,6 +63,8 @@ let e = await estado();
 check("raíl colapsado visible", !e.abierto && e.x === 0 && e.ancho === 96, JSON.stringify(e));
 check("contenido desplazado por el raíl", Math.abs(e.contenidoX - 96) <= 2, String(e.contenidoX));
 check("foco inicial en contenido", e.foco.indexOf("hero-") !== -1, e.foco);
+const ic0 = await icono();
+check("icono centrado con el raíl colapsado", Math.abs(ic0.centro - 48) <= 1, JSON.stringify(ic0));
 
 await key("ArrowDown", 40);
 e = await estado();
@@ -63,6 +76,9 @@ check("izquierda abre el cajón", e.abierto && e.x === 0, JSON.stringify(e));
 check("el foco entra al cajón", e.foco.startsWith("tab-item"), e.foco);
 check("el catálogo se empuja", Math.abs(e.contenidoX - 320) <= 4, String(e.contenidoX));
 check("el velo oscurece", e.velo > 0.35, String(e.velo));
+await sleep(400);
+const ic1 = await icono();
+check("el icono no se mueve al abrir", Math.abs(ic1.centro - 48) <= 1, JSON.stringify(ic1));
 const contraste = JSON.parse(await chrome.browser.eval(sid, `(() => {
   const it = document.querySelector('.tab-item.is-focused');
   const path = it.querySelector('.tab-icon svg path, .tab-icon svg circle, .tab-icon svg rect');

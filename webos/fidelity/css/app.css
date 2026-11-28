@@ -2063,3 +2063,72 @@ body {
   fill: none;
   stroke: currentColor;
 }
+
+/* El panel nunca debe desplazarse en horizontal: al expandirse, el navegador
+   puede mover scrollLeft para mantener el foco visible y los iconos quedan
+   corridos. Con overflow-x hidden no hay desplazamiento posible. */
+.home-tabs,
+.home-tabs.scrollable {
+  overflow-x: hidden;
+}
+
+/* Columna de iconos fija: el icono cae a 48 px del borde en colapsado y en
+   abierto, así no salta al expandir el raíl. */
+.home-tabs .tab-item {
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+
+/* Se cubren los estados: la capa heredada fija 22 px en seleccionado y
+   enfocado con más especificidad que el selector base. */
+.home-tabs .tab-item .tab-icon,
+.home-tabs .tab-item.is-selected .tab-icon,
+.home-tabs .tab-item.is-focused .tab-icon,
+.home-tabs .tab-item.is-selected.is-focused .tab-icon,
+.home-tabs.is-collapsed .tab-item .tab-icon,
+.home-tabs.is-expanded .tab-item .tab-icon,
+.home-tabs.is-collapsed .tab-item.is-selected .tab-icon,
+.home-tabs.is-expanded .tab-item.is-selected .tab-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* flex-basis manda sobre width en un contenedor flex: hay que fijarlo. */
+  flex: 0 0 44px;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  margin-right: 0;
+}
+
+.home-tabs.is-open .tab-item,
+.home-tabs.is-collapsed.is-open .tab-item,
+.home-tabs.is-expanded.is-open .tab-item {
+  /* Ancho del contenedor, no 280 fijos: durante la transicion el panel mide
+     menos de 320 y un hijo de 280 desbordaria, lo que hace que el navegador
+     desplace el panel en horizontal. */
+  width: 100%;
+  padding: 0 14px 0 6px;
+}
+
+.home-tabs.is-open .home-notify,
+.home-tabs.is-open .home-notify .notify-item {
+  width: 100%;
+}
+
+.home-tabs.is-open .tab-item .tab-icon,
+.home-tabs.is-collapsed.is-open .tab-item .tab-icon,
+.home-tabs.is-expanded.is-open .tab-item .tab-icon {
+  margin-right: 14px;
+}
+
+/* La marca ocupa la misma columna que los iconos. */
+.home-tabs.is-open .tabs-brand {
+  padding-left: 6px;
+}
+
+.home-tabs .tabs-mark,
+.home-tabs .tabs-mark-img {
+  width: 44px;
+  height: 44px;
+}

@@ -3434,6 +3434,10 @@
     X.navOpen = !0;
     X.navReturn = fromEl || X.focus || null;
     navPanel().classList.add("is-open");
+    /* Al expandirse, el panel es mas ancho: si el navegador lo desplazo en
+       horizontal durante la transicion, el scrollLeft residual deja los iconos
+       corridos a la izquierda. Se vuelve a cero al abrir. */
+    navPanel().scrollLeft = 0;
     navScrim() && navScrim().classList.add("is-on");
     /* El catalogo se corre a la derecha: el panel empuja, no tapa. */
     if (navPages()) {
