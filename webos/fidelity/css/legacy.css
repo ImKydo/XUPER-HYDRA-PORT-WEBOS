@@ -70,16 +70,6 @@ div, section, span { outline: none; }
   background: #000 url(../assets/original/welcome/wind_bg.webp) center center no-repeat;
   background-size: 1920px 1080px;
 }
-.welcome-name {
-  position: absolute;
-  left: 0; right: 0;
-  top: 625.5px;                     /* 417dp */
-  height: 40px;
-  font-size: 40.5px;                /* 27sp */
-  line-height: 40px;
-  text-align: center;
-  color: #ffffff;
-}
 .welcome-version {
   position: absolute;
   left: 0; right: 0;
@@ -91,14 +81,6 @@ div, section, span { outline: none; }
   color: #ffffff;
   opacity: .7;
 }
-.welcome-loading {
-  position: absolute;
-  left: 793.5px;                    /* (1920-333)/2 */
-  top: 748.5px;
-  width: 333px;                     /* 222dp */
-  height: 30px;                     /* 20dp  */
-}
-.welcome-loading img { width: 333px; height: 30px; }
 
 /* =============================================================================
    HOME  (activity_home.xml)
@@ -232,7 +214,6 @@ div, section, span { outline: none; }
   line-height: 26px;
   letter-spacing: .3px;
   white-space: nowrap;
-  text-shadow: 0 1px 3px rgba(0,0,0,.7);
 }
 .home-port-credit span {
   color: #e0a84e;
@@ -336,7 +317,6 @@ div, section, span { outline: none; }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-shadow: 0 1px 3px rgba(0,0,0,.85);
 }
 .poster.is-focused { -webkit-transform: scale(1.05); transform: scale(1.05); z-index: 40; }
 .poster.is-focused .p-shade,
@@ -503,7 +483,6 @@ div, section, span { outline: none; }
   align-items: center;
   color: #fff;
   font-size: 28px;
-  text-shadow: 0 2px 7px rgba(0,0,0,.9);
   pointer-events: none;
 }
 .live-main.is-preview-loading .live-preview-status {
@@ -703,7 +682,6 @@ div, section, span { outline: none; }
   font-size: 28px;
   line-height: 34px;
   color: #ffffff;
-  text-shadow: 0 2px 4px rgba(0,0,0,.8);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2413,7 +2391,6 @@ div, section, span { outline: none; }
   font-size: 42px;
   line-height: 1.18;
   font-weight: 600;
-  text-shadow: 0 2px 8px rgba(0,0,0,.8);
 }
 /* Not in the APK: stream error / preparation feedback. */
 .player-status {
@@ -2424,7 +2401,6 @@ div, section, span { outline: none; }
   color: #ffffff;
   font-size: 30px;
   line-height: 1.3;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.85);
   display: none;
   z-index: 6;
   pointer-events: none;
@@ -2936,7 +2912,6 @@ div, section, span { outline: none; }
   line-height: 1.3;
   border-radius: 4px;
   -webkit-text-stroke: 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.65);
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
   max-width: 85%;
@@ -3003,7 +2978,6 @@ div, section, span { outline: none; }
   line-height: 42px;
   font-weight: 800;
   color: #ffffff;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
 }
 .psv-header-sub {
   font-size: 20px;
@@ -3075,7 +3049,6 @@ div, section, span { outline: none; }
 }
 .psv-row.is-row-focused .psv-title {
   color: #ffffff;
-  text-shadow: 0 0 10px rgba(224, 168, 78, 0.5);
 }
 
 .psv-grid,
@@ -3995,19 +3968,16 @@ div, section, span { outline: none; }
 .player-subtitles.bg-outline .player-subtitles-text {
   background: transparent;
   -webkit-text-stroke: 2px #000000;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
 }
 /* Sin fondo: sólo el color del texto y una sombra suave. */
 .player-subtitles.bg-none .player-subtitles-text {
   background: transparent;
   -webkit-text-stroke: 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.85);
 }
 /* Caja negra: fondo semitransparente sin contorno. */
 .player-subtitles.bg-box .player-subtitles-text {
   background: rgba(0, 0, 0, 0.75);
   -webkit-text-stroke: 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
 }
 
 /* =============================================================================
@@ -4857,7 +4827,6 @@ div, section, span { outline: none; }
   line-height: 1.35;
   color: #ffffff;
   -webkit-text-stroke: 2px #000000;
-  text-shadow: 1px 2px 1px rgba(0, 0, 0, .95);
   transition: font-size .15s ease, color .15s ease, background-color .15s ease;
 }
 .subs-rows {
@@ -4935,7 +4904,6 @@ div, section, span { outline: none; }
 
 .player-subtitles.outline-off .player-subtitles-text {
   -webkit-text-stroke: 0;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, .90);
 }
 
 .player-subtitles.bg-none .player-subtitles-text {
@@ -5363,15 +5331,6 @@ div, section, span { outline: none; }
   line-height: 32px;
   color: #ffd7db;
 }
-.welcome-free {
-  position: absolute;
-  left: 0; right: 0; bottom: 54px;
-  text-align: center;
-  font-size: 20px;
-  line-height: 28px;
-  letter-spacing: .4px;
-  color: #7d8794;
-}
 
 /* --- Rail header / footer hints ------------------------------------------ */
 .home-tabs {
@@ -5755,7 +5714,6 @@ div, section, span { outline: none; }
   left: 18px;
   right: auto;
   color: #ffffff;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
 .dps-switch.is-focused,
@@ -5920,7 +5878,6 @@ div, section, span { outline: none; }
   line-height: 1.28;
   font-weight: 600;
   text-align: center;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
   display: none;
   z-index: 8;
@@ -5958,7 +5915,6 @@ div, section, span { outline: none; }
   font-weight: 700;
   letter-spacing: 0.5px;
   color: #ffffff;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
 }
 
 .detail-episode.is-playing .ep-num {
@@ -5967,7 +5923,6 @@ div, section, span { outline: none; }
 
 .detail-episode.is-focused .ep-num {
   color: #ffffff;
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
 }
 
 /* A collapsed rail is only a navigation affordance. Do not leave a vertical
@@ -6351,7 +6306,6 @@ div, section, span { outline: none; }
 .pc-row.is-focused .num,
 .pc-row.is-focused .nm {
   color: #ffffff;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
 }
 
 .player-channels .pc-channel-fav,
@@ -6505,7 +6459,6 @@ div, section, span { outline: none; }
   font-weight: 900;
   color: #ffffff;
   text-align: left;
-  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.95);
 }
 
 .pi-namerow {
@@ -6527,7 +6480,6 @@ div, section, span { outline: none; }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.95);
 }
 
 .pi-uhd {
@@ -6581,7 +6533,6 @@ div, section, span { outline: none; }
   font-size: 28px;
   font-weight: 800;
   color: #ffffff;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
 }
 
 .pi-range {
@@ -6981,7 +6932,6 @@ div, section, span { outline: none; }
 
 .live-row .channel-star.is-favorite {
   color: #ffcc00;
-  text-shadow: 0 0 10px rgba(255, 204, 0, 0.6);
 }
 
 .live-row .channel-star.is-focused,
@@ -7057,7 +7007,6 @@ div, section, span { outline: none; }
 
 .player-channels .pc-channel-fav.is-favorite {
   color: #ffcc00;
-  text-shadow: 0 0 8px rgba(255, 204, 0, .5);
 }
 
 .player-channels .pc-channel-fav.is-focused {
@@ -7591,38 +7540,8 @@ body,
   background: #141414 radial-gradient(circle at 50% 45%, #1c1c1c 0%, #141414 72%);
 }
 
-.welcome-logo {
-  position: absolute;
-  left: 50%;
-  top: 440px;
-  width: 140px;
-  height: 140px;
-  margin-left: -70px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 28px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
-}
 
-.welcome-logo img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
-}
 
-.welcome-name {
-  font-size: 48px;
-  font-weight: 800;
-  letter-spacing: 5px;
-  color: #ffffff;
-  text-transform: uppercase;
-  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.8);
-}
 
 .welcome-version {
   font-size: 19px;
@@ -7631,11 +7550,6 @@ body,
   font-weight: 500;
 }
 
-.welcome-free {
-  font-size: 17px;
-  letter-spacing: 1.2px;
-  color: #6b7280;
-}
 
 /* --- 3. Home Navigation: Modern Top Navigation Bar (Google TV / Apple TV Style) --- */
 .home-sidebar-bg {
@@ -7837,7 +7751,6 @@ body,
 .tab-item:hover .tab-title {
   color: #ffffff;
   font-weight: 800;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
 }
 
 .tab-item.is-focused .tab-icon,
@@ -8041,7 +7954,6 @@ body,
   font-size: 23px;
   font-weight: 800;
   color: #ffffff;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
   bottom: 12px;
   padding: 0 14px;
   z-index: 3;
@@ -8090,7 +8002,6 @@ body,
   height: 38px;
   line-height: 38px;
   text-transform: uppercase;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
   margin-bottom: 18px;
 }
 
@@ -8189,7 +8100,6 @@ body,
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.95);
   margin-right: 18px;
 }
 
@@ -9811,7 +9721,6 @@ body,
   font-weight: 900;
   color: #ffffff;
   letter-spacing: -0.5px;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.95);
 }
 
 .psv-header-sub {
@@ -10100,7 +10009,6 @@ body,
   font-size: 36px;
   font-weight: 800;
   color: #ffffff;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
 }
 
 .vod-tip {
@@ -10502,7 +10410,6 @@ button:hover *,
 .tab-item:hover .tab-title {
   color: #ffffff;
   font-size: 21px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .tab-item.is-focused .tab-icon,
@@ -10800,7 +10707,6 @@ button:hover *,
 .pcat-tile:hover .pcat-name {
   color: #ffffff;
   font-weight: 800;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 /* --- 5b. Administrador de Addons y Listas M3U: Modal Flotante Cinema 10-Foot UI --- */
@@ -11664,7 +11570,6 @@ button:hover *,
   margin-top: 10px;
   color: #ffffff;
   font-weight: 700;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
   text-align: left;
   white-space: normal;
   display: -webkit-box;
@@ -11737,7 +11642,6 @@ button:hover *,
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: left;
-  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.95);
 }
 
 .section-explorer-card.is-focused {
@@ -11858,7 +11762,6 @@ body.is-focused {
   font-weight: 800;
   line-height: 32px;
   color: #ffffff;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

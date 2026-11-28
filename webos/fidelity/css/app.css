@@ -274,7 +274,6 @@ body {
   font-size: 19px;
   font-weight: 600;
   line-height: 1.2;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
 }
 
 .poster.is-img-error {
@@ -304,7 +303,6 @@ body {
   font-size: 26px;
   font-weight: 700;
   line-height: 1.15;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
 }
 
 .bento .bento-badge {
@@ -1003,1013 +1001,6 @@ body {
   box-shadow: 0 0 0 3px #ffffff, 0 12px 32px rgba(0, 0, 0, 0.7);
 }
 
-/* El indicador de carga era una imagen con estética de videojuego y no
-   encajaba con la marca. Una barra fina y sobria comunica lo mismo. */
-.welcome-loading img {
-  display: none;
-}
-
-.welcome-loading {
-  width: 200px;
-  height: 5px;
-  border-radius: 999px;
-  background: #2a2a3a;
-  overflow: hidden;
-  position: relative;
-}
-
-.welcome-loading::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -40%;
-  width: 45%;
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(0, 210, 190, 0), #4fe3d4, rgba(0, 210, 190, 0));
-  box-shadow: 0 0 12px rgba(0, 210, 190, 0.55);
-  animation: zephyr-load 1.4s ease-in-out infinite;
-}
-
-@keyframes zephyr-load {
-  0% { left: -40%; }
-  100% { left: 100%; }
-}
-
-/* Marco de la portada: el lienzo completo. La capa heredada recortaba el
-   pager a 940.5 px bajo la barra; aqui ocupa los 1080 px del lienzo y cada
-   pagina decide su encuadre. */
-.home-pages {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 1920px;
-  height: 1080px;
-  overflow: hidden;
-  -webkit-transition: -webkit-transform .26s cubic-bezier(.22, .61, .36, 1);
-  transition: transform .26s cubic-bezier(.22, .61, .36, 1);
-}
-
-/* Empujon: el catalogo se corre a la derecha en vez de quedar debajo. */
-.home-pages.is-pushed {
-  -webkit-transform: translateX(320px);
-  transform: translateX(320px);
-}
-
-/* Solo mientras dura la animacion: capa GPU temporal, no permanente. */
-.home-pages.is-animating {
-  will-change: transform;
-}
-
-/* La pagina de TV en vivo conserva su encuadre original (top 86, alto 994). */
-.home-page:first-child {
-  top: 86px;
-  height: 994px;
-}
-
-/* ------------------------------------------------------------------
-   Portada (hero)
-   Imagen a sangre, degradado a la izquierda para el texto y otro abajo para
-   fundir con el catalogo. Todo en coordenadas del lienzo de 1920 porque la
-   app posiciona en absoluto.
-   ------------------------------------------------------------------ */
-.hero {
-  overflow: hidden;
-  border-radius: 0 0 34px 34px;
-  background: #080d14;
-}
-
-.hero-media {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 1920px;
-  height: 790px;
-  object-fit: cover;
-  opacity: 0;
-  -webkit-transition: opacity .5s ease;
-  transition: opacity .5s ease;
-}
-
-.hero.is-ready .hero-media {
-  opacity: 1;
-}
-
-.hero-scrim {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 1920px;
-  height: 790px;
-}
-
-.hero-scrim-l {
-  background: linear-gradient(90deg, #05070d 6%, rgba(7, 7, 11, .88) 30%, rgba(7, 7, 11, .28) 56%, rgba(7, 7, 11, 0) 76%);
-}
-
-.hero-scrim-b {
-  background: linear-gradient(0deg, #05070d 0%, rgba(7, 7, 11, .55) 14%, rgba(7, 7, 11, .12) 34%, rgba(7, 7, 11, 0) 52%);
-}
-
-.hero-body {
-  position: absolute;
-  left: 96px;
-  top: 236px;
-  width: 800px;
-}
-
-.hero-kicker {
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: .14em;
-  text-transform: none;
-  color: #4fe3d4;
-}
-
-.hero-kicker::before {
-  content: "";
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #00d2be;
-  margin-right: 10px;
-  vertical-align: 2px;
-}
-
-.hero-title {
-  margin-top: 14px;
-  font-size: 68px;
-  line-height: 1.04;
-  font-weight: 800;
-  letter-spacing: -.02em;
-  color: #ffffff;
-  max-height: 148px;
-  overflow: hidden;
-}
-
-.hero-meta {
-  margin-top: 18px;
-  font-size: 23px;
-  font-weight: 600;
-  color: #b9c0cc;
-}
-
-.hero-desc {
-  margin-top: 16px;
-  font-size: 23px;
-  line-height: 1.44;
-  color: #cfd4dd;
-  max-height: 100px;
-  overflow: hidden;
-}
-
-.hero-actions {
-  margin-top: 28px;
-  height: 62px;
-}
-
-.hero-btn {
-  height: 62px;
-  border: 0;
-  border-radius: 999px;
-  font-size: 23px;
-  font-weight: 700;
-  font-family: inherit;
-  vertical-align: top;
-}
-
-.hero-play {
-  background: #eaf3f5;
-  color: #05070d;
-  padding: 0 32px 0 26px;
-}
-
-.hero-play svg {
-  width: 26px;
-  height: 26px;
-  vertical-align: -6px;
-  margin-right: 12px;
-}
-
-.hero-info {
-  margin-left: 16px;
-  padding: 0 30px;
-  background: rgba(255, 255, 255, .14);
-  color: #eaf3f5;
-}
-
-.hero-info.is-on {
-  background: rgba(0, 210, 190, .22);
-  color: #ffd7db;
-}
-
-.hero-arrow {
-  position: absolute;
-  top: 300px;
-  width: 56px;
-  height: 56px;
-  padding: 0;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, .18);
-  background: rgba(10, 10, 16, .62);
-  color: #ffffff;
-  font-size: 34px;
-  line-height: 50px;
-  font-family: inherit;
-}
-
-.hero-prev {
-  left: 28px;
-}
-
-.hero-next {
-  left: 1836px;
-}
-
-.hero-dots {
-  position: absolute;
-  left: 96px;
-  top: 730px;
-}
-
-.hero-dot {
-  display: inline-block;
-  width: 34px;
-  height: 4px;
-  border-radius: 2px;
-  background: rgba(255, 255, 255, .24);
-  margin-right: 10px;
-  vertical-align: top;
-}
-
-.hero-dot.is-active {
-  background: #ffffff;
-}
-
-/* El boton claro quedaba con texto blanco por una regla de foco heredada mas
-   especifica. Se fija el color en el propio estado enfocado. */
-.hero-play,
-.hero-play.is-focused,
-.hero-play.is-focused span {
-  color: #05070d;
-}
-
-.hero-play.is-focused svg,
-.hero-play svg {
-  fill: #05070d;
-}
-
-.hero-info,
-.hero-info.is-focused,
-.hero-info.is-focused span {
-  color: #eaf3f5;
-}
-
-.hero-info.is-on,
-.hero-info.is-on.is-focused,
-.hero-info.is-on.is-focused span {
-  color: #ffd7db;
-}
-
-/* Sin imagen disponible, un degradado con algo de profundidad: negro plano
-   parece un fallo de carga. */
-.hero {
-  background: radial-gradient(120% 140% at 72% 18%, #1c2436 0%, #0d0f17 55%, #08080d 100%);
-}
-
-/* ------------------------------------------------------------------
-   Estados de la barra de pestañas
-   La capa heredada conservaba un hover/foco pensado para la barra ancha
-   original: alto 52, padding 22, margen 8, degradado rojo y una pastilla de
-   302x78 detrás del texto. Con las pestañas compactas eso hacia crecer la
-   pestaña de 172 a 202 px y la pastilla se salia tapando a la vecina.
-   Aqui el hover solo cambia color: la caja nunca se mueve.
-   ------------------------------------------------------------------ */
-.home-tabs .tab-item .tab-pill {
-  display: none;
-}
-
-/* Una sola geometria en reposo, foco y hover. La capa heredada daba 22 px de
-   relleno a la pestaña seleccionada y 8 al resto: el mismo elemento cambiaba
-   de ancho al interactuar con el. Se fija aqui para todos los estados. */
-.home-tabs .tab-item {
-  height: 52px;
-  padding: 0 8px;
-  margin: 0 8px 0 0;
-  border-radius: 999px;
-}
-
-.home-tabs .tab-item:hover,
-.home-tabs .tab-item.is-focused {
-  /* Mismo alto, relleno y margen que en reposo: el hover no debe mover la caja
-     ni un pixel, o las pestañas de al lado bailan al pasar el raton. */
-  height: 52px;
-  padding: 0 8px;
-  margin: 0 8px 0 0;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.10);
-  color: #eaf3f5;
-  box-shadow: none;
-  -webkit-transform: none;
-  transform: none;
-}
-
-.home-tabs .tab-item.is-focused {
-  background: rgba(255, 255, 255, 0.18);
-  box-shadow: 0 0 0 2px #ffffff;
-}
-
-.home-tabs .tab-item.is-selected,
-.home-tabs .tab-item.is-selected:hover,
-.home-tabs .tab-item.is-selected.is-focused {
-  background: #eaf3f5;
-  border-color: #eaf3f5;
-  color: #05070d;
-  box-shadow: 0 0 0 2px #ffffff;
-}
-
-.home-tabs .tab-item:hover .tab-title,
-.home-tabs .tab-item:hover .tab-icon {
-  color: inherit;
-}
-
-.home-tabs .tab-item.is-selected .tab-title,
-.home-tabs .tab-item.is-selected .tab-icon,
-.home-tabs .tab-item.is-selected:hover .tab-title,
-.home-tabs .tab-item.is-selected:hover .tab-icon,
-.home-tabs .tab-item.is-selected.is-focused .tab-title,
-.home-tabs .tab-item.is-selected.is-focused .tab-icon {
-  color: #05070d;
-}
-
-/* La capa heredada subia el titulo de la pestaña a 21 px/800 al enfocar y lo
-   dejaba en 18/600 en reposo: como el mando por aire enfoca al pasar por
-   encima, la barra entera cambiaba de anchos con solo mover el raton. Se fija
-   una sola tipografia para reposo, hover, foco y seleccion. */
-.home-tabs .tab-item .tab-title,
-.home-tabs.is-collapsed .tab-item .tab-title,
-.home-tabs .tab-item:hover .tab-title,
-.home-tabs .tab-item.is-focused .tab-title,
-.home-tabs .tab-item.is-selected .tab-title,
-.home-tabs.is-collapsed .tab-item:hover .tab-title,
-.home-tabs.is-collapsed .tab-item.is-focused .tab-title,
-.home-tabs.is-collapsed .tab-item.is-selected .tab-title {
-  font-size: 19px;
-  font-weight: 600;
-  color: inherit;
-}
-
-.home-tabs .tab-item .tab-icon,
-.home-tabs.is-collapsed .tab-item .tab-icon,
-.home-tabs .tab-item:hover .tab-icon,
-.home-tabs .tab-item.is-focused .tab-icon,
-.home-tabs .tab-item.is-selected .tab-icon {
-  width: 22px;
-  height: 22px;
-  color: inherit;
-}
-
-.home-tabs .tab-item.is-selected .tab-title,
-.home-tabs .tab-item.is-selected .tab-icon,
-.home-tabs .tab-item.is-selected:hover .tab-title,
-.home-tabs .tab-item.is-selected:hover .tab-icon,
-.home-tabs .tab-item.is-selected.is-focused .tab-title,
-.home-tabs .tab-item.is-selected.is-focused .tab-icon {
-  color: #05070d;
-}
-
-/* ------------------------------------------------------------------
-   Truncado (T6.1)
-   Medido en Chromium: el titulo del detalle se salia 96 px, la sinopsis se
-   cortaba 40 px a media linea, los nombres de episodio 23 px y los resultados
-   de busqueda hasta 526 px. Nada de eso tenia ellipsis ni envoltura.
-   ------------------------------------------------------------------ */
-.detail-title {
-  white-space: normal;
-  max-width: 880px;
-  max-height: 152px;
-  overflow: hidden;
-  line-height: 1.06;
-}
-
-.detail-synopsis {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
-  overflow: hidden;
-  max-height: 132px;
-}
-
-.s-name,
-.d-name,
-.settings-desc,
-.settings-label {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.hero-title {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-}
-
-/* Estado vacio del catalogo */
-.empty-state {
-  text-align: center;
-}
-
-.empty-title {
-  font-size: 34px;
-  font-weight: 700;
-  color: #eaf3f5;
-}
-
-.empty-desc {
-  margin-top: 16px;
-  font-size: 22px;
-  line-height: 1.5;
-  color: #8fa2ad;
-}
-
-/* El titulo de fila llevaba una barra roja de 6 px como border-left; el acento
-   ya lo da la tipografia y en el lenguaje nuevo sobraba. */
-.kids-subtitle {
-  border-left: 0;
-  padding-left: 0;
-}
-
-/* ------------------------------------------------------------------
-   Cajon lateral
-   Oculto por defecto; entra al pulsar izquierda en el borde del catalogo.
-   El velo es .home-sidebar-bg, que ya existia en el HTML.
-   ------------------------------------------------------------------ */
-.home-tabs {
-  left: 0;
-  top: 0;
-  width: 320px;
-  height: 1080px;
-  padding: 30px 20px 24px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  box-sizing: border-box;
-  background: #080d14;
-  border-right: 1px solid #16212b;
-  -webkit-transform: translateX(-100%);
-  transform: translateX(-100%);
-  -webkit-transition: -webkit-transform .24s cubic-bezier(.2, .8, .2, 1);
-  transition: transform .24s cubic-bezier(.2, .8, .2, 1);
-  z-index: 60;
-}
-
-.home-tabs.is-open {
-  -webkit-transform: translateX(0);
-  transform: translateX(0);
-  box-shadow: 24px 0 70px rgba(0, 0, 0, .7);
-}
-
-.home-tabs .tabs-brand { padding: 0 6px 24px 6px; }
-.home-tabs .tabs-mark, .home-tabs .tabs-mark-img { width: 44px; height: 44px; }
-.home-tabs .tabs-word { margin-top: 10px; font-size: 19px; letter-spacing: .14em; }
-.home-tabs .tabs-tag { margin-top: 4px; font-size: 12px; letter-spacing: .04em; color: #8b93a1; }
-
-.home-tabs .tab-item {
-  width: 280px;
-  height: 56px;
-  margin: 0 0 6px 0;
-  padding: 0 14px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  background: transparent;
-}
-
-.home-tabs .tab-item .tab-icon {
-  width: 22px;
-  height: 22px;
-  margin-right: 14px;
-  flex: 0 0 22px;
-  color: #9ca3af;
-}
-
-.home-tabs .tab-item .tab-title { font-size: 20px; font-weight: 600; color: #dbe7ea; }
-.home-tabs .tab-item.is-selected { background: rgba(255, 255, 255, .08); }
-.home-tabs .tab-item.is-focused { background: #eaf3f5; box-shadow: none; }
-.home-tabs .tab-item.is-focused .tab-title,
-.home-tabs .tab-item.is-focused .tab-icon { color: #05070d; }
-
-.home-sidebar-bg {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 1920px;
-  height: 1080px;
-  background: linear-gradient(90deg, rgba(0, 0, 0, .86) 0%, rgba(0, 0, 0, .70) 38%, rgba(0, 0, 0, .55) 100%);
-  opacity: 0;
-  pointer-events: none;
-  -webkit-transition: opacity .16s ease-out;
-  transition: opacity .16s ease-out;
-  z-index: 55;
-}
-
-.home-sidebar-bg.is-on { opacity: 1; }
-
-.home-notify {
-  left: 20px;
-  right: auto;
-  top: auto;
-  bottom: 28px;
-  width: 280px;
-  height: 56px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  opacity: 0;
-  visibility: hidden;
-  z-index: 61;
-}
-
-.home-tabs.is-open ~ .home-notify { opacity: 1; visibility: visible; }
-
-/* ------------------------------------------------------------------
-   El estado .is-collapsed venia de la barra vieja: forzaba 1478 px de ancho,
-   escondia los rotulos y encogia los items a iconos. En el cajon eso sobra;
-   todas estas reglas tienen la misma especificidad que las heredadas y van
-   despues, asi que ganan por orden.
-   ------------------------------------------------------------------ */
-.home-tabs.is-collapsed,
-.home-tabs.is-expanded {
-  left: 0;
-  top: 0;
-  width: 320px;
-  height: 1080px;
-  padding: 30px 20px 24px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  box-sizing: border-box;
-  background: #080d14;
-  border-right: 1px solid #16212b;
-  border-bottom: 0;
-  -webkit-transform: translateX(-100%);
-  transform: translateX(-100%);
-  -webkit-transition: -webkit-transform .24s cubic-bezier(.2, .8, .2, 1);
-  transition: transform .24s cubic-bezier(.2, .8, .2, 1);
-  z-index: 60;
-}
-
-.home-tabs.is-collapsed .tab-item,
-.home-tabs.is-expanded .tab-item {
-  width: 280px;
-  height: 56px;
-  margin: 0 0 6px 0;
-  padding: 0 14px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  background: transparent;
-}
-
-.home-tabs.is-collapsed .tab-item .tab-title,
-.home-tabs.is-expanded .tab-item .tab-title {
-  display: block;
-  font-size: 20px;
-  font-weight: 600;
-  color: #dbe7ea;
-}
-
-.home-tabs.is-collapsed .tab-item .tab-icon,
-.home-tabs.is-expanded .tab-item .tab-icon {
-  position: static;
-  width: 22px;
-  height: 22px;
-  margin-right: 14px;
-  flex: 0 0 22px;
-  color: #9ca3af;
-}
-
-.home-tabs.is-collapsed .tab-item.is-selected,
-.home-tabs.is-expanded .tab-item.is-selected {
-  background: rgba(255, 255, 255, .08);
-}
-
-.home-tabs.is-collapsed .tab-item.is-focused,
-.home-tabs.is-expanded .tab-item.is-focused {
-  background: #eaf3f5;
-  box-shadow: none;
-}
-
-.home-tabs.is-collapsed .tab-item.is-focused .tab-title,
-.home-tabs.is-collapsed .tab-item.is-focused .tab-icon,
-.home-tabs.is-expanded .tab-item.is-focused .tab-title,
-.home-tabs.is-expanded .tab-item.is-focused .tab-icon {
-  color: #05070d;
-}
-
-/* Abierto va al final: empata en especificidad y gana por orden. */
-.home-tabs.is-open,
-.home-tabs.is-collapsed.is-open,
-.home-tabs.is-expanded.is-open {
-  -webkit-transform: translateX(0);
-  transform: translateX(0);
-  box-shadow: 24px 0 70px rgba(0, 0, 0, .7);
-}
-
-/* Los items no cambian de golpe al moverse el foco. */
-.home-tabs.is-collapsed .tab-item,
-.home-tabs.is-expanded .tab-item,
-.home-tabs .tab-item {
-  -webkit-transition: background-color .12s ease-out, color .12s ease-out;
-  transition: background-color .12s ease-out, color .12s ease-out;
-}
-
-/* Borde y sombra solo cuando esta abierto: cerrado no cuesta nada. */
-.home-tabs.is-open,
-.home-tabs.is-collapsed.is-open,
-.home-tabs.is-expanded.is-open {
-  border-right-color: #1b2833;
-  box-shadow: 18px 0 48px rgba(0, 0, 0, .55);
-}
-
-/* ------------------------------------------------------------------
-   Raíl colapsable (estilo YouTube TV)
-   Siempre visible: 96 px con solo iconos. Al entrar en él se expande a 320 y
-   empuja el catálogo. El contenido arranca desplazado 96 px, no 0.
-   ------------------------------------------------------------------ */
-.home-tabs,
-.home-tabs.is-collapsed,
-.home-tabs.is-expanded {
-  width: 96px;
-  padding: 22px 0 18px 0;
-  align-items: center;
-  -webkit-transform: none;
-  transform: none;
-  border-right: 1px solid #16212b;
-  border-bottom: 0;
-  overflow: hidden;
-  -webkit-transition: width .24s cubic-bezier(.22, .61, .36, 1);
-  transition: width .24s cubic-bezier(.22, .61, .36, 1);
-}
-
-.home-tabs.is-open,
-.home-tabs.is-collapsed.is-open,
-.home-tabs.is-expanded.is-open {
-  width: 320px;
-  padding: 22px 20px 18px 20px;
-  align-items: stretch;
-  -webkit-transform: none;
-  transform: none;
-}
-
-/* Marca: sola la Z cuando está colapsado. */
-.home-tabs .tabs-brand {
-  padding: 0 0 16px 0;
-  text-align: center;
-}
-
-.home-tabs .tabs-mark,
-.home-tabs .tabs-mark-img {
-  width: 44px;
-  height: 44px;
-  margin: 0 auto;
-}
-
-.home-tabs .tabs-word,
-.home-tabs .tabs-tag {
-  display: none;
-}
-
-.home-tabs.is-open .tabs-brand {
-  padding: 0 6px 20px 6px;
-  text-align: left;
-}
-
-.home-tabs.is-open .tabs-mark,
-.home-tabs.is-open .tabs-mark-img {
-  margin: 0;
-}
-
-.home-tabs.is-open .tabs-word,
-.home-tabs.is-open .tabs-tag {
-  display: block;
-}
-
-/* Item: 64 px centrado en colapsado, 280 con rótulo al abrir. */
-.home-tabs .tab-item,
-.home-tabs.is-collapsed .tab-item,
-.home-tabs.is-expanded .tab-item {
-  width: 64px;
-  height: 52px;
-  margin: 0 0 6px 0;
-  padding: 0;
-  justify-content: center;
-  border-radius: 14px;
-}
-
-.home-tabs .tab-item .tab-icon,
-.home-tabs.is-collapsed .tab-item .tab-icon,
-.home-tabs.is-expanded .tab-item .tab-icon {
-  margin-right: 0;
-}
-
-.home-tabs .tab-item .tab-title,
-.home-tabs.is-collapsed .tab-item .tab-title,
-.home-tabs.is-expanded .tab-item .tab-title {
-  display: none;
-}
-
-.home-tabs.is-open .tab-item,
-.home-tabs.is-collapsed.is-open .tab-item,
-.home-tabs.is-expanded.is-open .tab-item {
-  width: 280px;
-  padding: 0 14px;
-  justify-content: flex-start;
-}
-
-.home-tabs.is-open .tab-item .tab-icon,
-.home-tabs.is-collapsed.is-open .tab-item .tab-icon,
-.home-tabs.is-expanded.is-open .tab-item .tab-icon {
-  margin-right: 14px;
-}
-
-.home-tabs.is-open .tab-item .tab-title,
-.home-tabs.is-collapsed.is-open .tab-item .tab-title,
-.home-tabs.is-expanded.is-open .tab-item .tab-title {
-  display: block;
-}
-
-/* Acciones dentro del raíl, arriba de Inicio. */
-.home-notify {
-  position: static;
-  width: auto;
-  height: auto;
-  margin: 0 0 10px 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  opacity: 1;
-  visibility: visible;
-  z-index: auto;
-}
-
-.home-notify .notify-item {
-  width: 52px;
-  height: 52px;
-  margin: 0 0 8px 0;
-}
-
-/* El catálogo parte desplazado por el raíl y se empuja al expandirlo. */
-.home-pages {
-  -webkit-transform: translateX(96px);
-  transform: translateX(96px);
-}
-
-.home-pages.is-pushed {
-  -webkit-transform: translateX(320px);
-  transform: translateX(320px);
-}
-
-/* La página de TV conserva su encuadre: el raíl se le monta encima 96 px. */
-.home-page:first-child {
-  left: -96px;
-  width: 1920px;
-}
-
-/* Alinear el texto de la portada con los títulos de fila. */
-.hero-body {
-  left: 48px;
-}
-
-.hero-dots {
-  left: 48px;
-}
-
-/* El icono enfocado se pintaba blanco sobre fondo blanco: legacy forzaba
-   fill y stroke blancos en el svg, no en el contenedor. */
-.tab-item.is-focused .tab-icon svg,
-.tab-item:hover .tab-icon svg {
-  fill: none;
-  stroke: currentColor;
-}
-
-.tab-item.is-focused .tab-icon {
-  -webkit-filter: none;
-  filter: none;
-}
-
-/* Sin sombras de texto: ensucian el borde de las letras en un panel. */
-.kids-subtitle,
-.hero-title,
-.hero-meta,
-.hero-desc,
-.hero-kicker,
-.p-title,
-.bento-title,
-.detail-title,
-.history-card-title,
-.home-tabs .tab-title,
-.home-tabs .tabs-word,
-.home-tabs .tabs-tag {
-  text-shadow: none;
-}
-
-/* El icono enfocado quedaba blanco sobre fondo blanco: la capa heredada pinta
-   fill y stroke en el svg Y en sus trazos (.tab-item.is-focused .tab-icon svg).
-   Se fija el color en el contenedor y se fuerza el trazo a currentColor; el
-   fill se deja al svg para no rellenar los iconos que usan fill="none". */
-.home-tabs .tab-item.is-focused .tab-icon,
-.home-tabs .tab-item.is-focused .tab-icon svg {
-  color: #05070d;
-}
-
-.home-tabs .tab-item.is-focused .tab-icon svg {
-  fill: none;
-  stroke: currentColor;
-}
-
-.home-tabs .tab-item.is-focused .tab-icon svg * {
-  stroke: currentColor;
-}
-
-/* La capa heredada trae '.tab-item.is-focused * { color: #ffffff }', que pinta
-   de blanco hasta el path del SVG. Se revierte en el subárbol enfocado. */
-.home-tabs .tab-item.is-focused,
-.home-tabs .tab-item.is-focused * {
-  color: #05070d;
-}
-
-.home-tabs .tab-item.is-focused .tab-icon svg {
-  fill: currentColor;
-  stroke: currentColor;
-}
-
-.home-tabs .tab-item.is-focused .tab-icon svg * {
-  stroke: currentColor;
-}
-
-/* Acciones con rótulo cuando el raíl está abierto, igual que las secciones. */
-.home-notify .notify-label {
-  display: none;
-}
-
-.home-tabs.is-open .home-notify {
-  width: auto;
-  align-items: stretch;
-}
-
-.home-tabs.is-open .home-notify .notify-item {
-  width: 280px;
-  height: 52px;
-  padding: 0 14px;
-  justify-content: flex-start;
-  border-radius: 12px;
-}
-
-.home-tabs.is-open .home-notify .notify-label {
-  display: block;
-  margin-left: 14px;
-  font-size: 20px;
-  font-weight: 600;
-  color: #dbe7ea;
-}
-
-.home-tabs.is-open .home-notify .notify-item.is-focused .notify-label {
-  color: #05070d;
-}
-
-/* Las flechas del carrusel se apartan del texto: a la derecha del todo. */
-/* 1760 + los 96 px que el raíl desplaza el catálogo = 1856; 1856 + 56 = 1912. */
-.hero-prev {
-  left: 1760px;
-  top: 276px;
-}
-
-.hero-next {
-  left: 1760px;
-  top: 348px;
-}
-
-/* El icono de la accion estaba centrado en absoluto: al añadir rótulo, el texto
-   quedaba antes que el icono. En abierto se pasa a flujo normal en fila. */
-.home-tabs.is-open .home-notify .notify-item {
-  display: flex;
-  align-items: center;
-}
-
-.home-tabs.is-open .home-notify .notify-item .n-normal {
-  position: static;
-  left: auto;
-  top: auto;
-  width: 22px;
-  height: 22px;
-  margin: 0;
-  -webkit-transform: none;
-  transform: none;
-  order: 0;
-}
-
-.home-tabs.is-open .home-notify .notify-label {
-  margin-left: 14px;
-  order: 1;
-}
-
-/* Cuando el raíl está colapsado, el icono vuelve a centrarse. */
-.home-tabs:not(.is-open) .home-notify .notify-item .n-normal {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 24px;
-  height: 24px;
-  -webkit-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
-}
-
-
-/* ------------------------------------------------------------------
-   Marca ZephyrTV (isotipo del SVG adjunto)
-   Paleta del isotipo: teal #00D2BE/#009A8F y azul #0B2F9F/#051B63 sobre
-   negro azulado. Sustituye al rojo anterior en toda la interfaz.
-   ------------------------------------------------------------------ */
-.home-tabs .tabs-mark {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.home-tabs .tabs-mark-img {
-  width: 40px;
-  height: 40px;
-  -webkit-filter: drop-shadow(0 6px 14px rgba(0, 210, 190, .18));
-  filter: drop-shadow(0 6px 14px rgba(0, 210, 190, .18));
-}
-
-/* Isotipo centrado en colapsado, con aire debajo para que se lea como marca. */
-.home-tabs .tabs-brand {
-  padding: 0 0 26px 0;
-  margin-bottom: 6px;
-  border-bottom: 1px solid #16212b;
-  width: 100%;
-}
-
-.home-tabs.is-open .tabs-brand {
-  display: flex;
-  align-items: center;
-  padding: 0 6px 22px 6px;
-  margin-bottom: 10px;
-}
-
-.home-tabs.is-open .tabs-mark-img {
-  margin-right: 12px;
-}
-
-.home-tabs .tabs-word {
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -.02em;
-  text-transform: none;
-  color: #eaf3f5;
-}
-
-.home-tabs .tabs-word b {
-  font-weight: 800;
-  color: #4fe3d4;
-}
-
-.home-tabs .tabs-tag {
-  margin-top: 2px;
-  font-size: 11px;
-  letter-spacing: .08em;
-  text-transform: none;
-  color: #7d8f9b;
-}
-
-/* Configuración, pegada al fondo y separada del contenido. */
-.home-tabs .tab-item.is-bottom {
-  margin-top: auto;
-}
-
-/* El icono y el rótulo del raíl en Title Case. */
-.home-tabs .tab-item .tab-title {
-  text-transform: none;
-}
-
-/* Los títulos de fila venían forzados a mayúsculas por CSS; el texto ya está
-   capitalizado y se respeta tal cual. */
-.kids-subtitle {
-  text-transform: none;
-  letter-spacing: -.01em;
-}
-
-/* En colapsado la sección activa se marca con un tinte teal discreto: el
-   blanco pleno queda para cuando el raíl tiene el foco. */
 .home-tabs:not(.is-open) .tab-item.is-selected {
   background: rgba(0, 210, 190, .14);
   box-shadow: none;
@@ -2023,11 +1014,6 @@ body {
   color: #4fe3d4;
 }
 
-/* Arranque: nombre en caja alta-baja y barra en teal del isotipo. */
-.welcome-name {
-  text-transform: none;
-  letter-spacing: .02em;
-}
 
 .welcome-loading {
   background: #1b2a33;
@@ -2131,4 +1117,93 @@ body {
 .home-tabs .tabs-mark-img {
   width: 44px;
   height: 44px;
+}
+
+/* ------------------------------------------------------------------
+   Arranque: isotipo desnudo, anillo de carga y versión discreta.
+   Sin caja, sin nombre y sin lema: la marca habla sola.
+   ------------------------------------------------------------------ */
+#screen-welcome.is-active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #05070d;
+}
+
+.welcome-stage {
+  position: relative;
+  width: 320px;
+  height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome-mark {
+  width: 188px;
+  height: 188px;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.welcome-mark img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.welcome-ring {
+  position: absolute;
+  left: 40px;
+  top: 40px;
+  width: 240px;
+  height: 240px;
+  -webkit-transform: rotate(-90deg);
+  transform: rotate(-90deg);
+  -webkit-transform-origin: 50% 50%;
+  transform-origin: 50% 50%;
+  -webkit-animation: zephyr-spin 1.35s linear infinite;
+  animation: zephyr-spin 1.35s linear infinite;
+}
+
+.welcome-ring-track {
+  fill: none;
+  stroke: #16212b;
+  stroke-width: 1.8;
+}
+
+.welcome-ring-arc {
+  fill: none;
+  stroke: #4fe3d4;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-dasharray: 58 269;
+}
+
+@-webkit-keyframes zephyr-spin {
+  from { -webkit-transform: rotate(-90deg); }
+  to { -webkit-transform: rotate(270deg); }
+}
+
+@keyframes zephyr-spin {
+  from { transform: rotate(-90deg); }
+  to { transform: rotate(270deg); }
+}
+
+/* La versión, abajo a la derecha y sin peso visual. */
+.welcome-version {
+  position: absolute;
+  left: auto;
+  right: 30px;
+  top: auto;
+  bottom: 24px;
+  width: auto;
+  height: auto;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: .08em;
+  color: #5f7280;
+  text-align: right;
 }

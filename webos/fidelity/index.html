@@ -101,11 +101,14 @@ if (!Array.prototype.findIndex) {
        design_width 1920 / design_width_in_dp 1280  ->  1dp = 1.5px
        ============================================================ -->
   <section id="screen-welcome" class="screen is-active">
-    <div class="welcome-logo"><img src="images/zephyr-mark.svg" alt="ZephyrTV"></div>
-    <div class="welcome-name">ZephyrTV</div>
+    <div class="welcome-stage">
+      <div class="welcome-mark"><img src="images/zephyr-mark.svg" alt=""></div>
+      <svg class="welcome-ring" viewBox="0 0 120 120" aria-hidden="true">
+        <circle class="welcome-ring-track" cx="60" cy="60" r="52"></circle>
+        <circle class="welcome-ring-arc" cx="60" cy="60" r="52"></circle>
+      </svg>
+    </div>
     <div class="welcome-version">v3.2.0</div>
-    <div class="welcome-loading"><img id="welcome-loading-img" alt="" src="assets/original/welcome/img_welcome_loading1.png"></div>
-    <div class="welcome-free">Cine, series y TV en vivo</div>
   </section>
 
   <!-- ============================================================
