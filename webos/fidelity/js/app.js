@@ -1094,7 +1094,10 @@
       tv: '<svg viewBox="0 0 33 33"><rect x="3.5" y="7" width="26" height="17" rx="2.5" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M11 24.5v3h11v-3" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>',
       thumb:
         '<svg viewBox="0 0 33 33"><path d="M12 15.5V28H7.6A2.6 2.6 0 0 1 5 25.4v-7.3a2.6 2.6 0 0 1 2.6-2.6H12z" fill="currentColor"/><path d="M14 15.6l4.3-9.2a2.2 2.2 0 0 1 4 1.6V13h5.6a2.9 2.9 0 0 1 2.8 3.6l-2 9A3.4 3.4 0 0 1 25.4 28H14z" fill="currentColor"/></svg>',
-      film: '<svg viewBox="0 0 33 33"><circle cx="16.5" cy="16.5" r="11.5" fill="none" stroke="currentColor" stroke-width="2.4"/><circle cx="16.5" cy="16.5" r="2.4" fill="currentColor"/><circle cx="16.5" cy="9.5" r="2.1" fill="currentColor"/><circle cx="16.5" cy="23.5" r="2.1" fill="currentColor"/><circle cx="9.5" cy="16.5" r="2.1" fill="currentColor"/><circle cx="23.5" cy="16.5" r="2.1" fill="currentColor"/></svg>',
+      home: '<svg viewBox="0 0 33 33"><path d="M5 15.4 16.5 5.6 28 15.4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.4 13.6V27h16.2V13.6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="M13.4 27v-7.6h6.2V27" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>',
+      film: '<svg viewBox="0 0 33 33"><rect x="4.5" y="12" width="24" height="14.5" rx="2.4" fill="none" stroke="currentColor" stroke-width="2.3"/><path d="M4.5 16.4h24" stroke="currentColor" stroke-width="2.2"/><path d="M8.6 12 11 7.8h3.2l-2.4 4.2M16.2 12l2.4-4.2h3.2L19.4 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
+      series: '<svg viewBox="0 0 33 33"><rect x="8.6" y="8" width="18.8" height="13" rx="2.2" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M4.4 12.4v9.4a3 3 0 0 0 3 3h12.4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M15.6 11.6v5.8l4.8-2.9z" fill="currentColor"/></svg>',
+      settings: '<svg viewBox="0 0 33 33"><circle cx="16.5" cy="16.5" r="4.3" fill="none" stroke="currentColor" stroke-width="2.3"/><path d="M16.5 4.8v3.4M16.5 24.8v3.4M4.8 16.5h3.4M24.8 16.5h3.4M8.2 8.2l2.4 2.4M22.4 22.4l2.4 2.4M24.8 8.2l-2.4 2.4M10.6 22.4l-2.4 2.4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
       strip:
         '<svg viewBox="0 0 33 33"><rect x="4" y="7" width="25" height="19" rx="2" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M9 7v19M24 7v19" stroke="currentColor" stroke-width="1.8"/><rect x="5.6" y="9" width="2.4" height="2.6" fill="currentColor"/><rect x="5.6" y="15.2" width="2.4" height="2.6" fill="currentColor"/><rect x="5.6" y="21.4" width="2.4" height="2.6" fill="currentColor"/><rect x="25" y="9" width="2.4" height="2.6" fill="currentColor"/><rect x="25" y="15.2" width="2.4" height="2.6" fill="currentColor"/><rect x="25" y="21.4" width="2.4" height="2.6" fill="currentColor"/></svg>',
       kids: '<svg viewBox="0 0 33 33"><circle cx="8.6" cy="8.6" r="4" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="24.4" cy="8.6" r="4" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="16.5" cy="18" r="9.6" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="13" cy="17" r="1.5" fill="currentColor"/><circle cx="20" cy="17" r="1.5" fill="currentColor"/><ellipse cx="16.5" cy="21.6" rx="2.4" ry="1.7" fill="currentColor"/></svg>',
@@ -1114,11 +1117,12 @@
        que abre el mismo panel de filtros del catálogo. Historial vive en
        Ajustes. */
     z = [
-      { label: "INICIO", page: 1, icon: "thumb" },
+      { label: "Inicio", page: 1, icon: "home" },
       { label: "TV", page: 0, icon: "tv" },
-      { label: "PELÍCULAS", page: 2, icon: "film" },
-      { label: "SERIES", page: 3, icon: "strip" },
-      { label: "CATEGORÍAS", page: -1, icon: "grid", action: "categories" },
+      { label: "Películas", page: 2, icon: "film" },
+      { label: "Series", page: 3, icon: "series" },
+      { label: "Categorías", page: -1, icon: "grid", action: "categories" },
+      { label: "Configuración", page: -1, icon: "settings", action: "settings", bottom: !0 },
     ],
     j = [
       {
@@ -3226,16 +3230,20 @@
           railMark = createEl("div", "tabs-mark"),
           markImg = createEl("img", "tabs-mark-img"),
           railText = createEl("div", "tabs-brand-text");
-        markImg.src = "images/logo-mark.png";
+        markImg.src = "images/zephyr-mark.svg";
         markImg.alt = "ZephyrTV";
         railMark.appendChild(markImg);
-        (railText.appendChild(createEl("div", "tabs-word", "ZEPHYRTV")),
+        ((function () {
+            var word = createEl("div", "tabs-word");
+            word.innerHTML = "Zephyr<b>TV</b>";
+            railText.appendChild(word);
+          })(),
           railText.appendChild(createEl("div", "tabs-tag", "Cine, series y TV en vivo")),
           railBrand.appendChild(railMark),
           railBrand.appendChild(railText),
           i.appendChild(railBrand));
         for (var n = 0; n < z.length; n++) {
-          var r = createEl("div", "tab-item focusable");
+          var r = createEl("div", "tab-item focusable" + (z[n].bottom ? " is-bottom" : ""));
           r.appendChild(createEl("div", "tab-pill"));
           var o = createEl("div", "tab-icon");
           ((o.innerHTML = B[z[n].icon] || ""), r.appendChild(o));
@@ -3247,6 +3255,11 @@
                 var destino = z[e];
                 closeNavDrawer(!0); // sin restaurar el foco viejo
                 if ("categories" === destino.action) return void openCatalogFilter();
+                if ("settings" === destino.action) {
+                  Ha();
+                  Ua("playback", !1);
+                  return;
+                }
                 if (X.tab !== e) {
                   selectHomeTab(e, !1);
                 }
@@ -3294,17 +3307,17 @@
         for (
           var t = [
             {
+              cls: "personal",
+              svg: '<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="11" r="5.2" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M6 27c.8-5.8 4.6-8.8 10-8.8S25.2 21.2 26 27" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>',
+              label: "Mi cuenta",
+            },
+            {
               cls: "search",
               /* SVG en lugar de PNG: los iconos de mapa de bits del APK
                  quedaban casi invisibles en paneles de TV y se perdían al
                  escalar. El trazo hereda currentColor. */
               svg: '<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="14" cy="14" r="8.5" fill="none" stroke="currentColor" stroke-width="2.8"/><path d="M20.5 20.5L28 28" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
               label: "Buscar",
-            },
-            {
-              cls: "personal",
-              svg: '<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="11" r="5.2" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M6 27c.8-5.8 4.6-8.8 10-8.8S25.2 21.2 26 27" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>',
-              label: "Mi cuenta",
             },
           ],
           i = 0;
@@ -5377,7 +5390,7 @@
     var media = createEl("img", "hero-media");
     media.alt = "";
     var body = createEl("div", "hero-body"),
-      kicker = createEl("div", "hero-kicker", opts.kicker || "DESTACADO"),
+      kicker = createEl("div", "hero-kicker", opts.kicker || "Destacado"),
       title = createEl("div", "hero-title"),
       meta = createEl("div", "hero-meta"),
       desc = createEl("div", "hero-desc"),

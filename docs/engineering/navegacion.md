@@ -56,9 +56,13 @@ usan.
 El raíl está **siempre visible** con 96 px y solo iconos. Al entrar en él se
 expande a 320 px y empuja el catálogo, como YouTube TV.
 
-Orden de arriba abajo: marca, **Buscar**, **Mi cuenta**, y después INICIO, TV,
-PELÍCULAS, SERIES y CATEGORÍAS. El foco por defecto es **INICIO**; las acciones
-viven arriba pero no son el punto de entrada.
+Orden de arriba abajo: marca, **Mi cuenta**, **Buscar**, y después Inicio, TV,
+Películas, Series y Categorías. **Configuración** va al final, pegada al fondo
+(`margin-top: auto`) y separada del contenido. El foco por defecto es **Inicio**;
+las acciones viven arriba pero no son el punto de entrada.
+
+**Mi cuenta** abre Ajustes en el panel de cuenta; **Configuración** abre Ajustes
+en "Configuración global".
 
 - Ancho 96 ↔ 320 con `transition: width .24s`. Los rótulos y la marca completa
   se muestran solo con `.is-open`.
@@ -118,3 +122,15 @@ al código base, que es lo que corresponde.
 La zona protegida de reproducción sigue intacta (`streamMode`, `forceRelay`,
 `resolveSmooth`, `playUrl`, seek, cambio de episodio y el relay FFmpeg). Este
 trabajo es de navegación, cabecera y marca.
+
+## Marca y paleta
+
+El isotipo sale de `images/zephyr-mark.svg` (dos aspas de viento: teal arriba,
+azul abajo). En colapsado se muestra solo, centrado y con 26 px de aire debajo;
+en abierto comparte fila con el wordmark **Zephyr** + **TV** en teal.
+
+Paleta tomada del isotipo: acento `#00D2BE`, acento claro `#4FE3D4`, azul
+`#0B2F9F`/`#051B63`, fondo `#05070D`, superficie `#080D14`, línea `#16212B`,
+texto `#EAF3F5`, apagado `#8FA2AD`. Sustituye al rojo anterior en toda la
+interfaz. Los iconos de app (`zephyr-icon.png`, 512/256) se rasterizan del SVG
+con Chromium: ImageMagick no entiende el `feDropShadow` del archivo.
