@@ -498,6 +498,15 @@
       "date": "2026-11-27"
     },
     {
+      "id": "T6.18",
+      "phase": "F6",
+      "title": "Title Case, iconos, Configuración y marca Zephyr",
+      "status": "done",
+      "commit": "71d58ee",
+      "evidence": "6 opciones; Mi cuenta sobre Buscar; casa/claqueta/episodios/engranaje; isotipo centrado y paleta teal #00D2BE; Configuración al fondo abre Ajustes",
+      "date": "2026-11-27"
+    },
+    {
       "id": "T7.1",
       "phase": "F7",
       "title": "Geometría pura + pruebas",
