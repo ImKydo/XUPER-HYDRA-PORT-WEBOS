@@ -123,6 +123,27 @@ La zona protegida de reproducción sigue intacta (`streamMode`, `forceRelay`,
 `resolveSmooth`, `playUrl`, seek, cambio de episodio y el relay FFmpeg). Este
 trabajo es de navegación, cabecera y marca.
 
+## Iconos
+
+Los del raíl vienen de **Lucide 0.544.0** (ISC), vendorizados en
+`src/assets/icons/*.svg`. `node tools/icons.mjs --build` genera
+`src/generated/icons.js`, que expone `window.ZEPHYR_ICONS`; el manifiesto lo
+concatena antes del legado. El raíl resuelve con `railIcon(nombre)` y cae al
+mapa heredado si falta. Lucide es de trazo: el CSS fija `fill: none` en el svg
+y en sus figuras.
+
+La columna de iconos está fijada a **48 px** del borde en colapsado y en
+abierto (caja de 44 px, `padding-left: 6px` abierto). El panel lleva
+`overflow-x: hidden` y se reinicia `scrollLeft` al abrir: durante la transición
+un hijo de 280 px desbordaba y el navegador desplazaba el panel.
+
+## Arranque
+
+`#screen-welcome` es el isotipo desnudo (188 px), un anillo de 240 px con un
+tramo teal girando (`zephyr-spin`) y la versión en la esquina inferior derecha.
+Sin caja, sin nombre y sin lema. Se anima el `<svg>` completo porque
+`transform-box` no existe en Chromium 38.
+
 ## Marca y paleta
 
 El isotipo sale de `images/zephyr-mark.svg` (dos aspas de viento: teal arriba,
